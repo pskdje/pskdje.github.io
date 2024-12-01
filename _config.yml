@@ -1,0 +1,4 @@
+exclude: [ "/static" ]
+webrick:
+  headers:
+    Access-Control-Allow-Origin: "*"
