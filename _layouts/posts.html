@@ -9,7 +9,7 @@
 		<link rel="stylesheet" href="/assets/css/style.css" />
 	</head>
 	<body>
-		<main>{{ content }}</main>
-		<div>上一篇<span>{{ page.previous }}</span>;下一篇<span>{{ page.next }}</span></div>
+		<main class="markdown-body">{{ content }}</main>
+		<div>上一篇<span>{{ page.previous | jsonify }}</span>;下一篇<span>{{ page.next | jsonify }}</span></div>
 	</body>
 </html>

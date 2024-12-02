@@ -1,5 +1,6 @@
 # Jekyll config
 exclude: [ "README.md" ]
+permalink: /posts/:categories/:year/:month/:day/:title:output_ext
 webrick:
   headers:
     Access-Control-Allow-Origin: "*"
