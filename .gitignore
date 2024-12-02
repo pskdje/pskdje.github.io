@@ -1,0 +1,22 @@
+# gitignore
+.vscode
+*.bak
+
+# MAC
+.DS_Store
+__MACOSX
+# Android
+/Android
+/Documents
+/Download
+/Movies
+/Music
+/Notifications
+/Pictures
+/Recordings
+# Windows
+/$RECYCLE.BIN
+/$Recycle.Bin
+.sys
+# UNIX
+/lost+found
