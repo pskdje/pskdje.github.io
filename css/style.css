@@ -1,0 +1,164 @@
+@charset "UTF-8";
+/* 通用 */
+/* 错误元素和警告元素 */
+div.error {
+	border: 3px solid red;
+	padding: 3px;
+	background-color: rgba(255,0,0,0.5);
+}
+div.error > h3 {
+	margin-top: 0;
+}
+div.error > p {
+	margin-left: 6px;
+	margin-right: 6px;
+}
+div.warn {
+	border: 3px solid #DD0;
+	padding: 3px;
+	background-color: rgba(255,255,0,0.5);
+}
+div.warn > h3 {
+	margin-top: 0;
+}
+div.warn > p {
+	margin-left: 6px;
+	margin-right: 6px;
+}
+/* 以纯文本的方式显示日志 */
+pre.log-view {
+	overflow: auto;
+	tab-size: 4;
+	font-family: monospace;
+}
+/* 设置元素 */
+a {
+	color: var(--docs-color);
+}
+body {
+	--docs-bacl: white;
+	--docs-color: black;
+}
+/* 默认加载样式 */
+.docs-style-loading {
+	margin: 0;
+	padding: 0;
+	width: 32px;
+	height: 32px;
+	border: 6px rgba(255,74,105,0.25) solid;
+	border-top: 6px #ff4a69 solid;
+	border-radius: 50%;
+	animation: docs-style-loading 0.6s infinite linear;
+}/* 旋转动画 */
+@keyframes docs-style-loading {
+	to { transform: rotate(360deg); }
+}
+/* 严重错误对话框 */
+div#critical_err {
+	position: fixed;
+	top: 5%;
+	left: 5%;
+	bottom: 5%;
+	right: 5%;
+	z-index: 100000000;
+	background: white;
+	box-sizing:border-box;
+	height: 90%;
+	width: 90%;
+	border: 0.5em solid #EEE;
+	padding: 1em;
+	color: black;
+}
+div#critical_err > button.clear_button{
+	position: absolute;
+	top: -0.5em;
+	right: -0.5em;
+	background-color: #EEE;
+	border: 1px solid #CCC;
+	cursor: pointer;
+}
+/* 窗口 */
+div.window_root {
+	--docs-bacl: white;
+	--docs-color: black;
+	all: initial;
+	position: fixed;
+	border: 1px solid gray;
+	background: white;
+	color: black;
+	display: flex;
+	flex-direction: column;
+	/* 默认 */
+	top: calc(50% - 6em);
+	left: calc(50% - 8em);
+	height: 12em;
+	width: 16em;
+}
+div.window_root > div.window_header {
+	all: initial;
+	display: flex;
+}
+div.window_root > div.window_header > h4 {
+	flex: 1;
+	margin: 0;
+	border: 1px solid gray;
+	padding: 1px 2px;
+	color: var(--docs-color);
+	cursor: move;
+	font-size: 1em;
+	user-select: none;
+	height: initial;
+	width: initial;
+	overflow: clip;
+}
+div.window_root > div.window_header > button {
+	all: initial;
+	animation: none;
+	background-clip: padding-box;
+	border: 1px solid gray;
+	border-radius: 0;
+	border-collapse: collapse;
+	padding: 1px 4px;
+	cursor: pointer;
+	font-size: 1em;
+	background: #BBB;
+	color: black;
+	user-select: none;
+	transition: background .5s;
+	height: initial;
+	width: initail;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+div.window_root > div.window_header > button:hover {
+	background: white;
+}
+div.window_root > div.window_content {
+	flex: 1;
+	position: relative;
+	border: 1px solid gray;
+	border-radius: 0;
+	box-sizing: border-box;
+	padding: 1px;
+	overflow: auto;
+}
+/* 默认暗色模式颜色定义 */
+body.docs-style-dark {
+	--docs-bacl: black;
+	--docs-color: white;
+	background-color: black;
+	color: white;
+}
+div.window_root.docs-style-dark {
+	--docs-bacl: black;
+	--docs-color: white;
+	background: black;
+	color: white;
+}
+div.window_root.docs-style-dark > div.window_header > button {
+	background: #333;
+	color: white;
+}
+div.window_root.docs-style-dark > div.window_header > button:hover {
+	background: black;
+}

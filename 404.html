@@ -3,9 +3,14 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>404</title>
+		<script src="/js/script.js"></script>
 	</head>
 	<body>
 		<h1>未找到页面</h1>
 		<p><code>404 Not Found</code></p>
+		<p id="url"></p>
+		<script>
+			document.getElementById("url").textContent=`当前路径: ${location.pathname}`;
+		</script>
 	</body>
 </html>

@@ -1,0 +1,93 @@
+/* debugTool (debugTool.js) */
+
+/* debugTool.init */
+div#debug_tool {
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+	width: 100%;
+	height: 100%;
+}
+div#debug_tool > button {
+	position: fixed;
+	z-index: 3;
+	cursor: pointer;
+}
+body.docs-style-dark div#debug_tool > button {
+	background: black;
+	color: #CCC;
+}
+div#debug_tool > div.debug_tool_view {
+	position: fixed;
+	top: 3%;
+	left: 3%;
+	z-index: 2;
+	width: 92%;
+	height: 92%;
+	border: 2px solid gray;
+	background-color: white;
+	padding: 2px;
+	overflow: auto;
+	color: black;
+}
+body.docs-style-dark div#debug_tool > div.debug_tool_view {
+	background-color: black;
+	color: white;
+}
+div#debug_tool > div.debug_tool_view > button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	cursor: pointer;
+}
+body.docs-style-dark div#debug_tool > div.debug_tool_view > button {
+	background-color: black;
+	color: white;
+}
+div#debug_tool > div.debug_tool_view > h3 {
+	margin: 1em 0;
+	font-size: 1.5em;
+}
+div#debug_tool > div.debug_tool_view > div[data-info="content"] {
+	height: calc(100% - 5.4em);
+	overflow: auto;
+}
+div#debug_tool > div.debug_tool_view > div > details {
+	overflow-wrap: anywhere;
+}
+div#debug_tool > div.debug_tool_view > div > details > summary {
+	cursor: pointer;
+	user-select: none;
+	overflow-wrap: anywhere;
+}
+div#debug_tool > div.debug_tool_view > div > details > div {
+	overflow: auto;
+}
+
+/* showLog */
+.show_log_info {
+	overflow: auto;
+	white-space: pre;
+}
+.show_log_content {
+	overflow: auto;
+	font-family: monospace;
+	tab-size: 4;
+}
+.show_log_content > p > .time {
+	color: green;
+}
+.show_log_content > p > .type {
+	color: maroon;
+}
+.show_log_content > p > .source {
+	color: gray;
+}
+.show_log_content > p > .message {
+	white-space: pre-wrap;
+	color: black;
+	overflow-wrap: anywhere;
+}
+div.window_root.docs-style-dark .show_log_content > p > .message {
+	color: white;
+}

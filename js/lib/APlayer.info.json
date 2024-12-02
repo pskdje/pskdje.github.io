@@ -1,0 +1,15 @@
+{
+	"name":"APlayer",
+	"desc":"",
+	"version":"",
+	"file":{
+		"url":"",
+		"CDN":["https://www.jsdelivr.com/package/npm/aplayer","https://cdnjs.com/libraries/aplayer","https://unpkg.com/aplayer/"],
+		"path":[]
+	},
+	"to":"audio player",
+	"website":"http://aplayer.js.org/",
+	"docs":"http://aplayer.js.org/#/zh-Hans",
+	"wiki":null,
+	"code":"https://github.com/DIYgod/APlayer"
+}

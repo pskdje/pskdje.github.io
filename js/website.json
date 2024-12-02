@@ -1,0 +1,36 @@
+{
+	"lib":{
+		"eruda":"https://cdn.jsdelivr.net/npm/eruda",
+		"storage_eruda":"#/eruda/eruda.js",
+		"DPlayer":"",
+		"APlayer":"",
+		"SVGA":"#/SVGAPlayer-Web/svga.min.js",
+		"reveal.js":"",
+		"marked":"https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+	},
+	"static":{
+		"layui":{
+			"info":"UI库",
+			"css":"//unpkg.com/layui/dist/css/layui.css",
+			"js":"//unpkg.com/layui/dist/layui.js"
+		}
+	},"tips":[
+		"这是提示(确信)",
+		"tips!!!",
+		"提示机制(暂定)",
+		"访问/docs/readme.html来查看文档",
+		"访问/tools/，看看有什么有用的工具",
+		"发现问题怎么办？没办法。",
+		"拒绝DDoS攻击",
+		"开发中...",
+		"issues似乎可用？",
+		"guide还是没使用",
+		"resource没有入驻什么",
+		"有什么推荐的东西？",
+		"提示…提示?提示!",
+		"摸鱼~",
+		"阿巴阿巴阿巴",
+		"要做一些备份哦 ^^",
+		"编辑时要记得 Ctrl+S 保存数据，否则软件崩溃…嘶！倒吸一口气！全没了"
+	]
+}

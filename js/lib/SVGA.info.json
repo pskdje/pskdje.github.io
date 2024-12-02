@@ -1,0 +1,15 @@
+{
+	"name":"SVGA",
+	"desc":"",
+	"version":"",
+	"file":{
+		"url":"",
+		"CDN":[],
+		"path":[]
+	},
+	"to":"解析SVGA文件",
+	"website":"https://svga.io/",
+	"docs":null,
+	"wiki":null,
+	"code":"https://github.com/svga/SVGAPlayer-Web"
+}

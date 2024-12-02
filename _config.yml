@@ -1,4 +1,4 @@
-exclude: [ "/static" ]
+# Jekyll config
 webrick:
   headers:
     Access-Control-Allow-Origin: "*"

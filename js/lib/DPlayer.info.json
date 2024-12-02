@@ -1,0 +1,15 @@
+{
+	"name":"DPlayer",
+	"desc":"",
+	"version":"1.26.0",
+	"file":{
+		"url":"",
+		"CDN":[],
+		"path":[]
+	},
+	"to":"video player",
+	"website":"http://dplayer.js.org/",
+	"docs":"http://dplayer.js.org/guide.html",
+	"wiki":null,
+	"code":"https://github.com/DIYgod/DPlayer"
+}
