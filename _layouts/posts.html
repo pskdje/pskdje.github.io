@@ -9,7 +9,25 @@
 		<link rel="stylesheet" href="/assets/css/style.css" />
 	</head>
 	<body>
+		<header class="top_head">
+			<img />
+			<p class="page_title">{{ page.title }}</p>
+			<p class="page_info">时间: <time>{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}</time> ,字数: <span>{{ page.content | number_of_words }}</span></p>
+		</header>
+		<hr />
 		<main class="markdown-body">{{ content }}</main>
-		<div>上一篇<span>{{ page.previous | jsonify }}</span>;下一篇<span>{{ page.next | jsonify }}</span></div>
+		<nav class="page_nav">
+			<span>上一篇</span>
+			<span>
+				<a href="{{ page.previous.url }}">{{ page.previous.title }}</a>
+				<template id="post_previous">{{ page.previous.content }}</template>
+			</span>
+			;<span>下一篇</span>
+			<span>
+				<a href="{{ page.next.url }}">{{ page.next.title }}</a>
+				<template id="post_next">{{ page.next.content }}</template>
+			</span>
+		</nav>
+		<footer></footer>
 	</body>
 </html>
