@@ -1,0 +1,21 @@
+/* posts */
+body > main {
+	margin: 1em;
+}
+body > main {
+	margin: 0.5em;
+}
+.page_nav {
+	display: flex;
+}
+.page_nav .item {
+	flex: 1;
+	height: 4em;
+	margin: 2px;
+	border: 1px solid gray;
+	padding: 2px;
+}
+.page_nav p {
+	margin: 0;
+	padding: 0;
+}

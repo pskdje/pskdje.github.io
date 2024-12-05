@@ -7,26 +7,26 @@
 		<meta name="type" content="post" />
 		<script src="/js/script.js"></script>
 		<link rel="stylesheet" href="/assets/css/style.css" />
+		<link rel="stylesheet" href="/css/posts.css" />
 	</head>
 	<body>
 		<header class="top_head">
 			<img />
 			<p class="page_title">{{ page.title }}</p>
-			<p class="page_info">时间: <time>{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}</time> ,字数: <span>{{ page.content | number_of_words }}</span></p>
+			<p class="page_info">时间: <time>{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}</time> ,原始数据字符数: <span>{{ page.content | size }}</span></p>
 		</header>
 		<hr />
 		<main class="markdown-body">{{ content }}</main>
 		<nav class="page_nav">
-			<span>上一篇</span>
-			<span>
-				<a href="{{ page.previous.url }}">{{ page.previous.title }}</a>
-				<template id="post_previous">{{ page.previous.content }}</template>
-			</span>
-			;<span>下一篇</span>
-			<span>
-				<a href="{{ page.next.url }}">{{ page.next.title }}</a>
-				<template id="post_next">{{ page.next.content }}</template>
-			</span>
+			<div class="up item">
+				<span>上一篇</span>
+				<a class="page_link" href="{{ page.previous.url }}">{{ page.previous.title }}</a>
+				<p class="page_text" id="post_previous">{{ page.previous.content | truncate:1024 | strip |strip_html }}</p>
+			</div><div class="dw item">
+				<span>下一篇</span>
+				<a class="page_link" href="{{ page.next.url }}">{{ page.next.title }}</a>
+				<p class="page_text" id="post_next">{{ page.next.content | truncate:1024 | strip |strip_html }}</p>
+			</div>
 		</nav>
 		<footer></footer>
 	</body>
