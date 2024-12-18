@@ -1,0 +1,91 @@
+[
+	{
+		"name":"script.js",
+		"desc":"关于/js/script.js的更新日志"
+	},{
+		"dt":1733054902000,
+		"c":"添加message事件监听，使用`WPJDS`属性进行签名分流处理，同时添加Temp.WPJDSH容纳处理。删除未使用的`docsScript.criticalError`函数。添加`docsScript.postMessage`函数，以`WPJDS:'DS.js'`进行签名。"
+	},{
+		"dt":1730283393239,
+		"c":"添加自定义元素<docs-warn><docs-error>，添加相关的类：`DocsTipDivElement` `DocsWarnElement` `DocsErrorElement`。"
+	},{
+		"dt":1727748949252,
+		"c":"docWindow现在支持触摸拖拽移动。"
+	},{
+		"dt":1727077238225,
+		"c":"修复了docWindow的移动问题。"
+	},{
+		"dt":1726908483488,
+		"c":"根据性能分析，与服务器同步提升HTTPAgent分块最大值。目前最大值5242880字节（5MB）。"
+	},{
+		"dt":1724221888000,
+		"c":"调整了注释，添加了DATA_page.setDEBUG来在script层面设置调试状态，删去了多余的DEBUG[0]检查。"
+	},{
+		"dt":1719043086000,
+		"c":"调整了RunDataPush推送到事件处理器所携带的数据，添加了一个静态函数。"
+	},{
+		"dt":1718355264645,
+		"c":"添加了RunDataPush类，用于调试。该类可将数据推送到指定的接收组件上。"
+	},{
+		"dt":1709217334098,
+		"c":"调整了错误监听的代码，理论上在Firefox浏览器下，可以尝试检查语法错误。"
+	},{
+		"dt":1708431514134,
+		"c":"docsScript.pageData新增isSetDark属性，表示暗色模式是否应用到文档中。"
+	},{
+		"dt":1708366415661,
+		"c":"调整了部分变量声明。hasOwnKey现在默认使用Object.hasOwn来检测，同时也提供了向下兼容。docsScript.bodyDark现在允许在调试情况下直接设置暗色模式。调整了未处理的reject事件对于错误对象的处理逻辑。"
+	},{
+		"dt":1707552525240,
+		"c":"现在会检查Log的参数name的类型。微调代码结构。"
+	},{
+		"dt":1706266364292,
+		"c":"调整debug.js加载事件，现在会检查 `DATA_page.debugToolInit` 来处理。详细信息见该文档的[其它执行信息](/docs/website/script.html#a-qtzxxx)部分。\n\n拆分 `task` 组件，放入func.js。\n\n删除 `r` 函数",
+		"ct":"markdown"
+	},{
+		"dt":1702714415447,
+		"c":"对全局加载失败和执行错误进行监听。不能保证对资源加载失败正确监听，因为测试未成功。"
+	},{
+		"dt":1702384365000,
+		"c":"因服务器新增接口，docsScript.HTTPAgent增加了相关支持。"
+	},{
+		"dt":1702196728808,
+		"c":"现在，因为没有被处理的Promise.reject所引发的事件中产生的日志，会提供额外的信息。当前提供：事件实例和错误对象。"
+	},{
+		"dt":1701704714341,
+		"c":"添加了docsScript.compatible来存储兼容信息，同时添加了addEventListener的多选项检测。调整了docsScript.HTTPAgent的xhr接口监听AbortSignal的代码。"
+	},{
+		"dt":1701700616732,
+		"c":"## r()\n\n为r函数添加弃用提示，预计在之后的修改中移除。\n\n## docsScript.HTTPAgent\n\n为参数data添加类型检查，`null`将会重置为`{}`空对象。\n\n参数type调整为通过字符串指定请求API，**不向下兼容**。\n\n调整了代理错误的读取逻辑。\n\n调整代码结构。\n\n### 类HTTPAgentResponse\n\n构造后的对象现在被冻结(`Object.freeze()`)。\n\n添加了`API_type`属性，表示请求接口类型。\n\n### fetch 接口\n\n响应类型添加body类型，保证结果稳定。\n\n修复了响应类型未定义时无法获取响应内容。\n\n### xhr 接口\n\n添加了xhrProgress和xhrUploadProgress，允许监听进度。\n\n添加了signal，允许使用`AbortSignal`来停止请求。",
+		"ct":"markdown"
+	},{
+		"dt":1692795331586,
+		"c":"修改了eruda的CDN，保证启用调试时可正常加载。"
+	},{
+		"dt":1682146839216,
+		"c":"修复了当Log.add的message参数传入数组时，且数组内存在Error对象，会出现日志仅有Error对象的内容，而没有其它内容。"
+	},{
+		"dt":1682145775324,
+		"c":"对没有被处理的Promise.reject进行监听。"
+	},{
+		"dt":1676560136346,
+		"c":"调用docsScript.init()后将执行DATA_page.load内的函数。"
+	},{
+		"dt":1676471293661,
+		"c":"修复了致命漏洞：当配置存储在local storage时，将写入配置。现已修改为读取配置。"
+	},{
+		"dt":1676470687761,
+		"c":"docsScript.bodyDark 现在可以清除由它开启的暗色模式"
+	},{
+		"dt":1673806826555,
+		"c":"删除了`Log`实例`length`的`set`方法，该方法没有任何用处。\n\n`docsScript`添加新功能`task`，使用方法见[文档](/docs/website/script.html)。",
+		"ct":"markdown"
+	},{
+		"dt":1672511616004,
+		"c":"添加了类DocsError，调整了docsScript.HTTPAgent的堆栈获取。"
+	},{
+		"dt":"未记录",
+		"c":"已有功能:\n\n```javascript\nlet Temp\nlet cache\nlet config\nlet DEBUG\nclass Log\nfunction r()\nfunction p(obj[,sou])\nfunction pageInit()\nfunction errorElement(text[,appendNode])\nfunction warnElement(text[,appendNode])\nfunction debugTools(runName,...args)\nfunction hasOwnKey(obj,key)\nfunction getType(obj[,reType])\nfunction docWindow(title,doc)\nconst docsScript\n```\n\n`docsScript`中:\n\n```version: [YYYY,mm,dd,HH,MM,SS]\npageData: Object\ninit: function scriptInit(keys={},...args)\nloadLib: function(name)\ngetTip: function()\nXHR: function xhr(method,url[,loadFun][,errorFun][,type][,data])\nappendScript: function(src[,onload][,onerror])\nremoveScropt: function(id)\ndateToStr: function dateOrTimestampToString(datetime,isMil=true)\ngetRandom: function(type,min,max)\nHTTPAgent: function(method,url,data={}[,type])\nwarn: function warning(message,display)\nbodyDark: function setBodyDark()\nreadConfig: function readConfigInLocalStorage()\nwriteConfig: function writeConfigToLocalStorage()\ncriticalError: function(error,variable,information)\n```\n\n`docsScript.pageData`中:\n\n```\nport: location.port\npath: location.pathname\nsearch: URLSearchParams(location.search)\nhash: location.hash\nhtml: document.documentElement\ntitle: document.title\nimages: document.images\nlinks: document.links\nscripts: document.scripts\nstyles: document.styleSheets\ndocWH:[ window.innerWidth , window.innerHeight ]\nisDark:boolean\n```\n",
+		"ct":"markdown"
+	}
+]

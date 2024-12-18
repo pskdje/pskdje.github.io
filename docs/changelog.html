@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>更新日志</title>
+		<script src="/js/script.js"></script>
+		<style>
+article ,article a[href] {
+	color: #888;
+}
+#lr > div.list {
+	overflow: auto;
+}
+.time {
+	font-family: monospace;
+}
+.markdown {
+	border: 2px dashed green;
+	overflow: auto;
+}
+		</style>
+		<script>window.onload=()=>docsScript.bodyDark();</script>
+	</head>
+	<body>
+		<h1><span id="t"></span> - 更新日志</h1>
+		<p id="desc"></p>
+		<noscript>请打开<code>JavaScript</code>来获取和解析更新日志</noscript>
+		<div id="lr"></div>
+		<hr />
+		<article>
+			<p>更新日志处理 <a href="?href=changelog.html">v1.3</a></p>
+		</article>
+		<script data-info="初始化">
+function load_marked(b){if(!b)cache.log.all.add(30,"加载js","marked加载失败")};
+var log=cache.log.clst=new Log("changelog show system","更新日志显示");
+var lr=document.getElementById("lr");
+var ti=document.getElementById("t");
+var sh=docsScript.pageData.search;
+if(sh.has("href"))document.getElementById("desc").textContent="加载中…";
+		</script>
+		<script src="https://unpkg.com/marked/marked.min.js" onerror="load_marked(false)"></script>
+		<script data-info="marked扩展">try{
+// 写在这里防止未加载导致停止运行
+marked.use({
+	renderer:{
+		link(href,title,text){
+			const url=new URL(href,location.href);
+			if(url.origin===location.origin)return false;
+			return`<a target="_blank" href="${href}" ${title?'title="'+title+'"':''}>${text}</a>`;
+		}
+	}
+});
+}catch(e){log.add(50,"marked",e)}	</script>
+		<script data-info="加载">
+function l(d){// 将传入的数据写入日志并返回，同时对数据进行深拷贝
+	if(window.structuredClone){
+		try{
+			log.add(0,"l",d,window.structuredClone(d));
+		}catch(e){
+			log.add(40,"l",e,e);
+			log.add(0,"l",d,d);
+		}
+	}else log.add(0,"l",d,d);
+	return d;
+};function la(s,t){// 添加日志内容
+	log.add(0,s,t);
+};function hr(){// 生成 hr 元素
+	return document.createElement("hr");
+}
+function cLogItem(idx,time,ce,ct,title){
+	const c=(tag)=>{return document.createElement(tag)};
+	const p="p",div="div";
+	let rE=c(div),tmE=c(p),cE=c(div),tlE=c("h3");
+	rE.className="list";
+	rE.setAttribute("data-index",String(idx));
+	if(title){
+		tlE.textContent=String(title);
+		rE.append(tlE);
+	}
+	tmE.className="time";
+	if(typeof time==="number"){
+		let dtE=c("time");
+		dtE.dateTime=new Date(time).toISOString();
+		dtE.textContent=docsScript.dateToStr(time,false);
+		tmE.append(dtE);
+	}else{
+		tmE.textContent=String(time);
+	}
+	rE.append(tmE);
+	switch(ct){
+		case "markdown":
+			if(typeof marked==="object"){
+				cE.className="markdown";
+				try{ cE.innerHTML=marked.parse(ce);
+				}catch(e){
+					log.add(40,"markdown",e);
+					cache.log.err.addError(40,"/docs/changelog>cLogItem",e);
+					errorElement("markdown解析失败",cE);
+				};break;
+			}
+		case "text":
+		default:
+			let txE=c(p);
+			txE.textContent=String(ce);
+			cE.append(txE);
+			break;
+	}
+	rE.append(cE);
+	lr.append(rE);
+}
+la("has href",sh.has("href"));
+if(sh.has("href")){
+	let h=sh.get("href");
+	la("let h",h);
+	fetch(new URL("/assets/changelog/"+h+".json",location.href).href).then(async d=>{
+		la("res.ok",d.ok);
+		if(!d.ok){
+			errorElement("该日志不存在",lr);
+			return;
+		}
+		let g=await d.json();
+		la("isArray",Array.isArray(g));
+		if(!Array.isArray(g))return;
+		let m=g[0];
+		la("meta",[m]);
+		if(typeof m.name!=="string"||typeof m.desc!=="string")return;
+		ti.textContent=m.name;
+		document.getElementById("desc").textContent=m.desc;
+		document.title=m.name+" 的更新日志";
+		createItem:
+		for(let i=1;i<g.length;i++){
+			const te=[`类型错误: 索引[${i}]的属性'`,"'的类型是不受支持的。","支持的类型: "];
+			const o=g[i];
+			la("cl:"+i,[o]);
+			if(!hasOwnKey(o,"dt")||typeof o.c!=="string")continue;
+			lr.append(hr());
+			if(typeof o.dt!=="number"&&typeof o.dt!=="string"){
+				errorElement("时间信息类型错误",lr);
+				la("typeof",te[0]+"dt"+te[1]+te[2]+"数字和字符串");
+				continue;
+			};if(hasOwnKey(o,"ct")&&typeof o.ct!=="string"){
+				errorElement("内容解析方法类型错误",lr);
+				la("typeof",te[0]+"ct"+te[1]+te[2]+"字符串");
+				continue;
+			};if(hasOwnKey(o,"t")&&typeof o.t!=="string"){
+				errorElement("标题类型错误",lr);
+				la("typeof",te[0]+"t"+te[1]+te[2]+"字符串");
+				continue;
+			}
+			cLogItem(i,o.dt,o.c,o.ct,o.t);
+		}
+	}).catch(e=>{
+		log.add(40,"fetch",e);
+		cache.log.err.addError(40,"/docs/changelog>fetch",e);
+		errorElement("处理<i>数据</i>时出现异常。",lr)
+	});
+}
+DEBUG.push(()=>debugTool.init());
+		</script>
+	</body>
+</html>

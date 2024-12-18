@@ -1,0 +1,16 @@
+[
+	{
+		"name":"func.js",
+		"desc":"提供一些工具，用于分担script.js的代码。"
+	},{
+		"dt":1705913136888,
+		"c":"接收了从script.js拆分出的task组件。"
+	},{
+		"dt":1702715116623,
+		"c":"通过加载测试，批准相关信息日志的建立。"
+	},{
+		"dt":"pre",
+		"c":"### 现阶段功能\n\n#### `docsFunc`\n\n`a` - 在all添加日志 \n`ae` - 在all添加错误日志 \n`e` - 在err添加错误日志\n\nclass `log` - 简化对日志all和err的增加\n\n`errorWindow` - 错误窗口 \n`warnWindow` - 警告窗口 \n`dce` - 创建元素\n\nahref - 阻止指定链接打开，并对其执行函数\n\n#### 自定义元素\n\n`time-show` 显示时间",
+		"ct":"markdown"
+	}
+]

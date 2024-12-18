@@ -1,0 +1,26 @@
+[
+	{
+		"name":"debug.js",
+		"desc":"/js/debug.js文件的更新日志"
+	},{
+		"dt":1727173802896,
+		"c":"调整了工具showLog的日志内容读取机制。"
+	},{
+		"dt":1712025890906,
+		"c":"DebugToolWindow类的方法listItem的返回对象添加'n'属性，并冻结该对象。移除了无效函数的帮助信息。"
+	},{
+		"dt":1706945205331,
+		"c":"为DebugToolWindow类添加常量DT。"
+	},{
+		"dt":1703606105971,
+		"c":"添加performance来获取性能信息。当前仅可向控制台发送信息。"
+	},{
+		"dt":1702445109853,
+		"c":"调试工具窗口的页面信息部分新增'当前时间/时间戳'部分。(可以更快的更新更新日志了)"
+	},{
+		"dt":1692892743092,
+		"t":"debug.js更新日志启用",
+		"c":"现有功能:\n\nfunction dfun\n\nvar debugTool\n\n.[info,errorName,addHelp,init,run,tools]\n\n.tools.[this,debugTool,about,help,stack,showLog,agentData,debugJS]\n\n",
+		"ct":"markdown"
+	}
+]
