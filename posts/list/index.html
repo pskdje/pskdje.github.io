@@ -15,7 +15,7 @@ title: page list
 [
 
 	{%- for i in (1..paginator.posts.size) -%}
-	{%- assign post = paginator.posts[i] -%}
+	{%- assign post = paginator.posts[i-1] -%}
 	{
 		"url": "{{ post.url | replace: '"', '\"' }}",
 		"title": "{{ post.title | replace: '"', '\"' }}"
@@ -39,7 +39,7 @@ title: page list
 		<ul id="page_list"></ul>
 		<script data-info="列表生成">
 			const pagelist=JSON.parse(document.getElementById("pagelist").textContent);
-			const id_pagelist=document.getElementById(page_list);
+			const id_pagelist=document.getElementById("page_list");
 			for(const i of pagelist){
 				let rel=document.createElement("li");
 				let lel=document.createElement("a");
