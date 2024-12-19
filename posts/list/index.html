@@ -1,4 +1,5 @@
 ---
+title: page list
 ---
 <!DOCTYPE html>
 <html>
@@ -6,32 +7,52 @@
 		<meta charset="utf-8" />
 		<title>page list</title>
 		<script src="/js/script.js"></script>
+		<link rel="stylesheet" href="//unpkg.com/layui@2.9.20/dist/css/layui.css" />
 	</head>
 	<body>
 		<h1>页面列表</h1>
 		<script id="pagelist" type="application/json">
 [
-	{%- for post in paginator.posts -%}
+
+	{%- for i in (1..paginator.posts.size) -%}
+	{%- assign post = paginator.posts[i] -%}
 	{
 		"url": "{{ post.url | replace: '"', '\"' }}",
 		"title": "{{ post.title | replace: '"', '\"' }}"
-	}{% if post != paginator.per_page %},{% endif %}
+	}{% if i < paginator.posts.size %},{% endif %}
 	{%- endfor -%}
+
 ]
 		</script>
 		<script id="pageindex" type="application/json">
 [
-	{%- for page in (1..paginator.total_pages) -%}
+
+	{%- for i in (1..paginator.total_pages) -%}
 	{
-		"index": {{page}},
+		"index": {{i}},
 		"url": "none"
-	}{% if page != paginator.total_pages %},{% endif %}
+	}{% if i < paginator.total_pages %},{% endif %}
 	{%- endfor -%}
+
 ]
+		</script>
+		<ul id="page_list"></ul>
+		<script data-info="列表生成">
+			const pagelist=JSON.parse(document.getElementById("pagelist").textContent);
+			const id_pagelist=document.getElementById(page_list);
+			for(const i of pagelist){
+				let rel=document.createElement("li");
+				let lel=document.createElement("a");
+				rel.append(lel);
+				lel.textContent=i.title;
+				lel.href=i.url;
+				id_pagelist.append(rel);
+			}
 		</script>
 		{%- if paginator.total_pages > 1 -%}
 		<div>换页待实现</div>
 		<script></script>
 		{%- endif -%}
+		<script src="//unpkg.com/layui@2.9.20/dist/layui.js" async></script>
 	</body>
 </html>
