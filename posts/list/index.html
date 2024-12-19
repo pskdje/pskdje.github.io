@@ -12,9 +12,9 @@ title: page list
 	<body>
 		<h1>页面列表</h1>
 		<script id="pagelist" type="text/csv">
-{%- for i in paginator.posts -%}
+{% for i in paginator.posts %}
 {{ i.title | replace: ",", "" }},{{ i.url }}
-{%- endfor -%}
+{% endfor %}
 		</script>
 		<script id="pageindex" type="application/json">
 [
@@ -32,14 +32,15 @@ title: page list
 			const pagelist=[];
 			const id_pagelist=document.getElementById("page_list");
 			for(const i of opl){
+				if(!i)continue;
 				pagelist.push(i.split(","));
 			}
 			for(const i of pagelist){
 				let rel=document.createElement("li");
 				let lel=document.createElement("a");
 				rel.append(lel);
-				lel.textContent=i.title;
-				lel.href=i.url;
+				lel.textContent=i[0];
+				lel.href=i[1];
 				id_pagelist.append(rel);
 			}
 		</script>
