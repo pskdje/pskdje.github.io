@@ -9,7 +9,7 @@ title: page list
 		<script src="/js/script.js"></script>
 		<link rel="stylesheet" href="//unpkg.com/layui@2.9.20/dist/css/layui.css" />
 	</head>
-	<body>
+	<body class="layui-margin-2">
 		<h1>页面列表</h1>
 		<script id="pagelist" type="text/csv">
 {% for i in paginator.posts %}
@@ -26,22 +26,25 @@ title: page list
 	{%- endfor -%}
 ]
 		</script>
-		<ul id="page_list"></ul>
+		<ul id="page_list" class="layui-menu"><li class="layui-menu-item-divider"></li></ul>
 		<script data-info="列表生成">
 			const opl=document.getElementById("pagelist").textContent.split("\n");
 			const pagelist=[];
 			const id_pagelist=document.getElementById("page_list");
 			for(const i of opl){
-				if(!i)continue;
+				if(!i.trim())continue;
 				pagelist.push(i.split(","));
 			}
 			for(const i of pagelist){
 				let rel=document.createElement("li");
 				let lel=document.createElement("a");
+				let tel=document.createElement("li");
 				rel.append(lel);
+				rel.className="layui-padding-1";
 				lel.textContent=i[0];
 				lel.href=i[1];
-				id_pagelist.append(rel);
+				tel.className="layui-menu-item-divider";
+				id_pagelist.append(rel,tel);
 			}
 		</script>
 		{%- if paginator.total_pages > 1 -%}
