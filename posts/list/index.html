@@ -11,35 +11,29 @@ title: page list
 	</head>
 	<body>
 		<h1>页面列表</h1>
-		<script id="pagelist" type="application/json">
-[
-
-	{%- for i in (1..paginator.posts.size) -%}
-	{%- assign post = paginator.posts[i-1] -%}
-	{
-		"url": "{{ post.url | replace: '"', '\"' }}",
-		"title": "{{ post.title | replace: '"', '\"' }}"
-	}{% if i < paginator.posts.size %},{% endif %}
-	{%- endfor -%}
-
-]
+		<script id="pagelist" type="text/csv">
+{%- for i in paginator.posts -%}
+{{ i.title | replace: ",", "" }},{{ i.url }}
+{%- endfor -%}
 		</script>
 		<script id="pageindex" type="application/json">
 [
-
 	{%- for i in (1..paginator.total_pages) -%}
 	{
 		"index": {{i}},
 		"url": "none"
 	}{% if i < paginator.total_pages %},{% endif %}
 	{%- endfor -%}
-
 ]
 		</script>
 		<ul id="page_list"></ul>
 		<script data-info="列表生成">
-			const pagelist=JSON.parse(document.getElementById("pagelist").textContent);
+			const opl=document.getElementById("pagelist").textContent.split("\n");
+			const pagelist=[];
 			const id_pagelist=document.getElementById("page_list");
+			for(const i of opl){
+				pagelist.push(i.split(","));
+			}
 			for(const i of pagelist){
 				let rel=document.createElement("li");
 				let lel=document.createElement("a");
