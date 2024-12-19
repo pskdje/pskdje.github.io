@@ -1,6 +1,8 @@
 # Jekyll config
 exclude: [ "README.md" ]
 permalink: /posts/:categories/:year/:month/:day/:title:output_ext
+paginate: 3
+paginate_page: /posts/list/:num
 webrick:
   headers:
     Access-Control-Allow-Origin: "*"

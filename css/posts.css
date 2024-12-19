@@ -23,4 +23,7 @@ body > main {
 .page_nav p {
 	margin: 0;
 	padding: 0;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	height: 1cqi;
 }
