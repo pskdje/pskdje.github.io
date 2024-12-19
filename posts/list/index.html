@@ -9,7 +9,16 @@
 	</head>
 	<body>
 		<h1>页面列表</h1>
-		<script id="pagelist" type="application/json"></script>
+		<script id="pagelist" type="application/json">
+[
+	{%- for post in paginator.posts -%}
+	{
+		"url": "{{ post.url | replace: '"', '\"' }}",
+		"title": "{{ post.title | replace: '"', '\"' }}"
+	}{% if post != paginator.per_page %},{% endif %}
+	{%- endfor -%}
+]
+		</script>
 		<script id="pageindex" type="application/json">
 [
 	{%- for page in (1..paginator.total_pages) -%}
