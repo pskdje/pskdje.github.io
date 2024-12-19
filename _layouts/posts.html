@@ -19,20 +19,20 @@
 		<main class="markdown-body">{{ content }}</main>
 		<nav class="page_nav">
 			<div class="up item">
-				<span>上一篇</span>
+				<span class="tip">上一篇: </span>
 				{%- if page.previous -%}
 				<a class="page_link" href="{{ page.previous.url }}">{{ page.previous.title }}</a>
 				<p class="page_text" id="post_previous">{{ page.previous.content | truncate:1024 | strip |strip_html }}</p>
 				{%- else -%}
-				<span>无</span>
+				<span class="no_page">无</span>
 				{%- endif -%}
 			</div><div class="dw item">
-				<span>下一篇</span>
+				<span class="tip">下一篇: </span>
 				{%- if page.next -%}
 				<a class="page_link" href="{{ page.next.url }}">{{ page.next.title }}</a>
 				<p class="page_text" id="post_next">{{ page.next.content | truncate:1024 | strip |strip_html }}</p>
 				{%- else -%}
-				<span>无</span>
+				<span class="no_page">无</span>
 				{%- endif -%}
 			</div>
 		</nav>
