@@ -11,7 +11,6 @@
 	</head>
 	<body>
 		<header class="top_head">
-			<img />
 			<p class="page_title">{{ page.title }}</p>
 			<p class="page_info">时间: <time>{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}</time> ,原始数据字符数: <span>{{ page.content | size }}</span></p>
 		</header>
