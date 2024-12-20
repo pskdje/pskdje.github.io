@@ -53,7 +53,7 @@ title: page list
 				next_page=Number("{{ paginator.next_page }}"),
 				next_page_path="{{ paginator.next_page_path }}",
 				thisPageIndex=Number("{{ paginator.page }}");
-			const pageindex=JSON.parse(document.getElementById("pageindex"));
+			const pageindex=JSON.parse(document.getElementById("pageindex").textContent);
 			layui.laypage.render({
 				elem:"page_index_mn",
 				count: pageindex.length,
