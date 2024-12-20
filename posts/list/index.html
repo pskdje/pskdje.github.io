@@ -19,10 +19,8 @@ title: page list
 		<script id="pageindex" type="application/json">
 [
 	{%- for i in (1..paginator.total_pages) -%}
-	{
-		"index": {{i}},
-		"url": "none"
-	}{% if i < paginator.total_pages %},{% endif %}
+	{"index": {{i}}, "url": "none"}
+	{%- if i < paginator.total_pages -%},{%- endif -%}
 	{%- endfor -%}
 ]
 		</script>
@@ -48,12 +46,25 @@ title: page list
 			}
 		</script>
 		{%- if paginator.total_pages > 1 -%}
-		<div>换页待实现</div>
-		<script>
+		<div id="page_index_mn">换页组件</div>
+		<script data-info="换页">
 			const previous_page=Number("{{ paginator.previous_page }}"),
 				previous_page_path="{{ paginator.previous_page_path }}",
 				next_page=Number("{{ paginator.next_page }}"),
-				next_page_path="{{ paginator.next_page_path }}";
+				next_page_path="{{ paginator.next_page_path }}",
+				thisPageIndex=Number("{{ paginator.page }}");
+			const pageindex=JSON.parse(document.getElementById("pageindex"));
+			layui.laypage.render({
+				elem:"page_index_mn",
+				count: pageindex.length,
+				limit:1,
+				curr: thisPageIndex,
+				layout:["count","prev","page","next","skip"],
+				countText:["共","页"],
+				jump(obj,first){
+					console.debug(obj,first);
+				}
+			})
 		</script>
 		{%- endif -%}
 		<script src="//unpkg.com/layui@2.9.20/dist/layui.js" async></script>
