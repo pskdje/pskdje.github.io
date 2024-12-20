@@ -49,7 +49,12 @@ title: page list
 		</script>
 		{%- if paginator.total_pages > 1 -%}
 		<div>换页待实现</div>
-		<script></script>
+		<script>
+			const previous_page=Number("{{ paginator.previous_page }}"),
+				previous_page_path="{{ paginator.previous_page_path }}",
+				next_page=Number("{{ paginator.next_page }}"),
+				next_page_path="{{ paginator.next_page_path }}";
+		</script>
 		{%- endif -%}
 		<script src="//unpkg.com/layui@2.9.20/dist/layui.js" async></script>
 	</body>
