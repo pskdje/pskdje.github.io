@@ -123,10 +123,11 @@ div.window_root > div.window_header > button {
 	font-size: 1em;
 	background: #BBB;
 	color: black;
+	text-align: center;
 	user-select: none;
 	transition: background .5s;
 	height: initial;
-	width: initail;
+	width: 1em;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
