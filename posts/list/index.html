@@ -18,44 +18,58 @@ title: page list
 {{ i.title | replace: ",", "" }},{{ i.url }}
 {% endfor %}
 		</script>
-		<script id="pageindex" type="application/json">
-[
-	{%- for i in (1..paginator.total_pages) -%}
-	{"index": {{i}}, "url": "none"}
-	{%- if i < paginator.total_pages -%},{%- endif -%}
-	{%- endfor -%}
-]
-		</script>
 		<ul id="page_list" class="layui-menu"><li class="layui-menu-item-divider"></li></ul>
 		<script data-info="列表生成">
-			const opl=document.getElementById("pagelist").textContent.split("\n");
-			const pagelist=[];
 			const id_pagelist=document.getElementById("page_list");
-			for(const i of opl){
-				if(!i.trim())continue;
-				pagelist.push(i.split(","));
+			function createList(csv){// 生成列表
+				const opl=csv.split("\n");
+				const pagelist=[];
+				for(const i of opl){
+					if(!i.trim())continue;
+					pagelist.push(i.split(","));
+				}
+				for(const i of pagelist){
+					let rel=document.createElement("li");
+					let lel=document.createElement("a");
+					let tel=document.createElement("li");
+					rel.append(lel);
+					rel.className="layui-padding-1";
+					lel.textContent=i[0];
+					lel.href=i[1];
+					tel.className="layui-menu-item-divider";
+					id_pagelist.append(rel,tel);
+				}
 			}
-			for(const i of pagelist){
-				let rel=document.createElement("li");
-				let lel=document.createElement("a");
-				let tel=document.createElement("li");
-				rel.append(lel);
-				rel.className="layui-padding-1";
-				lel.textContent=i[0];
-				lel.href=i[1];
-				tel.className="layui-menu-item-divider";
-				id_pagelist.append(rel,tel);
-			}
+			createList(document.getElementById("pagelist").textContent);
 		</script>
 		{%- if paginator.total_pages > 1 -%}
 		<div id="page_index_mn">换页组件</div>
-		<script data-info="换页">
-			const previous_page=Number("{{ paginator.previous_page }}"),
+		<script id="pageinfo">
+			let pageListBaseURL="/{{ site.paginate_path | replace: ':num', '' }}",
+				previous_page=Number("{{ paginator.previous_page }}"),
 				previous_page_path="{{ paginator.previous_page_path }}",
 				next_page=Number("{{ paginator.next_page }}"),
 				next_page_path="{{ paginator.next_page_path }}",
 				thisPageIndex=Number("{{ paginator.page }}");
-			const pageindex=JSON.parse(document.getElementById("pageindex").textContent);
+		</script>
+		<script data-info="换页">
+			function getListPageURL(index){// 计算页面链接
+				if(typeof index!=="string"){
+					cache.log.all.add(30,"getListPageURL","索引类型不是数字");
+					return pageListBaseURL;
+				};if(index===1)return pageListBaseURL;
+				else return pageListBaseURL+`${index}/`;
+			}
+			function loadPageListTask(index){
+				fetch(getListPageURL(index)).then(r=>{
+					const dp=new DOMParser();
+					const d=dp.parseFromString(r.text(),"text/html");
+					let c=d.getElementById("pagelist")?.textContent;
+					if(!c) layui.layer.msg("找不到页面列表数据");
+					while(id_pagelist.lastChild) id_pagelist.lastChild.remove();
+					createList(c);
+				})
+			}
 			layuiLoad.push(()=>{
 			layui.laypage.render({
 				elem:"page_index_mn",
@@ -65,7 +79,8 @@ title: page list
 				layout:["count","prev","page","next","skip"],
 				countText:["共","页"],
 				jump(obj,first){
-					console.debug(obj,first);
+					if(first)return;
+					loadPageListTask(obj.curr);
 				}
 			});
 			});
