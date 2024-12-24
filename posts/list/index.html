@@ -50,6 +50,8 @@ title: page list
 				previous_page_path="{{ paginator.previous_page_path }}",
 				next_page=Number("{{ paginator.next_page }}"),
 				next_page_path="{{ paginator.next_page_path }}",
+				total_pages=Number("{{ paginator.total_pages }}"),
+				total_posts=Number("{{ paginator.total_posts }}"),
 				thisPageIndex=Number("{{ paginator.page }}");
 		</script>
 		<script data-info="换页">
@@ -73,7 +75,7 @@ title: page list
 			layuiLoad.push(()=>{
 			layui.laypage.render({
 				elem:"page_index_mn",
-				count: pageindex.length,
+				count: total_pages,
 				limit:1,
 				curr: thisPageIndex,
 				layout:["count","prev","page","next","skip"],
