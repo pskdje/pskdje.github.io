@@ -128,8 +128,17 @@
 		}
 	});
 	// 处理器
+	let env={};// 环境参数
 	function setEnv(d){// 设置一些环境参数，一般启动时设置一次
-		// 计划替代网络相关功能并用此函数设置环境
+		// 注意: 参数是否有效由各自需要某个参数的函数决定，也就意味着传递无效的参数可能会造成意外的错误。
+		if(typeof d.append!=="object")throw new TypeError("不是配置对象");
+		Object.assign(env,d.append);
+	}
+	function getEnv(){// 获取环境参数
+		pms("thisEnvArgs",env,{time:Date.now()});
+	}
+	function reEnv(){// 重置环境参数
+		env={};
 	}
 	function addVar(d){// 添加变量，将会对收到的代码进行执行
 		function fpms(data){pms("functionPush",data)}
@@ -160,6 +169,9 @@
 	}
 	const handle={// 处理器列表
 		init:setEnv,
+		setEnv,
+		getEnv,
+		reEnv,
 		addVar,
 		setVar,
 		getVar,
@@ -180,4 +192,73 @@
 			ck("消息接收已被修改");
 		}
 	},1000);
-})()
+
+	/* 覆盖原始接口，防止访问外部导致逃逸 */
+	// 获取Worker API
+	const close=self.close,
+		fetch=self.fetch,
+		Request=self.Request,
+		Response=self.Response,
+		XMLHttpRequest=self.XMLHttpRequest,
+		WebSocket=self.WebSocket,
+		EventSource=self.EventSource,
+		fonts=self.fonts,
+		FontFace=self.FontFace,
+		BroadcastChannel=self.BroadcastChannel,
+		MessageChannel=self.MessageChannel,
+		caches=self.caches,
+		crypto=self.crypto,
+		indexedDB=self.indexedDB,
+		Notification=self.Notification,
+		performance=self.performance;
+	// 中间组件
+	function networkMsg(api,opt,sta="none"){// 发送网络事件
+		pms("network",opt,{api,status:sta});
+	}
+	// 覆盖原始接口
+	self.close=()=>{
+		pms("callCloseFunction");
+	}
+	self.fetch=(resource,options={})=>{
+		let u,o={};
+		if(typeof resource==="string") u=resource;
+		else u=resource.url;
+		u=new URL(String(u),env.network?.baseURL).href;
+		for(const on of["method","headers","body","cache","credentials","integrity","mode","redirect","referrer"]){
+			if(Object.hasOwn(options,on)){
+				o[on]=options[on];
+				continue;
+			}else if(typeof resource==="string")continue;
+			else if(Object.hasOwn(resource,on)){
+				o[on]=resource[on];
+				continue;
+			}
+		}
+		let r=new Request(u,o);
+		networkMsg("fetch",o,"request");
+		if(env.network?.allow==false)return;
+		return fetch(r).then(s=>{
+			networkMsg("fetch",{
+				headers:s.headers,
+				ok:s.ok,
+				redirected:s.redirected,
+				status:s.status,
+				statusText:s.statusText,
+				type:s.type,
+				url:s.url,
+			},"response");
+			return s;
+		})
+	}
+	self.XMLHttpRequest=class{}
+	self.WebSocket=class{}
+	self.EventSource=class{}
+	self.fonts={// 可能无法覆盖
+	}// 可以用var覆盖掉
+	self.FontFace=class{}
+	self.caches={}
+	self.indexedDB={// 可能无法覆盖
+	}
+	self.Notification=class{}
+	self.performance={}
+})();

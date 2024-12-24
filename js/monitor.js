@@ -73,7 +73,7 @@ const docsMonitor=(function docsMonitor(){
 			return;
 		}
 		style.textContent=`@charset "UTF-8";
-/ *@import url("/css/monospace.css"); */
+/* @import url("/css/monospace.css"); */
 .errmsg-root {
 	height: 100%;
 	width: 100%;
