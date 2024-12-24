@@ -135,16 +135,16 @@
 		Object.assign(env,d.append);
 	}
 	function getEnv(){// 获取环境参数
-		pms("thisEnvArgs",env,{time:Date.now()});
+		pms("getEnv",env,{time:Date.now()});
 	}
 	function reEnv(){// 重置环境参数
 		env={};
 	}
 	function addVar(d){// 添加变量，将会对收到的代码进行执行
-		function fpms(data){pms("functionPush",data)}
 		const name=d.name,code=d.code;
+		function fpms(data){pms("functionPush",data,{name})}
 		try{
-			self[name]=new Function("pms",`"use strict";return(${code})`)(fpms);
+			self[name]=new Function("pms",`"use strict";return(${code});`)(fpms);
 		}catch(e){
 			pms("addVariableError",e,{name,code});
 		}
@@ -160,7 +160,7 @@
 		const id=data.id;
 		let r=void(0);
 		try{
-			r=new Function(data.code)();
+			r=new Function(`"use strict";return(${data.code})`)();
 		}catch(e){
 			pms("evalCodeError",e,{id,code:data.code});
 			return;
@@ -182,7 +182,7 @@
 		pms("errorEvent",ev.error,{message:ev.message,filename:ev.filename,lineno:ev.lineno,colno:ev.colno});
 	});
 	self.addEventListener("unhandledrejection",ev=>{
-		pms("unhandledrejectionEvent","出现未处理的Promise.reject事件。为防止错误的数据，不发送信息，请在控制台查看。");
+		pms("unhandledrejection","出现未处理的Promise.reject事件。为防止错误的数据，不发送信息，请在控制台查看。");
 		console.error("Event Promise.reject",ev,ev.promise,ev.reason);
 	});
 	setInterval(function check(){// 检查
@@ -215,6 +215,15 @@
 	function networkMsg(api,opt,sta="none"){// 发送网络事件
 		pms("network",opt,{api,status:sta});
 	}
+	function HeadersToString(h){// 处理Headers对象
+		let o={};
+		for(const d in h.entries()){
+			let k=d[0],v=d[1];
+			if(!(k in o)) o[k]=[];
+			o[k].push(v);
+		}
+		return o;
+	}
 	// 覆盖原始接口
 	self.close=()=>{
 		pms("callCloseFunction");
@@ -224,7 +233,7 @@
 		if(typeof resource==="string") u=resource;
 		else u=resource.url;
 		u=new URL(String(u),env.network?.baseURL).href;
-		for(const on of["method","headers","body","cache","credentials","integrity","mode","redirect","referrer"]){
+		for(const on of ["method","headers","body","cache","credentials","integrity","mode","redirect","referrer"]){
 			if(Object.hasOwn(options,on)){
 				o[on]=options[on];
 				continue;
@@ -235,11 +244,12 @@
 			}
 		}
 		let r=new Request(u,o);
+		if(o.headers instanceof Headers) o.headers=HeadersToString(o.headers);
 		networkMsg("fetch",o,"request");
 		if(env.network?.allow==false)return;
 		return fetch(r).then(s=>{
 			networkMsg("fetch",{
-				headers:s.headers,
+				headers:HeadersToString(s.headers),
 				ok:s.ok,
 				redirected:s.redirected,
 				status:s.status,
