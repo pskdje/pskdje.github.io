@@ -13,7 +13,7 @@ title: page list
 	</head>
 	<body class="layui-margin-2">
 		<h1>页面列表</h1>
-		<script id="pagelist" type="text/csv">
+		<script id="pagelist" type="text/csv" data-info="csv格式的页面列表数据">
 {% for i in paginator.posts %}
 {{ i.title | replace: ",", "" }},{{ i.url }}
 {% endfor %}
@@ -67,7 +67,10 @@ title: page list
 					const dp=new DOMParser();
 					const d=dp.parseFromString(r.text(),"text/html");
 					let c=d.getElementById("pagelist")?.textContent;
-					if(!c) layui.layer.msg("找不到页面列表数据");
+					if(!c){
+						layui.layer.msg("找不到页面列表数据");
+						return;
+					}
 					while(id_pagelist.lastChild) id_pagelist.lastChild.remove();
 					createList(c);
 				})
@@ -89,9 +92,9 @@ title: page list
 		</script>
 		{%- endif -%}
 		<script id="layui" src="//unpkg.com/layui@2.9.20/dist/layui.js" async></script>
-		<script>
+		<script data-info="layui加载后运行函数">
 			document.getElementById("layui").addEventListener("load",()=>{
-				for(const f of layuiLoad)try{ f();}catch(e){cache.log.err.addError(50,"layuiLoad",e)}
+				for(const f of layuiLoad)try{ f();}catch(e){cache.log.err.addError(50,"layuiLoad",e);console.error(e)}
 			});
 		</script>
 	</body>
