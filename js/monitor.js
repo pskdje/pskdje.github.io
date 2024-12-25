@@ -50,6 +50,7 @@ const docsMonitor=(function docsMonitor(){
 	function faultWindow(msg,tkl){// 弹出故障提示窗口
 		console.error(msg);
 		const ww=docWindow("故障","");
+		ww.zIndex=0xFFFFFFFF;
 		if(window.matchMedia("(max-width: 600px)").matches){
 			ww.left=ww.top="0px";
 			ww.width=ww.height="100%";
@@ -289,6 +290,8 @@ const docsMonitor=(function docsMonitor(){
 		faultWindow,
 		listening,
 		samplingVariable,
+		listenerErrorEvent,
+		listenerUnhlrejEvent,
 		swEvLse:switchEventListener,
 	});
 })();

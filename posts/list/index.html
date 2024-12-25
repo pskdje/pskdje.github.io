@@ -44,6 +44,7 @@ title: page list
 		</script>
 		{%- if paginator.total_pages > 1 -%}
 		<div id="page_index_mn">换页组件</div>
+		<div id="page_index_mn_tip" style="display: none;">* 目前使用的分页渲染组件没有接口可以更改当前页，请自行查看地址栏确认。</div>
 		<script id="pageinfo">
 			let pageListBaseURL="/{{ site.paginate_path | replace: ':num', '' }}",
 				previous_page=Number("{{ paginator.previous_page }}"),
@@ -62,28 +63,30 @@ title: page list
 				};if(index===1)return pageListBaseURL;
 				else return pageListBaseURL+`${index}/`;
 			}
-			function loadPageList(pageURL){// 加载页面
+			function loadPageList(pageURL,setHistory=false){// 加载页面
 				const layer=layui.layer;
-				const lidx=layer.load(2,{shade:0.3,id:"pageload"});
+				const lidx=layer.load(2,{shade:0.2,id:"pageload",zInedx:10});
+				if(setHistory)history.pushState(null,"",pageURL);
 				fetch(pageURL).then(async r=>{
 					const dp=new DOMParser();
 					const d=dp.parseFromString(await r.text(),"text/html");
 					let c=d.getElementById("pagelist")?.textContent;
 					if(!c){
 						layer.msg("找不到页面列表数据");
+						if(setHistory)history.back();
 						return;
 					}
 					while(id_pagelist.lastChild) id_pagelist.lastChild.remove();
 					createList(c);
-					history.pushState(null,"",pageURL);
 				}).finally(()=>layer.close(lidx));
 			}
 			function loadPageListTask(index){
 				const pURL=getListPageURL(index);
-				loadPageList(pURL);
+				loadPageList(pURL,true);
 			}
 			addEventListener("popstate",ev=>{
 				loadPageList(location.pathname);
+				document.getElementById("page_index_mn_tip").style.display="block";
 			});
 			layuiLoad.push(()=>{
 			layui.laypage.render({

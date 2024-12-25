@@ -1,8 +1,17 @@
 # Jekyll config
+
+# 排除列表
 exclude: [ "README.md" ]
+
+# 默认文章输出链接
 permalink: /posts/:categories/:year/:month/:day/:title:output_ext
+
+# 单个分页内最大文章数量
 paginate: 3
+
+# 分页链接
 paginate_path: posts/list/:num
+
 webrick:
   headers:
     Access-Control-Allow-Origin: "*"
