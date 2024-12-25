@@ -56,16 +56,16 @@ title: page list
 		</script>
 		<script data-info="换页">
 			function getListPageURL(index){// 计算页面链接
-				if(typeof index!=="string"){
+				if(typeof index!=="number"){
 					cache.log.all.add(30,"getListPageURL","索引类型不是数字");
 					return pageListBaseURL;
 				};if(index===1)return pageListBaseURL;
 				else return pageListBaseURL+`${index}/`;
 			}
 			function loadPageListTask(index){
-				fetch(getListPageURL(index)).then(r=>{
+				fetch(getListPageURL(index)).then(async r=>{
 					const dp=new DOMParser();
-					const d=dp.parseFromString(r.text(),"text/html");
+					const d=dp.parseFromString(await r.text(),"text/html");
 					let c=d.getElementById("pagelist")?.textContent;
 					if(!c){
 						layui.layer.msg("找不到页面列表数据");
