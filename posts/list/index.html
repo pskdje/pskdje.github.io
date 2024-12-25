@@ -62,19 +62,29 @@ title: page list
 				};if(index===1)return pageListBaseURL;
 				else return pageListBaseURL+`${index}/`;
 			}
-			function loadPageListTask(index){
-				fetch(getListPageURL(index)).then(async r=>{
+			function loadPageList(pageURL){// 加载页面
+				const layer=layui.layer;
+				const lidx=layer.load(2,{shade:0.3,id:"pageload"});
+				fetch(pageURL).then(async r=>{
 					const dp=new DOMParser();
 					const d=dp.parseFromString(await r.text(),"text/html");
 					let c=d.getElementById("pagelist")?.textContent;
 					if(!c){
-						layui.layer.msg("找不到页面列表数据");
+						layer.msg("找不到页面列表数据");
 						return;
 					}
 					while(id_pagelist.lastChild) id_pagelist.lastChild.remove();
 					createList(c);
-				})
+					history.pushState(null,"",pageURL);
+				}).finally(()=>layer.close(lidx));
 			}
+			function loadPageListTask(index){
+				const pURL=getListPageURL(index);
+				loadPageList(pURL);
+			}
+			addEventListener("popstate",ev=>{
+				loadPageList(location.pathname);
+			});
 			layuiLoad.push(()=>{
 			layui.laypage.render({
 				elem:"page_index_mn",
