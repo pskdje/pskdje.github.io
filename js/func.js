@@ -47,7 +47,21 @@ const docsFunc={
 	dce:function documentCreateElement(tag){// 创建元素
 		return document.createElement(tag);
 	}, task:function timeTask(){// 定时任务
-		const tr=class Task {
+		class SingleTask {// 单个任务
+			get[Symbol.toStringTag](){return"SingleTask"};
+			get rund(){return this._rund};
+			constructor(time,data){
+				this.theNotRun=false;// 声明不运行该任务，将在下一个循环删除
+				this._rund=false;// 表示已运行，不要修改它来骗自己
+				this.time=time;
+				this.data=data;
+			}; setTime(t){// 修改任务时间
+				if(typeof t!=="number")throw new TypeError("请输入要增量或变更为的时间整数");
+				if(t>86300000)return this.time=t;
+				else return this.time=this.time+t;
+			}
+		}
+		const tr=class TimeTask {// 主循环
 			get[Symbol.toStringTag](){return"TimeTask"};
 			log=new Log("task","定时任务运行日志");
 			#taskRefreshTime=1000;
@@ -64,22 +78,27 @@ const docsFunc={
 					const t=Date.now();
 					let rm=[],k=p.task;
 					for(let i=0;i<k.length;i++){
-						const l=k[i];const m=l.time,d=l.data;
+						const l=k[i];if(typeof l!=="object"){rm.push(i);continue}
+						const m=Number(l.time),d=l.data;
+						if(l.theNotRun||isNaN(m)){rm.push(i);continue}
 						if(m>t)continue;
+						l._rund=true;
 						if(typeof d==="function")try{
 							d();
-						}catch(e){this.log.add(10,"运行函数",e,e)}
+						}catch(e){p.log.add(10,"运行函数",e,e)}
 						if(typeof d==="string") docsScript.warn(d,"window");
 						rm.push(i);
 					};for(let i=rm.length-1;i>=0;i--){k.splice(rm[i],1);}
-					if(this.viewTC)this.log.add(0,"运行耗时",Date.now()-t);
+					if(p.viewTC) p.log.add(0,"运行耗时",Date.now()-t);
 				},this.#taskRefreshTime,this);
 				this.log.add(0,"建立","循环ID: "+id);
 			}; add(time,data){// 添加任务
-				if(typeof time!=="number")return false;
-				if(time>86300000)this.task.push({time:time,data:data});
-				else this.task.push({time:Date.now()+time,data:data});
-				return true;
+				if(typeof time!=="number")throw new TypeError("未正确提供要运行的时间");
+				let st=null;
+				if(time>86300000) st=new SingleTask(time,data);
+				else st=new SingleTask(Date.now()+time,data);
+				this.task.push(st);
+				return st;
 			}; clear(){// 清除运行
 				const id=this.#intervalId;
 				this.log.add(0,"清除","循环ID: "+id);

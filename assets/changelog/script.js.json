@@ -3,6 +3,9 @@
 		"name":"script.js",
 		"desc":"关于/js/script.js的更新日志"
 	},{
+		"dt":1735202952459,
+		"c":"调整了error事件处理对没有Error对象时的反应。调整了调试库eruda的加载时机（因为本身有网络和被附加的原因，还有性能考量，最终决定添加defer属性）。"
+	},{
 		"dt":1733054902000,
 		"c":"添加message事件监听，使用`WPJDS`属性进行签名分流处理，同时添加Temp.WPJDSH容纳处理。删除未使用的`docsScript.criticalError`函数。添加`docsScript.postMessage`函数，以`WPJDS:'DS.js'`进行签名。"
 	},{

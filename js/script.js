@@ -880,6 +880,7 @@ Temp["loadDebugTool"]=(function hasLoadDebugTool(){// 判断是否加载调试�
 		rlog.add(0,"(hasDebugTool).debugTool","调试工具确认添加，来自:eruda");
 		erudaDT.id="eruda";
 		erudaDT.src="https://unpkg.com/eruda/eruda.js";// 设置路径
+		erudaDT.defer=true;
 		erudaDT.onload=()=>{eruda.init()};// 必须，启动调试工具。
 		erudaDT.onerror=()=>{rlog.add(30,"(hasDebugTool).debugTool","调试工具加载失败。(工具名:eruda)");}// 加载失败时输出信息到日志
 		document.head.appendChild(erudaDT);// 附加
@@ -934,8 +935,8 @@ setTimeout(async function(){// 用于调试
 	window.addEventListener("error",ev=>{try{
 		let msg,data={event:ev};
 		if(ev instanceof ErrorEvent){
-			data.error=ev.error;data.name=ev.name;data.message=ev.message;
-			if(!ev.error) msg="跨域脚本，无法获取错误信息。";
+			data.error=ev.error;data.message=ev.message;
+			if(!ev.error) msg=["无错误对象",ev.message];
 			else msg=errorToList(ev.error);
 		}else msg="资源加载失败";
 		errlog.add(40,"error Event",msg,data);
