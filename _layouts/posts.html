@@ -15,7 +15,7 @@
 			<p class="page_info">时间: <time>{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}</time> ,原始数据字符数: <span>{{ page.content | size }}</span></p>
 		</header>
 		<hr />
-		<main class="markdown-body">{{ content }}</main>
+		<main id="body_content" class="markdown-body">{{ content }}</main>
 		<nav class="page_nav">
 			<div class="up item">
 				<span class="tip">上一篇: </span>
