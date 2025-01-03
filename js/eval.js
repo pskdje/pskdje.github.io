@@ -15,7 +15,12 @@
 	}
 	const postMessage=self.postMessage;
 	function pms(...args){// 传递信息到启动方
-		postMessage(msgPack(...args));
+		try{
+			postMessage(msgPack(...args));
+		}catch(e){
+			console.error(e);
+			postMessage(msgPack("pmsErr",e));
+		}
 	}
 	function messageError(ev,info){// 传递错误提示
 		pms("msgErr",ev.data,{info,origin:ev.origin,sourceType:Object.prototype.toString.call(ev.source)});
@@ -127,12 +132,25 @@
 			cseMsg("trace",{args:a,stack:s,a,s});
 		}
 	});
+	function cp(ot,os){// 遍历复制对象
+		for(const k in os){
+			const v=os[k];
+			if(typeof v==="object"&&typeof ot[k]==="object"){
+				cp(ot[k],v);
+				return;
+			}
+			ot[k]=v;
+		}
+	}
+	const Temp={
+		HTTP_pools:{},// HTTP连接池
+	};
 	// 处理器
 	let env={};// 环境参数
 	function setEnv(d){// 设置一些环境参数，一般启动时设置一次
 		// 注意: 参数是否有效由各自需要某个参数的函数决定，也就意味着传递无效的参数可能会造成意外的错误。
 		if(typeof d.append!=="object")throw new TypeError("不是配置对象");
-		Object.assign(env,d.append);
+		cp(env,d.append);
 	}
 	function getEnv(){// 获取环境参数
 		pms("getEnv",env,{time:Date.now()});
@@ -160,7 +178,7 @@
 		const id=data.id;
 		let r=void(0);
 		try{
-			r=new Function(`"use strict";return(${data.code})`)();
+			r=new Function(`"use strict";${data.code}`)();
 		}catch(e){
 			pms("evalCodeError",e,{id,code:data.code});
 			return;
@@ -188,6 +206,7 @@
 	setInterval(function check(){// 检查
 		function ck(tp){pms("checkWarn",tp)}
 		if(self.onmessage!==inputMessage){
+			console.warn("消息接收被修改",self.onmessage);
 			self.onmessage=inputMessage;
 			ck("消息接收已被修改");
 		}
@@ -212,10 +231,12 @@
 		Notification=self.Notification,
 		performance=self.performance;
 	// 中间组件
+	function funNoStr(){return `function ${this?.name||"any"}() {\n    [native code]\n}`}// 隐藏实际代码
 	function networkMsg(api,opt,sta="none"){// 发送网络事件
 		pms("network",opt,{api,status:sta});
 	}
 	function HeadersToString(h){// 处理Headers对象
+		if(!(h instanceof Headers))return h;
 		let o={};
 		for(const d in h.entries()){
 			let k=d[0],v=d[1];
@@ -224,11 +245,31 @@
 		}
 		return o;
 	}
+	function dsHTTPAgent(method,url,headers,body){
+		const id=`${Date.now()}_${Math.trunc(Math.random()*10)}`;
+		let m=method??"GET",h=HeadersToString(headers),b=body;
+		Temp.HTTP_pools[id]={};
+		pms("toHTTPAgent",{method:m,url,headers:h,body},{id});
+		return id;
+	}
+	handle["SHTTP"]=d=>{// 从父文档接收HTTP响应
+		const ho=Temp.HTTP_pools[d.id];
+		if(typeof ho!=="object")throw new ReferenceError("找不到id对应的请求");
+		if(ho.type==="wait"){
+			ho.waitUntil();
+			return;
+		}else if(ho.type==="reject"){
+			ho.reject();
+			return
+		}
+		if(typeof ho.response==="object") ho.respondWith(ho.response);
+	}
 	// 覆盖原始接口
 	self.close=()=>{
 		pms("callCloseFunction");
 	}
 	self.fetch=(resource,options={})=>{
+		if(env.network?.allow==false)throw new TypeError("fetch");
 		let u,o={};
 		if(typeof resource==="string") u=resource;
 		else u=resource.url;
@@ -243,10 +284,34 @@
 				continue;
 			}
 		}
+		const mode=env.network?.mode;
+		if(mode==="HTTPAgent"){
+			let dm=o.body?"POST":"GET";
+			const id=dsHTTPAgent(o.method??dm,url,o.headers,o.body);
+			return new Promise((resolve,reject)=>{
+				const ho=Temp.HTTP_pools[id];
+				ho.timeoutId=setTimeout(()=>{ho.reject()},6e4);
+				ho.rem=()=>{delete Temp.HTTP_pools[id]}// 删除
+				ho.clt=()=>{clearTimeout(ho.timeoutId)}// 清除计时器
+				ho.respondWith=d=>{// 产生响应
+					ho.clt();
+					ho.rem();
+					resolve(new Response(d.body,{status:d.status,statusText:d.statusText,headers:d.headers}));
+				}
+				ho.waitUntil=()=>{// 延长处理
+					ho.clt();
+					ho.timeoutId=setTimeout(()=>{ho.reject()},12e4);
+				}
+				ho.reject=d=>{// 拒绝响应
+					ho.clt();
+					ho.rem();
+					reject(new TypeError("Failed to fetch"));
+				}
+			});
+		}
 		let r=new Request(u,o);
 		if(o.headers instanceof Headers) o.headers=HeadersToString(o.headers);
 		networkMsg("fetch",o,"request");
-		if(env.network?.allow==false)return;
 		return fetch(r).then(s=>{
 			networkMsg("fetch",{
 				headers:HeadersToString(s.headers),
@@ -258,7 +323,9 @@
 				url:s.url,
 			},"response");
 			return s;
-		})
+		},e=>{
+			networkMsg("fetch",{error:e},"error");
+		});
 	}
 	self.XMLHttpRequest=class{}
 	self.WebSocket=class{}
@@ -267,8 +334,8 @@
 	}// 可以用var覆盖掉
 	self.FontFace=class{}
 	self.caches={}
-	self.indexedDB={// 可能无法覆盖
-	}
 	self.Notification=class{}
 	self.performance={}
 })();
+
+var indexedDB={}// 强行覆盖
