@@ -19,7 +19,7 @@ title: page list
 {% endfor %}
 		</script>
 		<ul class="layui-menu">
-			<li class="layui-padding-1 layui-row"><span class="layui-col-sm3">标题</span> <span class="layui-col-sm1">时间</span></li>
+			<li id="page_list_topinfo" class="layui-padding-1 layui-row"><span class="layui-col-sm3">标题</span> <span class="layui-col-sm1">时间</span></li>
 			<li class="layui-menu-item-divider"></li>
 			<ul id="page_list"></div>
 		</ul>
@@ -53,6 +53,7 @@ title: page list
 				}
 			}
 			createList(document.getElementById("pagelist").textContent);
+			document.getElementById("page_list_topinfo").addEventListener("click",()=>{layer.alert("点击页面列表的标题栏会出现样式问题，该问题不计划修复。",{zIndex:10})});
 		</script>
 		{%- if paginator.total_pages > 1 -%}
 		<div id="page_index_mn">换页组件</div>
