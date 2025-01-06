@@ -131,6 +131,20 @@ class DocsEval extends EventTarget {
 	#oncallclosefunction=null;// callCloseFunction
 	get oncallclosefunction(){return this.#oncallclosefunction}
 	set oncallclosefunction(v){this.#oncallclosefunction=this.#setOnF(v)}
+	#ontohttpagent=function(ev){// toHTTPAgent代理的默认实现
+		const d=ev.data;
+		const q=d.data;
+		function pd(t,r,s){
+			ev.target.post("SHTTP",{id:d.id,type:t,response:r},s);
+		}
+		docsScript.HTTPAgent(q.method,q.url,{headers:q.headers,body:q.body,type:"arraybuffer"},"fetch").then(r=>{
+			pd("response",{body:r.data,status:r.statusCode,statusText:r.statusText,headers:r.headers},[r.data]);
+		},e=>{
+			pd("reject");
+		});
+	};// toHTTPAgent
+	get ontohttpagent(){return this.#ontohttpagent}
+	set ontohttpagent(v){this.#ontohttpagent=this.#setOnF(v)}
 	/*#on=null;// 
 	get on(){return this.#on}
 	set on(v){this.#on=this.#setOnF(v)}*/

@@ -254,15 +254,19 @@
 	}
 	handle["SHTTP"]=d=>{// 从父文档接收HTTP响应
 		const ho=Temp.HTTP_pools[d.id];
+		if(d.type==="get_pools"){
+			console.debug(Temp.HTTP_pools);
+			return;
+		}
 		if(typeof ho!=="object")throw new ReferenceError("找不到id对应的请求");
-		if(ho.type==="wait"){
+		if(d.type==="wait"){
 			ho.waitUntil();
 			return;
-		}else if(ho.type==="reject"){
+		}else if(d.type==="reject"){
 			ho.reject();
 			return
 		}
-		if(typeof ho.response==="object") ho.respondWith(ho.response);
+		if(typeof d.response==="object") ho.respondWith(d.response);
 	}
 	// 覆盖原始接口
 	self.close=()=>{
@@ -283,34 +287,54 @@
 				o[on]=resource[on];
 				continue;
 			}
-		}
-		const mode=env.network?.mode;
-		if(mode==="HTTPAgent"){
-			let dm=o.body?"POST":"GET";
-			const id=dsHTTPAgent(o.method??dm,url,o.headers,o.body);
+		};function createPromise(id){// 创建fetch的返回值
 			return new Promise((resolve,reject)=>{
 				const ho=Temp.HTTP_pools[id];
+				if(!ho){
+					console.warn(`未找到id为'${id}'的数据对象，已自动创建。`);
+					Temp.HTTP_pools[id]={};
+				}
+				ho.log=[`${Date.now()}: 创建`];
+				ho.adl=(t)=>{ho.log.push(`${Date.now()}: ${t}`)};
 				ho.timeoutId=setTimeout(()=>{ho.reject()},6e4);
-				ho.rem=()=>{delete Temp.HTTP_pools[id]}// 删除
-				ho.clt=()=>{clearTimeout(ho.timeoutId)}// 清除计时器
+				ho.rem=()=>{ho.adl("删除HTTP池引用");delete Temp.HTTP_pools[id]}// 删除
+				ho.clt=()=>{ho.adl("清除计时"+ho.timeoutId);clearTimeout(ho.timeoutId)}// 清除计时器
 				ho.respondWith=d=>{// 产生响应
+					ho.adl("响应");
 					ho.clt();
 					ho.rem();
 					resolve(new Response(d.body,{status:d.status,statusText:d.statusText,headers:d.headers}));
 				}
 				ho.waitUntil=()=>{// 延长处理
+					ho.adl("延长");
 					ho.clt();
 					ho.timeoutId=setTimeout(()=>{ho.reject()},12e4);
 				}
 				ho.reject=d=>{// 拒绝响应
+					ho.adl("拒绝");
 					ho.clt();
 					ho.rem();
 					reject(new TypeError("Failed to fetch"));
 				}
 			});
 		}
+		const mode=env.network?.mode;
+		if(mode==="HTTPAgent"){
+			let dm=o.body?"POST":"GET";
+			const id=dsHTTPAgent(o.method??dm,u,o.headers,o.body);
+			return createPromise(id);
+		}
 		let r=new Request(u,o);
 		if(o.headers instanceof Headers) o.headers=HeadersToString(o.headers);
+		if(mode==="hook"){
+			const id=`${Date.now()}`;
+			Temp.HTTP_pools[id]={};
+			networkMsg("fetch",{
+				...o,
+				id
+			},"hook");
+			return createPromise(id);
+		}
 		networkMsg("fetch",o,"request");
 		return fetch(r).then(s=>{
 			networkMsg("fetch",{

@@ -1,0 +1,20 @@
+/* 文档样式
+ * 一套很简单的样式
+ * 主要以浏览器默认为主
+ */
+
+pre {
+	font-family: monospace;
+	overflow: auto;
+	tab-size: 4;
+}
+
+.cfvt {
+	/* 用于名称 */
+	overflow: auto;
+}
+
+.ovea {
+	/* 让浏览器自动添加滚动 */
+	overflow: auto;
+}
