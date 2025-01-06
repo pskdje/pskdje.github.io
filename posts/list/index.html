@@ -18,9 +18,10 @@ title: page list
 {{ i.title | replace: ",", "" }},{{ i.url }},{% if i.time %}{{ i.time }}{% else %}{{ i.date }}{% endif %}
 {% endfor %}
 		</script>
-		<ul id="page_list" class="layui-menu">
+		<ul class="layui-menu">
 			<li class="layui-padding-1 layui-row"><span class="layui-col-sm3">标题</span> <span class="layui-col-sm1">时间</span></li>
 			<li class="layui-menu-item-divider"></li>
+			<ul id="page_list"></div>
 		</ul>
 		<script data-info="列表生成">
 			const id_pagelist=document.getElementById("page_list");
