@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post
 title: 添加更新日志区域
 time: 2024/12/18-20:52
 ---

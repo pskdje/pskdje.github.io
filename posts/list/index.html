@@ -8,14 +8,14 @@ title: page list
 		<title>page list</title>
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
-		<link rel="stylesheet" href="//unpkg.com/layui@2.9.20/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.9.21/dist/css/layui.css" />
 		<script>const layuiLoad=[];</script>
 	</head>
 	<body class="layui-margin-2">
 		<h1>页面列表</h1>
 		<script id="pagelist" type="text/csv" data-info="csv格式的页面列表数据">
 {% for i in paginator.posts %}
-{{ i.title | replace: ",", "" }},{{ i.url }},{% if page.time %}{{ page.time }}{% else %}{{ page.date }}{% endif %}
+{{ i.title | replace: ",", "" }},{{ i.url }},{% if i.time %}{{ i.time }}{% else %}{{ i.date }}{% endif %}
 {% endfor %}
 		</script>
 		<ul id="page_list" class="layui-menu">
@@ -39,7 +39,8 @@ title: page list
 						ltm=dce("span"),
 						tel=dce("li");
 					rel.append(lel);
-					rel.className="layui-padding-1 layui-row";
+					rel.className="layui-padding-1";
+					lel.className="layui-row";
 					lel.href=i[1];
 					lel.append(lti," ",ltm);
 					lti.className="layui-col-sm3";
@@ -118,7 +119,7 @@ title: page list
 			});
 		</script>
 		{%- endif -%}
-		<script id="layui" src="//unpkg.com/layui@2.9.20/dist/layui.js" async></script>
+		<script id="layui" src="//unpkg.com/layui@2.9.21/dist/layui.js" async></script>
 		<script data-info="layui加载后运行函数">
 			document.getElementById("layui").addEventListener("load",()=>{
 				for(const f of layuiLoad)try{ f();}catch(e){cache.log.err.addError(50,"layuiLoad",e);console.error(e)}

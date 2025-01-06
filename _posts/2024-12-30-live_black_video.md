@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post
 title: 完成直播遮挡特殊信息用视频
 time: 2024/12/30-20:56
 ---
