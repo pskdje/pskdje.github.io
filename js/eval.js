@@ -162,7 +162,7 @@
 		const name=d.name,code=d.code;
 		function fpms(data){pms("functionPush",data,{name})}
 		try{
-			self[name]=new Function("pms",`"use strict";return(${code});`)(fpms);
+			self[name]=new Function("fpm",`"use strict";return(${code});`)(fpms);
 		}catch(e){
 			pms("addVariableError",e,{name,code});
 		}

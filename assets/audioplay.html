@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>audio play</title>
+		<script src="/js/script.js"></script>
+		<script src="/js/monitor.js"></script>
+		<link rel="stylesheet" href="//unpkg.com/layui@2.9.21/dist/css/layui.css" />
+	</head>
+	<body>
+		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
+		<button id="getdatabutton" type="button">获取数据</button>
+		<button type="button"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
+		<table id="playlist" class="layui-table" lay-options="{height:'full-80',limit:Infinity}">
+			<thead>
+				<tr>
+					<th lay-options="{field:'title'}">标题</th>
+					<th lay-options="{field:'type'}">类型</th>
+					<th lay-options="{field:'args',hide:true,style:'font-family:Consolas,Courier,monospace;'}">参数</th>
+				</tr>
+			</thead>
+		</table>
+		<script src="/js/evaltool.js"></script>
+		<script src="//unpkg.com/layui@2.9.21/dist/layui.js"></script>
+		<script>
+			// 还是不手搓太多功能了
+const id_player=document.getElementById("player");
+const playlist=[];
+let playIdx=0;
+let running=false;
+let noAutoPlayNext=false;
+let audioErrorCount=0;
+function changeData(data){
+	const msgOpt={zIndex:20,icon:0,anim:6};
+	const cf=data.call??{};
+	if(typeof cf!=="object"){
+		layer.msg("调用列表格式错误",msgOpt);
+		return;
+	}
+	for(const i in cf){
+		setCall(i,cf[i]);
+	}
+	const list=data.list??[];
+	if(!Array.isArray(list)){
+		layer.msg("播放列表类型错误，请提供正确的播放列表。",msgOpt);
+		return;
+	}
+	if(list.length>0){
+		playIdx=0;
+		playlist.splice(0);
+		audioErrorCount=0;
+	}
+	const tableData=[];
+	for(const i of list){
+		docsMonitor.listening["playOneData"]=i;
+		if(typeof i!=="object")throw new TypeError("播放列表条目不是对象");
+		if(typeof i.title!=="string"){
+			docsScript.warn("未提供标题，该播放条目被忽略。","log");
+			continue;
+		}
+		tableData.push(cfgPlayList(i));
+	}
+	layui.table.reloadData("playlist",{data:tableData});
+	docsMonitor.listening["playOneData"]=undefined;
+	playAudio(playIdx);
+	changePLIdx(playIdx);
+}
+function setCall(n,t){
+	deval.addVar(n,`function ${n} (value){\n\t${t}\n}`);
+}
+function cfgPlayList(d){// 配置播放列表
+	if(typeof d.title!=="string")throw new TypeError("标题不是字符串或未定义");
+	const rd={
+		title:d.title,
+		type:"",
+		args:"",
+	};
+	function st(t){rd.type=d.type=t};
+	if(typeof d.url==="string"){
+		st("link");
+		rd.args=`url="${d.url}"`;
+	}else if(typeof d.call==="string"&&hasOwnKey(d,"value")){
+		st("call");
+		rd.args=`call=${d.call},value=${d.value}`;
+	}else{
+		st("unknow");
+	}
+	if(rd.type==="unknow"||!rd.type)return undefined;
+	playlist.push(d);
+	return rd;
+}
+function showArgs(){
+	layui.table.hideCol("playlist",{field:"args",hide:false});
+}
+function changePLIdx(idx){// 更新播放列表
+	layui.table.setRowChecked("playlist",{
+		type:"radio",
+		index:idx,
+	});
+}
+function dfutTtle(){// 默认标题
+	document.title="audio play";
+}
+function playAudio(idx){// 播放某个索引对应的音频
+	const p=playlist[idx];
+	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
+	running=true;
+	document.title="Play: "+p.title;
+	switch(p.type){
+		case "link":
+			id_player.src=p.url;
+			running=false;
+			break;
+		case "call":
+			deval.evalCode(`${p.call} (${p.value})`,Date.now());
+			break;
+	}
+}
+function playNext(){// 播放下一个
+	let nIdx=playIdx+1;
+	if(!(nIdx in playlist)){
+		nIdx=0;
+	}
+	playAudio(nIdx);
+	changePLIdx(nIdx);
+	playIdx=nIdx;
+}
+function getLocalFile(){// 获取本地文件
+	const fd="uf_efasdw";
+	function success(l,idx){
+		const wd=layui.upload.render({
+			elem:`[data-k="${fd}"]`,
+			url:"about:blank",
+			accept:"file",
+			acceptMime:"application/json",
+			exts:"json",
+			auto:false,
+			force:"json",
+			drag:true,
+			choose(obj){
+				obj.preview(async(i,f)=>{
+					let d=null;
+					try{d=JSON.parse(await f.text())}catch(e){cache.log.err.addError(30,"JSON.parse",e)}
+					if(!d)return;
+					docsMonitor.try(changeData,[d]);
+				});
+				layer.close(idx);
+			}
+		});
+	}
+	layer.open({
+		type:1,
+		zIndex:10,
+		id:"upload_file",
+		title:"读取文件",
+		content:`<div class="layui-upload-drag layui-margin-2" data-k="${fd}">
+			<i class="layui-icon layui-icon-upload"></i>
+			<div>点击获取文件，或拖拽文件至此。</div>
+		</div>`,
+		anim:2,
+		shadeClose:true,
+		success
+	});
+}
+function getNetworkFileWindow(){// 获取网络文件
+	layer.prompt({title:"输入要获取文件的url",zIndex:10},(value,index)=>{
+		var u="";
+		try{u=new URL(value).href;}catch(e){layer.msg("无法解析该URL数据",{zIndex:20});return;}
+		getNetworkData(u);
+		layer.close(index);
+	});
+}
+function getNetworkData(u){// 请求文件并处理
+	const loaidx=layer.msg("获取网络文件中…",{
+		icon:16,
+		shade:0.2,
+		zIndex:20
+	});
+	return fetch(u).then(async r=>{// 只要能解析出数据就算成功，忽略任何非数据的响应问题
+		let d=null;
+		layer.close(loaidx);
+		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e)}
+		if(!d)return;
+		docsMonitor.try(changeData,[d]);
+	},e=>{
+		layer.close(loaidx);
+		layer.msg("由于网络或策略原因，获取数据失败。",{icon:2,shade:0.2,zIndex:20});
+	});
+}
+function playError(){// 播放失败处理
+	dfutTtle();
+	layer.msg(`播放${playIdx}失败，自动播放下一个。\n标题: ${playlist[playIdx].title}`,{zIndex:20});
+	audioErrorCount++;
+	if(audioErrorCount>10){
+		layer.msg("累计播放失败次数超过阈值，已停止自动切换下一个。请检查播放列表是否可用。",{zIndex:20});
+		audioErrorCount=0;
+		return;
+	}
+	if(noAutoPlayNext)return;
+	playNext();
+}
+var deval=new DocsEval();
+if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
+document.getElementById("getdatabutton").onclick=()=>{
+	layer.alert("选择数据获取的操作",{
+		zIndex:10,
+		btn:["取消","本地数据","网络数据"],
+		btnAlign:"c",
+		btn2:getLocalFile,
+		btn3:getNetworkFileWindow,
+	});
+}
+deval.setEnv({network:{mode:"HTTPAgent"}});
+deval.onmsgerr=deval.onhandleerror=deval.onaddvariableerror=deval.onevalcodeerror=deval.onerrorevent=deval.onunhandledrejection=ev=>{
+	running=false;
+	playError();
+}
+deval.onfunctionpush=ev=>{
+	const d=ev.data.data;
+	let e=false;
+	if(typeof d==="string"){
+		id_player.src=d;
+	}else if(false){
+		// 没想好
+	}else{
+		e=true;
+	}
+	running=false;
+	if(e) playError();
+}
+layui.table.on("row(playlist)",(o)=>{
+	o.setRowChecked({type:"radio"});
+	if(running){
+		changePLIdx(playIdx);
+		layer.msg("当前正在处理歌曲信息，暂时不可切换。",{zIndex:20});
+		return;
+	}
+	playIdx=o.index;
+	playAudio(playIdx);
+});
+id_player.onerror=()=>{
+	playError();
+}
+id_player.onended=()=>{
+	dfutTtle();
+	if(noAutoPlayNext)return;
+	playNext();
+}
+			//
+		</script>
+	</body>
+</html>

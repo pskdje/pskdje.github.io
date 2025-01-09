@@ -89,8 +89,8 @@ class DocsEval extends EventTarget {
 		else return null;
 	}// 主要事件
 	#onmsgerr=null;// msgErr
-	get onmessage(){return this.#onmsgerr}
-	set onmessage(v){this.#onmsgerr=this.#setOnF(v)}
+	get onmsgerr(){return this.#onmsgerr}
+	set onmsgerr(v){this.#onmsgerr=this.#setOnF(v)}
 	#onhandleerror=null;// handleError
 	get onhandleerror(){return this.#onhandleerror}
 	set onhandleerror(v){this.#onhandleerror=this.#setOnF(v)}
