@@ -27,7 +27,7 @@ class DocsEval extends EventTarget {
 	#dpem(nm,d){// 触发消息事件
 		const ev=new MessageEvent(nm,{data:d,origin:"eval.js"});
 		this.dispatchEvent(ev);
-		let on=this["on"+nm];
+		let on=this["on"+nm.toLowerCase()];
 		if(typeof on==="function")try{
 			on(ev);
 		}catch(e){
@@ -54,7 +54,7 @@ class DocsEval extends EventTarget {
 			console.warning(em,d);
 		}
 		this.msgPush.push(d);
-		this.#dpem(String(d.type).toLowerCase().trim(),d);
+		this.#dpem(String(d.type).trim(),d);
 	}
 	// 发送操作
 	setEnv(d){

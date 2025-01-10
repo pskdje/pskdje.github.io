@@ -1,0 +1,57 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "/assets/symbol/JSON_Schema/playlist.schema.json",
+	"title": "audioplay播放列表数据",
+	"description": "audioplay.html播放列表的数据",
+	"type": "object",
+	"properties": {
+		"title": {
+			"type": "string",
+			"title": "播放列表标题",
+			"description": "暂未实际使用"
+		},
+		"list": {
+			"type": "array",
+			"uniqueItems": true,
+			"items": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"type": "string",
+						"title": "指定该条目的标题"
+					},
+					"url": {
+						"type": "string",
+						"format": "uri-reference",
+						"title": "音频资源的路径",
+						"description": "优先级最高(1)，有该属性直接视为可直接用url的资源进行播放"
+					},
+					"value": {
+						"description": "通常与其它功能结合使用。"
+					},
+					"call": {
+						"type": "string",
+						"title": "要调用的函数",
+						"description": "优先级2，调用在call定义的函数。"
+					}
+				},
+				"required": ["title"],
+				"description": "除了标题，其它都是可选。按照存在的键的优先级确定播放处理类型。"
+			},
+			"title": "播放列表条目",
+			"description": "实际放置播放列表的地方"
+		},
+		"call": {
+			"type": "object",
+			"patternProperties": {
+				"^.+$": {
+					"type": "string",
+					"title": "函数体代码",
+					"description": "这里写函数体代码，没有太多验证，如果你想，也可以考虑逃逸。"
+				}
+			},
+			"title": "要被调用的函数列表",
+			"description": "这里放置可被播放列表调用的函数，只能放函数体。会有闭包进一些函数可供使用，详见文档（暂未编写）。"
+		}
+	}
+}

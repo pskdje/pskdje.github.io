@@ -1,0 +1,10 @@
+{
+	"json.schemas": [
+		{
+			"fileMatch": [
+				"*.apl.json"
+			],
+			"url": "./assets/symbol/JSON_Schema/playlist.schema.json"
+		}
+	]
+}
