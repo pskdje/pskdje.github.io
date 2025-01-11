@@ -1,0 +1,6 @@
+{
+	"title": "audio call lib",
+	"call": {
+		"get163": "fetch(`https://music.163.com/song/media/outer/url?id=${value}.mp3`,{method:'HEAD'}).then(r=>{if(r.headers.has('Location'))fpm(r.headers.get('Location'))})"
+	}
+}

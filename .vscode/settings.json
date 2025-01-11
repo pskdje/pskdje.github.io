@@ -2,7 +2,8 @@
 	"json.schemas": [
 		{
 			"fileMatch": [
-				"*.apl.json"
+				"*.apl.json",
+				"/assets/playlist/*.json"
 			],
 			"url": "./assets/symbol/JSON_Schema/playlist.schema.json"
 		}

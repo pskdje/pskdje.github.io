@@ -25,6 +25,7 @@
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player");
+const urlsea=docsScript.pageData.search;
 const playlist=[];
 let playIdx=0;
 let running=false;
@@ -214,6 +215,9 @@ document.getElementById("getdatabutton").onclick=()=>{
 }
 deval.setEnv({network:{mode:"HTTPAgent"}});
 deval.onmsgerr=deval.onhandleerror=deval.onaddvariableerror=deval.onevalcodeerror=deval.onerrorevent=deval.onunhandledrejection=ev=>{
+	const d=ev.data.data;
+	console.error("运行代码时出现了错误",d);
+	cache.log.err.add(40,"evalcodeError",d);
 	running=false;
 	playError();
 }
@@ -248,6 +252,7 @@ id_player.onended=()=>{
 	if(noAutoPlayNext)return;
 	playNext();
 }
+if(urlsea.has("href")) getNetworkData(urlsea.get("href"));
 			//
 		</script>
 	</body>
