@@ -11,13 +11,16 @@
 .s-bacl {
 	background-color: var(--docs-bacl);
 }
+#player {
+	width: 35%;
+}
 #playtext {
 	position: absolute;
 	top: 0;
 	right: 0;
-	height: calc(1em + 2px);
-	width: calc(50% - 2px);
-	font-size: 1em;
+	height: calc(2em + 2px);
+	width: calc(65% - 0.5em);
+	font-size: 2em;
 }
 body {
 	--scroll-behavor: smooth;
@@ -30,11 +33,19 @@ body {
 		--scroll-behavor: auto;
 	}
 }
+@media(max-width:650px){
+	#player {
+		width: 100%;
+	}
+	#playtext {
+		display: none;
+	}
+}
 			/*  */
 		</style>
 	</head>
 	<body>
-		<audio id="player" class="layui-show" style="width:50%;" controls crossorigin="anonymous" autoplay></audio>
+		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
 		<p id="playtext"></p>
 		<p class="s-bacl">
 			<span>操作: </span>
@@ -55,13 +66,19 @@ body {
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player");
+const id_playtext=document.getElementById("playtext");
 const urlsea=docsScript.pageData.search;
 const playlist=[];// 播放列表(数据层面)
 const uiText=Object.seal({// UI文本(预留I18N)
 	playtext:"正在播放:",
+	playtext_none:"无",
 	playtitle_play:"play:",
 	playtitle_pause:"pause:",
 	getdatabutton:"获取数据",
+	// 播放列表
+	pl_title:"标题",
+	pl_type:"类型",
+	pl_args:"参数",
 	// 数据处理
 	cd_calldatatypeerr:"调用列表格式错误",
 	cd_playlist_typeerr:"播放列表类型错误，请提供正确的播放列表。",
@@ -98,8 +115,7 @@ function changeData(data){// 更新数据
 		if(typeof uit[i]!=="string")continue;
 		uiText[i]=uit[i];// 若因输错键名导致在严格模式下报错概不负责
 	}
-	const id_getdatabutton=document.getElementById("getdatabutton");
-	if(id_getdatabutton&&uit.getdatabutton) id_getdatabutton.textContent=uiText.getdatabutton;
+	changeUIText(uit);
 	const cf=data.call??{};
 	if(typeof cf!=="object"){
 		layer.msg(uiText.cd_calldatatypeerr,msgOpt);
@@ -133,6 +149,15 @@ function changeData(data){// 更新数据
 	if(playlist.length<1)return;
 	playAudio(playIdx);
 	changePLIdx(playIdx);
+}
+function changeUIText(d){// 更新已存在元素的文本
+	const gdb=document.getElementById("getdatabutton");
+	if(gdb&&d.getdatabutton) gdb.textContent=uiText.getdatabutton;
+	if(d.pl_title||d.pl_type||d.pl_args) layui.table.reload({cols:[[
+		{field:'title',title:uiText.pl_title},
+		{field:'type',title:uiText.pl_type},
+		{field:'args',hide:true,style:'font-family:Consolas,Courier,monospace;',title:uiText.pl_args},
+	]]});
 }
 function setCall(n,t){
 	deval.addVar(n,`function ${n} (value){\n\t${t}\n}`);
@@ -175,12 +200,14 @@ function changePLIdx(idx){// 更新播放列表，附带滚动
 }
 function dfutTtle(){// 重置播放提示
 	document.title="audio play";
+	id_playtext.textContent=uiText.playtext_none;
 }
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
 	document.title=`${uiText.playtitle_play} ${p.title}`;
+	id_playtext.textContent=`${uiText.playtext} ${p.title}`;
 	switch(p.type){
 		case "link":
 			id_player.src=p.url;
