@@ -6,12 +6,42 @@
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
 		<link rel="stylesheet" href="//unpkg.com/layui@2.9.21/dist/css/layui.css" />
+		<style>
+			/*  */
+.s-bacl {
+	background-color: var(--docs-bacl);
+}
+#playtext {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: calc(1em + 2px);
+	width: calc(50% - 2px);
+	font-size: 1em;
+}
+body {
+	--scroll-behavor: smooth;
+}
+.playlistdata :where(.layui-table-body , tbody) {
+	scroll-behavior: var(--scroll-behavor);
+}
+@media(prefers-reduced-motion:reduce){
+	body {
+		--scroll-behavor: auto;
+	}
+}
+			/*  */
+		</style>
 	</head>
 	<body>
-		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
-		<button id="getdatabutton" type="button">获取数据</button>
-		<button type="button"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
-		<table id="playlist" class="layui-table" lay-options="{height:'full-80',limit:Infinity}">
+		<audio id="player" class="layui-show" style="width:50%;" controls crossorigin="anonymous" autoplay></audio>
+		<p id="playtext"></p>
+		<p class="s-bacl">
+			<span>操作: </span>
+			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs">获取数据</button>
+			<button type="button" class="layui-btn layui-btn-xs layui-btn-primary"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
+		</p>
+		<table id="playlist" class="layui-table" lay-options="{height:'full-80',limit:Infinity,className:'playlistdata s-bacl'}">
 			<thead>
 				<tr>
 					<th lay-options="{field:'title'}">标题</th>
@@ -26,16 +56,53 @@
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player");
 const urlsea=docsScript.pageData.search;
-const playlist=[];
-let playIdx=0;
-let running=false;
-let noAutoPlayNext=false;
-let audioErrorCount=0;
-function changeData(data){
+const playlist=[];// 播放列表(数据层面)
+const uiText=Object.seal({// UI文本(预留I18N)
+	playtext:"正在播放:",
+	playtitle_play:"play:",
+	playtitle_pause:"pause:",
+	getdatabutton:"获取数据",
+	// 数据处理
+	cd_calldatatypeerr:"调用列表格式错误",
+	cd_playlist_typeerr:"播放列表类型错误，请提供正确的播放列表。",
+	// 播放
+	pa_none_type:"播放操作无效",
+	pe_msg0:"播放",
+	pe_msg1:"失败，自动播放下一个。",
+	pe_msg2:"标题:",
+	pe_errconmax:"累计播放失败次数超过阈值，已停止自动切换下一个。请检查播放列表是否可用。",
+	is_running:"当前正在处理歌曲信息，暂时不可切换。",
+	// 文件获取
+	readfiletitle:"读取文件",
+	readfilecontent:"点击获取文件，或拖拽文件至此。",
+	// 网络
+	nw_wwtitle:"输入要获取文件的url",
+	nw_urlerr:"无法解析该URL数据",
+	nw_getting:"获取网络文件中…",
+	nw_error:"由于网络或策略原因，获取数据失败。",
+	// 获取选项
+	gdb_XZCZ:"选择数据获取的操作",
+	gdb_QX:"取消",
+	gdb_BDSJ:"本地数据",
+	gdb_WLSJ:"网络数据",
+});// 主要覆盖显示，不覆盖控制台日志之类的地方。
+let playIdx=0;// 播放索引
+let running=false;// 是否正在运行
+let noAutoPlayNext=false;// 是否不播放下一个
+let audioErrorCount=0;// 错误累积计数
+function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
+	const uit=data.UIText??{};
+	if(typeof uit!=="object")return;
+	for(const i in uit){
+		if(typeof uit[i]!=="string")continue;
+		uiText[i]=uit[i];// 若因输错键名导致在严格模式下报错概不负责
+	}
+	const id_getdatabutton=document.getElementById("getdatabutton");
+	if(id_getdatabutton&&uit.getdatabutton) id_getdatabutton.textContent=uiText.getdatabutton;
 	const cf=data.call??{};
 	if(typeof cf!=="object"){
-		layer.msg("调用列表格式错误",msgOpt);
+		layer.msg(uiText.cd_calldatatypeerr,msgOpt);
 		return;
 	}
 	for(const i in cf){
@@ -43,7 +110,7 @@ function changeData(data){
 	}
 	const list=data.list??[];
 	if(!Array.isArray(list)){
-		layer.msg("播放列表类型错误，请提供正确的播放列表。",msgOpt);
+		layer.msg(uiText.cd_playlist_typeerr,msgOpt);
 		return;
 	}
 	if(list.length>0){
@@ -81,6 +148,9 @@ function cfgPlayList(d){// 配置播放列表
 	if(typeof d.url==="string"){
 		st("link");
 		rd.args=`url="${d.url}"`;
+	}else if(hasOwnKey(d,"comment")){
+		st("comment");
+		rd.args=`comment=${d.comment}`;
 	}else if(typeof d.call==="string"&&hasOwnKey(d,"value")){
 		st("call");
 		rd.args=`call=${d.call},value=${d.value}`;
@@ -94,28 +164,40 @@ function cfgPlayList(d){// 配置播放列表
 function showArgs(){
 	layui.table.hideCol("playlist",{field:"args",hide:false});
 }
-function changePLIdx(idx){// 更新播放列表
+function changePLIdx(idx){// 更新播放列表，附带滚动
 	layui.table.setRowChecked("playlist",{
 		type:"radio",
 		index:idx,
 	});
+	const el=document.querySelector(`[lay-table-id="playlist"] tr[data-index="${idx}"][class="layui-table-checked"]`);
+	if(!el)return;
+	el.scrollIntoView({behavior:"auto",block:"nearest"});
 }
-function dfutTtle(){// 默认标题
+function dfutTtle(){// 重置播放提示
 	document.title="audio play";
 }
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
-	document.title="Play: "+p.title;
+	document.title=`${uiText.playtitle_play} ${p.title}`;
 	switch(p.type){
 		case "link":
 			id_player.src=p.url;
 			running=false;
 			break;
+		case "comment":
+		case "unknow":
+			running=false;
+			playNext();
+			break;
 		case "call":
 			deval.evalCode(`${p.call} (${p.value})`,Date.now());
 			break;
+		default:
+			running=false;
+			layer.msg(uiText.pa_none_type,{zIndex:20});
+			playNext();
 	}
 }
 function playNext(){// 播放下一个
@@ -123,9 +205,9 @@ function playNext(){// 播放下一个
 	if(!(nIdx in playlist)){
 		nIdx=0;
 	}
-	playAudio(nIdx);
-	changePLIdx(nIdx);
 	playIdx=nIdx;
+	changePLIdx(nIdx);
+	playAudio(nIdx);
 }
 function getLocalFile(){// 获取本地文件
 	const fd="uf_efasdw";
@@ -153,11 +235,11 @@ function getLocalFile(){// 获取本地文件
 	layer.open({
 		type:1,
 		zIndex:10,
-		id:"upload_file",
-		title:"读取文件",
+		id:"read_file",
+		title:uiText.readfiletitle,
 		content:`<div class="layui-upload-drag layui-margin-2" data-k="${fd}">
 			<i class="layui-icon layui-icon-upload"></i>
-			<div>点击获取文件，或拖拽文件至此。</div>
+			<div>${uiText.readfilecontent}</div>
 		</div>`,
 		anim:2,
 		shadeClose:true,
@@ -165,15 +247,15 @@ function getLocalFile(){// 获取本地文件
 	});
 }
 function getNetworkFileWindow(){// 获取网络文件
-	layer.prompt({title:"输入要获取文件的url",zIndex:10},(value,index)=>{
+	layer.prompt({title:uiText.nw_wwtitle,zIndex:10},(value,index)=>{
 		var u="";
-		try{u=new URL(value).href;}catch(e){layer.msg("无法解析该URL数据",{zIndex:20});return;}
+		try{u=new URL(value).href;}catch(e){layer.msg(uiText.nw_urlerr,{zIndex:20});return;}
 		getNetworkData(u);
 		layer.close(index);
 	});
 }
 function getNetworkData(u){// 请求文件并处理
-	const loaidx=layer.msg("获取网络文件中…",{
+	const loaidx=layer.msg(`${uiText.nw_getting}`,{
 		icon:16,
 		shade:0.2,
 		zIndex:20
@@ -186,15 +268,15 @@ function getNetworkData(u){// 请求文件并处理
 		docsMonitor.try(changeData,[d]);
 	},e=>{
 		layer.close(loaidx);
-		layer.msg("由于网络或策略原因，获取数据失败。",{icon:2,shade:0.2,zIndex:20});
+		layer.msg(uiText.nw_error,{icon:2,shade:0.2,zIndex:20});
 	});
 }
 function playError(){// 播放失败处理
 	dfutTtle();
-	layer.msg(`播放${playIdx}失败，自动播放下一个。\n标题: ${playlist[playIdx].title}`,{zIndex:20});
+	layer.msg(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx].title}`,{zIndex:20});
 	audioErrorCount++;
 	if(audioErrorCount>10){
-		layer.msg("累计播放失败次数超过阈值，已停止自动切换下一个。请检查播放列表是否可用。",{zIndex:20});
+		layer.msg(uiText.pe_errconmax,{zIndex:20});
 		audioErrorCount=0;
 		return;
 	}
@@ -204,10 +286,10 @@ function playError(){// 播放失败处理
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
 document.getElementById("getdatabutton").onclick=()=>{
-	layer.alert("选择数据获取的操作",{
+	layer.alert(uiText.gdb_XZCZ,{
 		zIndex:10,
 		shadeClose:true,
-		btn:["取消","本地数据","网络数据"],
+		btn:[uiText.gdb_QX,uiText.gdb_BDSJ,uiText.gdb_WLSJ],
 		btnAlign:"c",
 		btn2:getLocalFile,
 		btn3:getNetworkFileWindow,
@@ -238,7 +320,7 @@ layui.table.on("row(playlist)",(o)=>{
 	o.setRowChecked({type:"radio"});
 	if(running){
 		changePLIdx(playIdx);
-		layer.msg("当前正在处理歌曲信息，暂时不可切换。",{zIndex:20});
+		layer.msg(uiText.is_running,{zIndex:20});
 		return;
 	}
 	playIdx=o.index;
@@ -252,7 +334,10 @@ id_player.onended=()=>{
 	if(noAutoPlayNext)return;
 	playNext();
 }
-if(urlsea.has("href")) getNetworkData(urlsea.get("href"));
+if(urlsea.has("href"))for(const h of urlsea.getAll("href")){
+	getNetworkData(h);
+}
+if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 			//
 		</script>
 	</body>

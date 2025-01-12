@@ -26,13 +26,17 @@
 						"title": "音频资源的路径",
 						"description": "优先级最高(1)，有该属性直接视为可直接用url的资源进行播放"
 					},
+					"comment": {
+						"title": "注释",
+						"description": "优先级2，存在该属性将表面这个条目是一条注释。若存在url属性，依旧按照url来处理。"
+					},
 					"value": {
 						"description": "通常与其它功能结合使用。"
 					},
 					"call": {
 						"type": "string",
 						"title": "要调用的函数",
-						"description": "优先级2，调用在call定义的函数。"
+						"description": "优先级3，调用在call定义的函数。"
 					}
 				},
 				"required": ["title"],
@@ -40,6 +44,18 @@
 			},
 			"title": "播放列表条目",
 			"description": "实际放置播放列表的地方"
+		},
+		"UIText": {
+			"type": "object",
+			"patternProperties": {
+				"^.+$": {
+					"type": "string",
+					"title": "UI文本",
+					"description": "只有类型为字符串的键才会被写入，如果提供不存在的键在严格模式下可能会报错。"
+				}
+			},
+			"title": "UI文本替换",
+			"description": "可以通过此更改部分UI的文本完成国际化，可选的键在uiText常量里。"
 		},
 		"call": {
 			"type": "object",
