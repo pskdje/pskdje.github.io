@@ -14,7 +14,7 @@ Github Page
 
 [audioplay.html](https://pskdje.github.io/assets/audioplay.html)
 
-# 其它
+## 其它
 
 > <span title="知识理应共享，信息亦是如此。">“知识应当流通与分享，真理亦是如此。”</span>
 > 
