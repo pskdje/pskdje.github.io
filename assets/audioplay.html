@@ -49,7 +49,8 @@ body {
 		<p id="playtext"></p>
 		<p class="s-bacl">
 			<span>操作: </span>
-			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs">获取数据</button>
+			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs" title="不要使用不安全的数据">获取数据</button>
+			<button id="showoptionwin" type="button" class="layui-btn layui-btn-xs">修改配置</button>
 			<button type="button" class="layui-btn layui-btn-xs layui-btn-primary"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
 		</p>
 		<table id="playlist" class="layui-table" lay-options="{height:'full-80',limit:Infinity,className:'playlistdata s-bacl'}">
@@ -75,6 +76,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	playtitle_play:"play:",
 	playtitle_pause:"pause:",
 	getdatabutton:"获取数据",
+	showoptionwin:"修改配置",
 	// 播放列表
 	pl_title:"标题",
 	pl_type:"类型",
@@ -97,8 +99,15 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	nw_urlerr:"无法解析该URL数据",
 	nw_getting:"获取网络文件中…",
 	nw_error:"由于网络或策略原因，获取数据失败。",
+	// 配置
+	opt_title:"配置",
+	opt_ok:"确定",
+	opt_cancel:"取消",// 下面那些都没有写输入检查，不要老想着注入口牙！
+	opt_NAPN:"是否不播放下一个",
+	opt_SPT:"是否显示播放时间",
+	opt_SRN:"是否强制修改为未在运行\n若正常运行时强行修改可能会出现问题",
 	// 获取选项
-	gdb_XZCZ:"选择数据获取的操作",
+	gdb_XZCZ:"选择数据获取的操作<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>",// 这条就是例子
 	gdb_QX:"取消",
 	gdb_BDSJ:"本地数据",
 	gdb_WLSJ:"网络数据",
@@ -107,6 +116,7 @@ let playIdx=0;// 播放索引
 let running=false;// 是否正在运行
 let noAutoPlayNext=false;// 是否不播放下一个
 let audioErrorCount=0;// 错误累积计数
+let showPlayTime=false;// 是否显示播放时间
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
 	const uit=data.UIText??{};
@@ -151,8 +161,10 @@ function changeData(data){// 更新数据
 	changePLIdx(playIdx);
 }
 function changeUIText(d){// 更新已存在元素的文本
-	const gdb=document.getElementById("getdatabutton");
+	const gdb=document.getElementById("getdatabutton"),
+		sow=document.getElementById("showoptionwin");
 	if(gdb&&d.getdatabutton) gdb.textContent=uiText.getdatabutton;
+	if(sow&&d.showoptionwin) sow.textContent=uiText.showoptionwin;
 	if(d.pl_title||d.pl_type||d.pl_args) layui.table.reload({cols:[[
 		{field:'title',title:uiText.pl_title},
 		{field:'type',title:uiText.pl_type},
@@ -200,7 +212,7 @@ function changePLIdx(idx){// 更新播放列表，附带滚动
 }
 function dfutTtle(){// 重置播放提示
 	document.title="audio play";
-	id_playtext.textContent=uiText.playtext_none;
+	id_playtext.textContent=`${uiText.playtext} ${uiText.playtext_none}`;
 }
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
@@ -310,6 +322,48 @@ function playError(){// 播放失败处理
 	if(noAutoPlayNext)return;
 	playNext();
 }
+function showOptWindow(){// 显示配置窗口
+	const form=layui.form;
+	function B(v){return Boolean(v)}
+	layer.open({
+		type:1,
+		title:uiText.opt_title,
+		content:`<div class="layui-form layui-margin-3" lay-filter="set-opts">
+			<input type="checkbox" name="napn" title="${uiText.opt_NAPN}" />
+			<input type="checkbox" name="spt" title="${uiText.opt_SPT}" />
+			<hr />
+			<input type="checkbox" name="srn" title="${uiText.opt_SRN}" />
+		</div>`,
+		btn:[uiText.opt_ok,uiText.opt_cancel],
+		shade:0.1,
+		shadeClose:true,
+		id:"set_option",
+		zIndex:10,
+		resize:true,
+		success(){
+			form.render(null,"set-opts");
+			form.val("set-opts",{
+				napn:noAutoPlayNext,
+				spt:showPlayTime
+			});
+		},
+		btn1(i){
+			const d=form.val("set-opts");
+			noAutoPlayNext=B(d.napn);
+			showPlayTime=B(d.spt);
+			if(d.srn) running=false;
+			layer.close(i);
+		},
+	})
+}
+function numToMinTimeStr(n){// 时间数字转为分:秒时间
+	const d=Math.trunc(n);
+	let m=Math.floor(d/60),
+		s=Math.floor(d%60);
+	m=(m<10?"0"+m:m);
+	s=(s<10?"0"+s:s);
+	return m+":"+s;
+}
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
 document.getElementById("getdatabutton").onclick=()=>{
@@ -322,6 +376,7 @@ document.getElementById("getdatabutton").onclick=()=>{
 		btn3:getNetworkFileWindow,
 	});
 }
+document.getElementById("showoptionwin").onclick=showOptWindow;
 deval.setEnv({network:{mode:"HTTPAgent"}});
 deval.onmsgerr=deval.onhandleerror=deval.onaddvariableerror=deval.onevalcodeerror=deval.onerrorevent=deval.onunhandledrejection=ev=>{
 	const d=ev.data.data;
@@ -360,6 +415,18 @@ id_player.onended=()=>{
 	dfutTtle();
 	if(noAutoPlayNext)return;
 	playNext();
+}
+id_player.onplay=()=>{
+	document.title=`${uiText.playtitle_play} ${playlist[playIdx].title}`;
+}
+id_player.onpause=()=>{
+	document.title=`${uiText.playtitle_pause} ${playlist[playIdx].title}`;
+}
+id_player.ontimeupdate=function(){
+	if(!showPlayTime)return;
+	let d=-1;
+	if(Number.isFinite(this.duration)) d=this.duration;
+	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 }
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")){
 	getNetworkData(h);
