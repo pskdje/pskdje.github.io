@@ -40,6 +40,12 @@ body {
 	#playtext {
 		display: none;
 	}
+	.opt-win-cont {
+		width: 200px;
+	}
+	.layui-form-checkbox[lay-skin=primary]>div {
+		white-space: pre-line;
+	}
 }
 			/*  */
 		</style>
@@ -91,6 +97,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	pe_msg2:"标题:",
 	pe_errconmax:"累计播放失败次数超过阈值，已停止自动切换下一个。请检查播放列表是否可用。",
 	is_running:"当前正在处理歌曲信息，暂时不可切换。",
+	psl_err:"阻止屏幕锁定失败",
 	// 文件获取
 	readfiletitle:"读取文件",
 	readfilecontent:"点击获取文件，或拖拽文件至此。",
@@ -105,18 +112,27 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	opt_cancel:"取消",// 下面那些都没有写输入检查，不要老想着注入口牙！
 	opt_NAPN:"是否不播放下一个",
 	opt_SPT:"是否显示播放时间",
+	opt_PSL:"是否阻止屏幕锁定",
 	opt_SRN:"是否强制修改为未在运行\n若正常运行时强行修改可能会出现问题",
 	// 获取选项
-	gdb_XZCZ:"选择数据获取的操作<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>",// 这条就是例子
+	gdb_XZCZ:"选择数据获取的操作",
 	gdb_QX:"取消",
 	gdb_BDSJ:"本地数据",
 	gdb_WLSJ:"网络数据",
 });// 主要覆盖显示，不覆盖控制台日志之类的地方。
-let playIdx=0;// 播放索引
-let running=false;// 是否正在运行
-let noAutoPlayNext=false;// 是否不播放下一个
-let audioErrorCount=0;// 错误累积计数
-let showPlayTime=false;// 是否显示播放时间
+let playIdx=0,// 播放索引
+	running=false,// 是否正在运行
+	noAutoPlayNext=false,
+	audioErrorCount=0,// 错误累积计数
+	showPlayTime=false,
+	preventScreenLock=false;
+function filterText(d){// 处理文本
+	let t=String(d);
+	t=t.replaceAll("&","&amp;");
+	t=t.replaceAll("<","&lt;").replaceAll(">","&gt;");
+	t=t.replaceAll('"',"&quot;").replaceAll(" ","&nbsp;");
+	return t;
+}
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
 	const uit=data.UIText??{};
@@ -128,7 +144,7 @@ function changeData(data){// 更新数据
 	changeUIText(uit);
 	const cf=data.call??{};
 	if(typeof cf!=="object"){
-		layer.msg(uiText.cd_calldatatypeerr,msgOpt);
+		layer.msg(filterText(uiText.cd_calldatatypeerr),msgOpt);
 		return;
 	}
 	for(const i in cf){
@@ -136,7 +152,7 @@ function changeData(data){// 更新数据
 	}
 	const list=data.list??[];
 	if(!Array.isArray(list)){
-		layer.msg(uiText.cd_playlist_typeerr,msgOpt);
+		layer.msg(filterText(uiText.cd_playlist_typeerr),msgOpt);
 		return;
 	}
 	if(list.length>0){
@@ -157,8 +173,8 @@ function changeData(data){// 更新数据
 	docsMonitor.listening["playOneData"]=undefined;
 	if(list.length>0) layui.table.reloadData("playlist",{data:tableData});
 	if(playlist.length<1)return;
-	playAudio(playIdx);
 	changePLIdx(playIdx);
+	playAudio(playIdx);
 }
 function changeUIText(d){// 更新已存在元素的文本
 	const gdb=document.getElementById("getdatabutton"),
@@ -230,12 +246,15 @@ function playAudio(idx){// 播放某个索引对应的音频
 			running=false;
 			playNext();
 			break;
-		case "call":
-			deval.evalCode(`${p.call} (${p.value})`,Date.now());
+		case "call": {
+			let v=p.value;
+			if(typeof v==="string") v='"'+v.replaceAll('"','\\"')+'"';
+			deval.evalCode(`${p.call} (${v})`,Date.now());
 			break;
+		}
 		default:
 			running=false;
-			layer.msg(uiText.pa_none_type,{zIndex:20});
+			layer.msg(filterText(uiText.pa_none_type),{zIndex:20});
 			playNext();
 	}
 }
@@ -247,6 +266,34 @@ function playNext(){// 播放下一个
 	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
+}
+function getWakeLock(){// 获取锁定阻止
+	if(!preventScreenLock)return;
+	if(Temp.PSWL){
+		if(!Temp.PSWL.released)return;
+		Temp.PSWL=null;
+	}
+	if(navigator?.wakeLock?.request){
+		navigator.wakeLock.request?.("screen").then(w=>{
+			Temp.PSWL=w;
+			w.onrelease=()=>Temp.PSWL=null;
+		}).catch(e=>{
+			layer.msg(filterText(uiText.psl_err),{zIndex:20});
+			console.error(e);
+			cache.log.err.add(30,"getWakeLock",e);
+		});
+	}else{
+		preventScreenLock=false;
+	}
+}
+function clrWakeLock(){// 清除锁定阻止
+	if(!Temp.PSWL)return;
+	Temp.PSWL.release();
+	Temp.PSWL=null;
+}
+function setWakeLock(){// 设置锁定阻止
+	if(preventScreenLock) getWakeLock();
+	else clrWakeLock();
 }
 function getLocalFile(){// 获取本地文件
 	const fd="uf_efasdw";
@@ -275,10 +322,10 @@ function getLocalFile(){// 获取本地文件
 		type:1,
 		zIndex:10,
 		id:"read_file",
-		title:uiText.readfiletitle,
+		title:filterText(uiText.readfiletitle),
 		content:`<div class="layui-upload-drag layui-margin-2" data-k="${fd}">
 			<i class="layui-icon layui-icon-upload"></i>
-			<div>${uiText.readfilecontent}</div>
+			<div>${filterText(uiText.readfilecontent)}</div>
 		</div>`,
 		anim:2,
 		shadeClose:true,
@@ -286,15 +333,15 @@ function getLocalFile(){// 获取本地文件
 	});
 }
 function getNetworkFileWindow(){// 获取网络文件
-	layer.prompt({title:uiText.nw_wwtitle,zIndex:10},(value,index)=>{
+	layer.prompt({title:filterText(uiText.nw_wwtitle),zIndex:10},(value,index)=>{
 		var u="";
-		try{u=new URL(value).href;}catch(e){layer.msg(uiText.nw_urlerr,{zIndex:20});return;}
+		try{u=new URL(value).href;}catch(e){layer.msg(filterText(uiText.nw_urlerr),{zIndex:20});return;}
 		getNetworkData(u);
 		layer.close(index);
 	});
 }
 function getNetworkData(u){// 请求文件并处理
-	const loaidx=layer.msg(`${uiText.nw_getting}`,{
+	const loaidx=layer.msg(filterText(uiText.nw_getting),{
 		icon:16,
 		shade:0.2,
 		zIndex:20
@@ -307,19 +354,22 @@ function getNetworkData(u){// 请求文件并处理
 		docsMonitor.try(changeData,[d]);
 	},e=>{
 		layer.close(loaidx);
-		layer.msg(uiText.nw_error,{icon:2,shade:0.2,zIndex:20});
+		layer.msg(filterText(uiText.nw_error),{icon:2,shade:0.2,zIndex:20});
 	});
 }
 function playError(){// 播放失败处理
 	dfutTtle();
-	layer.msg(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx].title}`,{zIndex:20});
+	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx].title}`),{zIndex:20});
 	audioErrorCount++;
 	if(audioErrorCount>10){
-		layer.msg(uiText.pe_errconmax,{zIndex:20});
+		layer.msg(filterText(uiText.pe_errconmax),{zIndex:20});
 		audioErrorCount=0;
 		return;
 	}
-	if(noAutoPlayNext)return;
+	if(noAutoPlayNext){
+		clrWakeLock();
+		return;
+	}
 	playNext();
 }
 function showOptWindow(){// 显示配置窗口
@@ -327,14 +377,15 @@ function showOptWindow(){// 显示配置窗口
 	function B(v){return Boolean(v)}
 	layer.open({
 		type:1,
-		title:uiText.opt_title,
-		content:`<div class="layui-form layui-margin-3" lay-filter="set-opts">
-			<input type="checkbox" name="napn" title="${uiText.opt_NAPN}" />
-			<input type="checkbox" name="spt" title="${uiText.opt_SPT}" />
+		title:filterText(uiText.opt_title),
+		content:`<div class="layui-form layui-margin-3 opt-win-cont" lay-filter="set-opts">
+			<input type="checkbox" name="napn" title="${filterText(uiText.opt_NAPN)}" />
+			<input type="checkbox" name="spt" title="${filterText(uiText.opt_SPT)}" />
+			<input type="checkbox" name="psl" title="${filterText(uiText.opt_PSL)}" />
 			<hr />
-			<input type="checkbox" name="srn" title="${uiText.opt_SRN}" />
+			<input type="checkbox" name="srn" title="${filterText(uiText.opt_SRN)}" />
 		</div>`,
-		btn:[uiText.opt_ok,uiText.opt_cancel],
+		btn:[filterText(uiText.opt_ok),filterText(uiText.opt_cancel)],
 		shade:0.1,
 		shadeClose:true,
 		id:"set_option",
@@ -344,15 +395,18 @@ function showOptWindow(){// 显示配置窗口
 			form.render(null,"set-opts");
 			form.val("set-opts",{
 				napn:noAutoPlayNext,
-				spt:showPlayTime
+				spt:showPlayTime,
+				psl:preventScreenLock,
 			});
 		},
 		btn1(i){
 			const d=form.val("set-opts");
 			noAutoPlayNext=B(d.napn);
 			showPlayTime=B(d.spt);
+			preventScreenLock=B(d.psl);
 			if(d.srn) running=false;
 			layer.close(i);
+			setWakeLock();
 		},
 	})
 }
@@ -367,15 +421,16 @@ function numToMinTimeStr(n){// 时间数字转为分:秒时间
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
 document.getElementById("getdatabutton").onclick=()=>{
-	layer.alert(uiText.gdb_XZCZ,{
+	layer.alert(`${filterText(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
 		zIndex:10,
 		shadeClose:true,
-		btn:[uiText.gdb_QX,uiText.gdb_BDSJ,uiText.gdb_WLSJ],
+		btn:[filterText(uiText.gdb_QX),filterText(uiText.gdb_BDSJ),filterText(uiText.gdb_WLSJ)],
 		btnAlign:"c",
 		btn2:getLocalFile,
 		btn3:getNetworkFileWindow,
 	});
 }
+document.addEventListener("visibilitychange",setWakeLock);
 document.getElementById("showoptionwin").onclick=showOptWindow;
 deval.setEnv({network:{mode:"HTTPAgent"}});
 deval.onmsgerr=deval.onhandleerror=deval.onaddvariableerror=deval.onevalcodeerror=deval.onerrorevent=deval.onunhandledrejection=ev=>{
@@ -402,7 +457,7 @@ layui.table.on("row(playlist)",(o)=>{
 	o.setRowChecked({type:"radio"});
 	if(running){
 		changePLIdx(playIdx);
-		layer.msg(uiText.is_running,{zIndex:20});
+		layer.msg(filterText(uiText.is_running),{zIndex:20});
 		return;
 	}
 	playIdx=o.index;
@@ -413,14 +468,19 @@ id_player.onerror=()=>{
 }
 id_player.onended=()=>{
 	dfutTtle();
-	if(noAutoPlayNext)return;
+	if(noAutoPlayNext){
+		clrWakeLock();
+		return;
+	}
 	playNext();
 }
 id_player.onplay=()=>{
 	document.title=`${uiText.playtitle_play} ${playlist[playIdx].title}`;
+	getWakeLock();
 }
 id_player.onpause=()=>{
 	document.title=`${uiText.playtitle_pause} ${playlist[playIdx].title}`;
+	clrWakeLock();
 }
 id_player.ontimeupdate=function(){
 	if(!showPlayTime)return;
@@ -428,9 +488,7 @@ id_player.ontimeupdate=function(){
 	if(Number.isFinite(this.duration)) d=this.duration;
 	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 }
-if(urlsea.has("href"))for(const h of urlsea.getAll("href")){
-	getNetworkData(h);
-}
+if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
 if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 			//
 		</script>
