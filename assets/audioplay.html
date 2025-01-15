@@ -83,11 +83,13 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	playtitle_pause:"pause:",
 	getdatabutton:"获取数据",
 	showoptionwin:"修改配置",
+	fail:"失败",
 	// 播放列表
 	pl_title:"标题",
 	pl_type:"类型",
 	pl_args:"参数",
 	// 数据处理
+	parseerror:"数据解析失败",
 	cd_calldatatypeerr:"调用列表格式错误",
 	cd_playlist_typeerr:"播放列表类型错误，请提供正确的播放列表。",
 	// 播放
@@ -113,6 +115,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	opt_NAPN:"是否不播放下一个",
 	opt_SPT:"是否显示播放时间",
 	opt_PSL:"是否阻止屏幕锁定",
+	opt_loop:"是否单曲循环",
 	opt_SRN:"是否强制修改为未在运行\n若正常运行时强行修改可能会出现问题",
 	// 获取选项
 	gdb_XZCZ:"选择数据获取的操作",
@@ -263,6 +266,7 @@ function playNext(){// 播放下一个
 	if(!(nIdx in playlist)){
 		nIdx=0;
 	}
+	if(playlist.length<1)return;
 	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
@@ -279,8 +283,6 @@ function getWakeLock(){// 获取锁定阻止
 			w.onrelease=()=>Temp.PSWL=null;
 		}).catch(e=>{
 			layer.msg(filterText(uiText.psl_err),{zIndex:20});
-			console.error(e);
-			cache.log.err.add(30,"getWakeLock",e);
 		});
 	}else{
 		preventScreenLock=false;
@@ -294,6 +296,9 @@ function clrWakeLock(){// 清除锁定阻止
 function setWakeLock(){// 设置锁定阻止
 	if(preventScreenLock) getWakeLock();
 	else clrWakeLock();
+}
+function alertParseError(){// 提示解析失败
+	layer.alert(filterText(uiText.parseerror),{title:filterText(uiText.fail),zIndex:20});
 }
 function getLocalFile(){// 获取本地文件
 	const fd="uf_efasdw";
@@ -310,7 +315,7 @@ function getLocalFile(){// 获取本地文件
 			choose(obj){
 				obj.preview(async(i,f)=>{
 					let d=null;
-					try{d=JSON.parse(await f.text())}catch(e){cache.log.err.addError(30,"JSON.parse",e)}
+					try{d=JSON.parse(await f.text())}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
 					if(!d)return;
 					docsMonitor.try(changeData,[d]);
 				});
@@ -349,7 +354,7 @@ function getNetworkData(u){// 请求文件并处理
 	return fetch(u).then(async r=>{// 只要能解析出数据就算成功，忽略任何非数据的响应问题
 		let d=null;
 		layer.close(loaidx);
-		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e)}
+		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
 		if(!d)return;
 		docsMonitor.try(changeData,[d]);
 	},e=>{
@@ -359,7 +364,7 @@ function getNetworkData(u){// 请求文件并处理
 }
 function playError(){// 播放失败处理
 	dfutTtle();
-	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx].title}`),{zIndex:20});
+	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx]?.title}`),{zIndex:20});
 	audioErrorCount++;
 	if(audioErrorCount>10){
 		layer.msg(filterText(uiText.pe_errconmax),{zIndex:20});
@@ -382,6 +387,7 @@ function showOptWindow(){// 显示配置窗口
 			<input type="checkbox" name="napn" title="${filterText(uiText.opt_NAPN)}" />
 			<input type="checkbox" name="spt" title="${filterText(uiText.opt_SPT)}" />
 			<input type="checkbox" name="psl" title="${filterText(uiText.opt_PSL)}" />
+			<input type="checkbox" name="loop" title="${filterText(uiText.opt_loop)}" />
 			<hr />
 			<input type="checkbox" name="srn" title="${filterText(uiText.opt_SRN)}" />
 		</div>`,
@@ -397,6 +403,7 @@ function showOptWindow(){// 显示配置窗口
 				napn:noAutoPlayNext,
 				spt:showPlayTime,
 				psl:preventScreenLock,
+				loop:id_player.loop,
 			});
 		},
 		btn1(i){
@@ -404,6 +411,7 @@ function showOptWindow(){// 显示配置窗口
 			noAutoPlayNext=B(d.napn);
 			showPlayTime=B(d.spt);
 			preventScreenLock=B(d.psl);
+			id_player.loop=B(d.loop);
 			if(d.srn) running=false;
 			layer.close(i);
 			setWakeLock();
@@ -433,14 +441,14 @@ document.getElementById("getdatabutton").onclick=()=>{
 document.addEventListener("visibilitychange",setWakeLock);
 document.getElementById("showoptionwin").onclick=showOptWindow;
 deval.setEnv({network:{mode:"HTTPAgent"}});
-deval.onmsgerr=deval.onhandleerror=deval.onaddvariableerror=deval.onevalcodeerror=deval.onerrorevent=deval.onunhandledrejection=ev=>{
+deval.on_msgErr=deval.on_handleError=deval.on_addVariableError=deval.on_evalCodeError=deval.on_errorEvent=deval.on_unhandledrejection=ev=>{
 	const d=ev.data.data;
 	console.error("运行代码时出现了错误",d);
 	cache.log.err.add(40,"evalcodeError",d);
 	running=false;
 	playError();
 }
-deval.onfunctionpush=ev=>{
+deval.on_functionPush=ev=>{
 	const d=ev.data.data;
 	let e=false;
 	if(typeof d==="string"){

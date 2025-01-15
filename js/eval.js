@@ -142,6 +142,12 @@
 			ot[k]=v;
 		}
 	}
+	function ialsyd(d){// 简单的类型检查，不是很复杂，不会检查子属性
+		const t=typeof d;
+		if(t==="undefined"||t==="boolean"||t==="number"||t==="bigint"||t==="string"||d===null)return true;
+		if(d instanceof Error||d instanceof ArrayBuffer||d instanceof DataView||d instanceof Date||d instanceof RegExp)return true;
+		return false;
+	}
 	const Temp={
 		HTTP_pools:{},// HTTP连接池
 	};
@@ -196,12 +202,21 @@
 		evalCode
 	};
 	self.onmessage=inputMessage;
+	const errevtip="为防止发送失败，不发送信息，请在控制台查看。";
 	self.addEventListener("error",ev=>{
-		pms("errorEvent",ev.error,{message:ev.message,filename:ev.filename,lineno:ev.lineno,colno:ev.colno});
+		if(ev.error instanceof Error||ev.error===null)
+			pms("errorEvent",ev.error,{message:ev.message,filename:ev.filename,lineno:ev.lineno,colno:ev.colno});
+		else{
+			pms("errorEvent","错误事件的错误信息不是Error对象。"+errevtip);
+			console.error("Event Error",ev,ev.error);
+		}
 	});
 	self.addEventListener("unhandledrejection",ev=>{
-		pms("unhandledrejection","出现未处理的Promise.reject事件。为防止错误的数据，不发送信息，请在控制台查看。");
-		console.error("Event Promise.reject",ev,ev.promise,ev.reason);
+		if(ialsyd(ev.reason)) pms("unhandledrejection",ev.reason);
+		else{
+			pms("unhandledrejection","对reject进行基本检查认定不好发送。"+errevtip);
+			console.error("Event Promise.reject",ev,ev.promise,ev.reason);
+		}
 	});
 	setInterval(function check(){// 检查
 		function ck(tp){pms("checkWarn",tp)}

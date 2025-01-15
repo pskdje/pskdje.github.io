@@ -27,7 +27,7 @@ class DocsEval extends EventTarget {
 	#dpem(nm,d){// 触发消息事件
 		const ev=new MessageEvent(nm,{data:d,origin:"eval.js"});
 		this.dispatchEvent(ev);
-		let on=this["on"+nm.toLowerCase()];
+		let on=this["on_"+nm];
 		if(typeof on==="function")try{
 			on(ev);
 		}catch(e){
@@ -89,63 +89,63 @@ class DocsEval extends EventTarget {
 		else return null;
 	}// 主要事件
 	#onmsgerr=null;// msgErr
-	get onmsgerr(){return this.#onmsgerr}
-	set onmsgerr(v){this.#onmsgerr=this.#setOnF(v)}
+	get on_msgErr(){return this.#onmsgerr}
+	set on_msgErr(v){this.#onmsgerr=this.#setOnF(v)}
 	#onhandleerror=null;// handleError
-	get onhandleerror(){return this.#onhandleerror}
-	set onhandleerror(v){this.#onhandleerror=this.#setOnF(v)}
+	get on_handleError(){return this.#onhandleerror}
+	set on_handleError(v){this.#onhandleerror=this.#setOnF(v)}
 	#onconsole=null;// console
-	get onconsole(){return this.#onconsole}
-	set onconsole(v){this.#onconsole=this.#setOnF(v)}
+	get on_console(){return this.#onconsole}
+	set on_console(v){this.#onconsole=this.#setOnF(v)}
 	#ongetenv=null;// getEnv
-	get ongetenv(){return this.#ongetenv}
-	set ongetenv(v){this.#ongetenv=this.#setOnF(v)}
+	get on_getEnv(){return this.#ongetenv}
+	set on_getEnv(v){this.#ongetenv=this.#setOnF(v)}
 	#onaddvariableerror=null;// addVariableError
-	get onaddvariableerror(){return this.#onaddvariableerror}
-	set onaddvariableerror(v){this.#onaddvariableerror=this.#setOnF(v)}
+	get on_addVariableError(){return this.#onaddvariableerror}
+	set on_addVariableError(v){this.#onaddvariableerror=this.#setOnF(v)}
 	#onfunctionpush=null;// functionPush
-	get onfunctionpush(){return this.#onfunctionpush}
-	set onfunctionpush(v){this.#onfunctionpush=this.#setOnF(v)}
+	get on_functionPush(){return this.#onfunctionpush}
+	set on_functionPush(v){this.#onfunctionpush=this.#setOnF(v)}
 	#ongetvar=null;// getVar
-	get ongetvar(){return this.#ongetvar}
-	set ongetvar(v){this.#ongetvar=this.#setOnF(v)}
+	get on_getVar(){return this.#ongetvar}
+	set on_getVar(v){this.#ongetvar=this.#setOnF(v)}
 	#onevalcodeerror=null;// evalCodeError
-	get onevalcodeerror(){return this.#onevalcodeerror}
-	set onevalcodeerror(v){this.#onevalcodeerror=this.#setOnF(v)}
+	get on_evalCodeError(){return this.#onevalcodeerror}
+	set on_evalCodeError(v){this.#onevalcodeerror=this.#setOnF(v)}
 	#onevalcodereturn=null;// evalCodeReturn
-	get onevalcodereturn(){return this.#onevalcodereturn}
-	set onevalcodereturn(v){this.#onevalcodereturn=this.#setOnF(v)}
+	get on_evalCodeReturn(){return this.#onevalcodereturn}
+	set on_evalCodeReturn(v){this.#onevalcodereturn=this.#setOnF(v)}
 	#onerrorevent=null;// errorEvent
-	get onerrorevent(){return this.#onerrorevent}
-	set onerrorevent(v){this.#onerrorevent=this.#setOnF(v)}
+	get on_errorEvent(){return this.#onerrorevent}
+	set on_errorEvent(v){this.#onerrorevent=this.#setOnF(v)}
 	#onunhandledrejection=null;// unhandledrejection
-	get onunhandledrejection(){return this.#onunhandledrejection}
-	set onunhandledrejection(v){this.#onunhandledrejection=this.#setOnF(v)}
+	get on_unhandledrejection(){return this.#onunhandledrejection}
+	set on_unhandledrejection(v){this.#onunhandledrejection=this.#setOnF(v)}
 	#oncheckwarn=null;// checkWarn
-	get oncheckwarn(){return this.#oncheckwarn}
-	set oncheckwarn(v){this.#oncheckwarn=this.#setOnF(v)}
+	get on_checkWarn(){return this.#oncheckwarn}
+	set on_checkWarn(v){this.#oncheckwarn=this.#setOnF(v)}
 	// 其它事件
 	#onnetwork=null;// network
-	get onnetwork(){return this.#onnetwork}
-	set onnetwork(v){this.#onnetwork=this.#setOnF(v)}
+	get on_network(){return this.#onnetwork}
+	set on_network(v){this.#onnetwork=this.#setOnF(v)}
 	#oncallclosefunction=null;// callCloseFunction
-	get oncallclosefunction(){return this.#oncallclosefunction}
-	set oncallclosefunction(v){this.#oncallclosefunction=this.#setOnF(v)}
+	get on_callCloseFunction(){return this.#oncallclosefunction}
+	set on_callCloseFunction(v){this.#oncallclosefunction=this.#setOnF(v)}
 	#ontohttpagent=function(ev){// toHTTPAgent代理的默认实现
 		const d=ev.data;
 		const q=d.data;
 		function pd(t,r,s){
 			ev.target.post("SHTTP",{id:d.id,type:t,response:r},s);
 		}
-		docsScript.HTTPAgent(q.method,q.url,{headers:q.headers,body:q.body,type:"arraybuffer"},"fetch").then(r=>{
+		docsScript.HTTPAgent(q.method,q.url,{headers:q.headers,body:q.body,type:"arraybuffer",timeout:50000},"fetch").then(r=>{
 			pd("response",{body:r.data,status:r.statusCode,statusText:r.statusText,headers:r.headers},[r.data]);
 		},e=>{
 			pd("reject");
 		});
 	};// toHTTPAgent
-	get ontohttpagent(){return this.#ontohttpagent}
-	set ontohttpagent(v){this.#ontohttpagent=this.#setOnF(v)}
-	/*#on=null;// 
-	get on(){return this.#on}
-	set on(v){this.#on=this.#setOnF(v)}*/
+	get on_toHTTPAgent(){return this.#ontohttpagent}
+	set on_toHTTPAgent(v){this.#ontohttpagent=this.#setOnF(v)}
+	/*#on_=null;// 
+	get on_(){return this.#on}
+	set on_(v){this.#on=this.#setOnF(v)}*/
 }
