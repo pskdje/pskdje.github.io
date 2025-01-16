@@ -4,7 +4,7 @@
 // @description 通过油猴脚本允许我网站访问其它资源
 // @author      dsjofh
 // @icon        https://pskdje.github.io/website_icon/favicon-64.ico
-// @version     2025-01-16T16
+// @version     2025-01-16T22
 // @match       http*://127.0.0.1:12540/*
 // @match       http*://192.168.*.*:12540/*
 // @match       https://pskdje.github.io/*
@@ -48,7 +48,7 @@
 			timeout:50000,
 			onabort:rj,onerror:rj,ontimeout:rj,
 			onload(r){
-				pd("response",{body:r.response,status:r.status,statusText:r.statusText,headers:sph(r.responseHeaders)},[r.response]);
+				pd("response",{body:r.response,status:r.status,statusText:r.statusText,headers:sph(r.responseHeaders)},(r.response instanceof ArrayBuffer)?[r.response]:undefined);
 				cache.log.requestLog.add(0,tmsou+"agent:onload",`[${q.method}] "${r.finalUrl}" - ${r.status} "${r.statusText}" - null`);
 			}
 		});
