@@ -33,9 +33,9 @@
 		function sph(ht){
 			if(typeof ht!=="string")return ht;
 			const r={};
-			for(const d in ht.split("\r\n")){
-				const h=d.split(":",2);
-				r[h[0].trim()]=h[1].trim();
+			for(const d of ht.split("\r\n")){
+				const h=d.split(/^(.+?):(.+)$/);
+				r[h[1].trim()]=h[2].trim();
 			};return r;
 		}
 		GM_xmlhttpRequest({
@@ -43,11 +43,13 @@
 			url:q.url,
 			headers:q.headers,
 			data:q.body,
+			redirect:q.method==="HEAD"?"manual":"follow",
 			responseType:"arraybuffer",
 			timeout:50000,
 			onabort:rj,onerror:rj,ontimeout:rj,
 			onload(r){
-				pd("response",{body:r.response,status:r.status,statusText:r.statusText,headers:sph(r.responseHeaders)});
+				pd("response",{body:r.response,status:r.status,statusText:r.statusText,headers:sph(r.responseHeaders)},[r.response]);
+				cache.log.requestLog.add(0,tmsou+"agent:onload",`[${q.method}] "${r.finalUrl}" - ${r.status} "${r.statusText}" - null`);
 			}
 		});
 	}
