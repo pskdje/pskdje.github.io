@@ -4,12 +4,13 @@
 // @description 通过油猴脚本允许我网站访问其它资源
 // @author      dsjofh
 // @icon        https://pskdje.github.io/website_icon/favicon-64.ico
-// @version     2025-01-16T22
+// @version     2025-01-18T10
 // @match       http*://127.0.0.1:12540/*
 // @match       http*://192.168.*.*:12540/*
 // @match       https://pskdje.github.io/*
 // @run-at      document-end
 // @downloadURL https://pskdje.github.io/static/tools/page_network.user.js
+// @supportURL  https://pskdje.github.io/posts/2025/01/16/page_network_userjs.html
 // @homepage    https://pskdje.github.io/posts/2025/01/16/page_network_userjs.html
 // @grant       GM_info
 // @grant       GM_xmlhttpRequest

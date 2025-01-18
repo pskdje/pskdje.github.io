@@ -10,6 +10,7 @@
 // @grant        none
 // @require      https://scriptcat.org/lib/637/1.4.3/ajaxHooker.js#sha256=y1sWy1M/U5JP1tlAY5e80monDp27fF+GMRLsOiIrSUY=
 // @downloadURL  https://pskdje.github.io/static/assets/tools/tm_js/no_bpbp_sac_df_req.user.js
+// @supportURL   https://pskdje.github.io/static/assets/tools/tm_js/
 // @license      CC0
 // @noframes
 // ==/UserScript==
