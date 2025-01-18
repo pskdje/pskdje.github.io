@@ -8,11 +8,18 @@ Github Page
 
 ## 一些页面链接
 
+<details>
+<summary>部分列表</summary>
+
+**这些链接并不完整，有的链接可能需要一些配置才能使用。**~~*相关文档可能还分散在各处。*~~
+
 [post列表](https://pskdje.github.io/posts/list/)
 
 [time.html](https://pskdje.github.io/assets/time.html)
 
 [audioplay.html](https://pskdje.github.io/assets/audioplay.html)
+
+</details>
 
 ## 其它
 

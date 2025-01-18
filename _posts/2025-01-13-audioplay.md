@@ -11,6 +11,8 @@ time: 2025/01/13-16:08
 
 解决办法为在控制台输入`deval.setEnv({network:{mode:"default"}})`使用默认的请求组件。这也意味着你将会受到安全限制。
 
+还有一些其它方法，见其它部分。
+
 以后可能会考虑其它功能。
 
 ## 数据
@@ -52,3 +54,9 @@ time: 2025/01/13-16:08
 [加载默认调用依赖](/assets/audioplay.html?href=playlist%2Fau_call.json) 这个示例会加载一些调用依赖，想要播放还是需要自己加载文件。
 
 [把上面的示例都加载](/assets/audioplay.html?lang=live&href=playlist%2Fau_call.json) 加载了`lang`和`href`的示例。
+
+## 通过油猴脚本获取资源
+
+详见[本站页面访问其它资源辅助脚本]({{ page.next.url }})
+
+利用这个脚本，可以允许call跨站访问链接，不过需要你自己添加允许的域名。
