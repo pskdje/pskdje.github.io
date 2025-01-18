@@ -4,7 +4,7 @@
 // @description 通过油猴脚本允许我网站访问其它资源
 // @author      dsjofh
 // @icon        https://pskdje.github.io/website_icon/favicon-64.ico
-// @version     2025-01-18T10
+// @version     2025-01-18T16
 // @match       http*://127.0.0.1:12540/*
 // @match       http*://192.168.*.*:12540/*
 // @match       https://pskdje.github.io/*
@@ -22,7 +22,7 @@
 	const hasLWS=typeof docWindow==="function"&&typeof docsScript==="object";// 检查是否有我网站的接口
 	if(!hasLWS)console.warn("未运行于特定环境，部分逻辑可能会无法运行。");
 	const path=location.pathname,
-		tmsou=`${tmnm}>`;
+		tmsou=`${GM_info?.scriptUpdateURL??"油猴脚本/"+tmnm}>`;
 	cache.log.root.add(20,tmnm,`油猴脚本"${GM_info.script.name}"已在"${path}"区域加载。`);
 	function on_toHTTPAgent(ev){// toHTTPAgent代理的油猴实现
 		const d=ev.data;
@@ -30,7 +30,11 @@
 		function pd(t,r,s){
 			ev.target.post("SHTTP",{id:d.id,type:t,response:r},s);
 		}
-		function rj(){pd("reject")}
+		function rj(){
+			pd("reject");
+			console.error("通过油猴代理转接失败",this.error);
+			cache.log.err.add(40,tmsou+"on_toHTTPAgent.rj",this.error);
+		}
 		function sph(ht){
 			if(typeof ht!=="string")return ht;
 			const r={};
@@ -50,7 +54,7 @@
 			onabort:rj,onerror:rj,ontimeout:rj,
 			onload(r){
 				pd("response",{body:r.response,status:r.status,statusText:r.statusText,headers:sph(r.responseHeaders)},(r.response instanceof ArrayBuffer)?[r.response]:undefined);
-				cache.log.requestLog.add(0,tmsou+"agent:onload",`[${q.method}] "${r.finalUrl}" - ${r.status} "${r.statusText}" - null`);
+				cache.log.requestLog.add(0,tmnm+">agent:onload",`[${q.method}] "${r.finalUrl}" - ${r.status} "${r.statusText}" - null`);
 			}
 		});
 	}

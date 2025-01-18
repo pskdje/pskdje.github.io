@@ -14,8 +14,8 @@ title: About
 
 <details><summary><!-- link --></summary>
 
-网站Github：[pskdje.github.io](https://github.com/pskdje/pskdje.github.io)
+网站Github： [pskdje.github.io](https://github.com/pskdje/pskdje.github.io)
 
-网站存储库公告（不是网站的，但容纳的存储库有变动肯定会影响网站的）：[pskdje.github.io/discussions#1](https://github.com/pskdje/pskdje.github.io/discussions/1)
+网站存储库公告（不是网站的，但容纳的存储库有变动肯定会影响网站的）： [pskdje.github.io/discussions#1](https://github.com/pskdje/pskdje.github.io/discussions/1)
 
 </details>
