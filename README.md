@@ -6,6 +6,8 @@ Github Page
 
 主页的各种链接不完善，以后也不打算好好完善（就是藏着）。所有链接在仓库里都找得到。
 
+现在使用讨论的 [#1](https://github.com/pskdje/pskdje.github.io/discussions/1) 来作为公告使用，这个公告可能会很少更新，不过与这个存储库相关的信息还是建议看这里。
+
 ## 一些页面链接
 
 <details>
