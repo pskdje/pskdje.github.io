@@ -57,7 +57,7 @@ body {
 		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
 		<p id="playtext"></p>
 		<p class="s-bacl">
-			<span>操作: </span>
+			<span onclick="adbgt()">操作: </span>
 			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs" title="不要使用不安全的数据">获取数据</button>
 			<button id="showoptionwin" type="button" class="layui-btn layui-btn-xs">修改配置</button>
 			<button type="button" class="layui-btn layui-btn-xs layui-btn-primary"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
@@ -190,7 +190,7 @@ function changeData(data){// 更新数据
 		shade:0,time:3000,
 		offset:"t",anim:"slideDown",
 		skin:"change-data-success",
-		content:`${filterText(uiText.cd_success1)} ${filterText(data.title)} ${filterText(uiText.cd_success2)}`,
+		content:`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`,
 	});
 	if(playlist.length<1)return;
 	changePLIdx(playIdx);
@@ -433,6 +433,17 @@ function showOptWindow(){// 显示配置窗口
 		},
 	})
 }
+function apdebugt(){// 调试工具
+	const to=this.listItem("audio play"),
+		sab=this.dce("button"),
+		aemeb=this.dce("button");
+	sab.textContent="显示参数列";
+	sab.onclick=showArgs;
+	aemeb.textContent="在控制台显示eval事件";
+	aemeb.onclick=()=>cache.runDataReceive.evalMessageEvent.push((n,d)=>console.debug("eval事件",d));
+	to.i.append(sab,aemeb);
+}
+function adbgt(){debugTool.initFun.push(apdebugt);debugTool.init();}// 启用调试面板
 function numToMinTimeStr(n){// 时间数字转为分:秒时间
 	const d=Math.trunc(n);
 	let m=Math.floor(d/60),
