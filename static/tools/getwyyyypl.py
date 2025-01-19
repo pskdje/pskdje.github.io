@@ -53,6 +53,7 @@ def get_album(id:int)->playlist|errstr:
         return d["message"]
     return {
         "title":d["album"]["name"],
+        "depend":["au_call.json"],
         "list":paclists(d["album"]["songs"])
     }
 
@@ -62,6 +63,7 @@ def get_playlist(id:int)->playlist|errstr:
         return d["message"]
     return {
         "title":d["result"]["name"],
+        "depend":["au_call.json"],
         "list":paclists(d["result"]["tracks"])
     }
 

@@ -8,7 +8,7 @@
 		"title": {
 			"type": "string",
 			"title": "播放列表标题",
-			"description": "暂未实际使用"
+			"description": "将在导入完成时用于提示。"
 		},
 		"list": {
 			"type": "array",
@@ -68,6 +68,17 @@
 			},
 			"title": "要被调用的函数列表",
 			"description": "这里放置可被播放列表调用的函数，只能放函数体。会有闭包进一些函数可供使用，详见文档（暂未编写）。"
+		},
+		"depend": {
+			"type": "array",
+			"uniqueItems": true,
+			"items": {
+				"type": "string",
+				"title": "依赖项目",
+				"description": "由字符串列表组成的依赖列表，建议采用根对象的title属性或者文件名。实际导入需要自行操作。"
+			},
+			"title": "依赖",
+			"description": "表明这个播放列表需要依赖另一个播放列表才可以使用，这个只是声明，具体导入需要自行进行。"
 		}
 	}
 }

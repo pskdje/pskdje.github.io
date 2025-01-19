@@ -28,6 +28,9 @@ body {
 .playlistdata :where(.layui-table-body , tbody) {
 	scroll-behavior: var(--scroll-behavor);
 }
+.change-data-success .layui-layer-content {
+	padding: 1em;
+}
 @media(prefers-reduced-motion:reduce){
 	body {
 		--scroll-behavor: auto;
@@ -92,6 +95,8 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	parseerror:"数据解析失败",
 	cd_calldatatypeerr:"调用列表格式错误",
 	cd_playlist_typeerr:"播放列表类型错误，请提供正确的播放列表。",
+	cd_success1:"加载",
+	cd_success2:"完成",
 	// 播放
 	pa_none_type:"播放操作无效",
 	pe_msg0:"播放",
@@ -99,6 +104,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	pe_msg2:"标题:",
 	pe_errconmax:"累计播放失败次数超过阈值，已停止自动切换下一个。请检查播放列表是否可用。",
 	is_running:"当前正在处理歌曲信息，暂时不可切换。",
+	psl_not_api:"你的浏览器不支持阻止屏幕锁定，已自动重置该配置。",
 	psl_err:"阻止屏幕锁定失败",
 	// 文件获取
 	readfiletitle:"读取文件",
@@ -174,7 +180,18 @@ function changeData(data){// 更新数据
 		tableData.push(cfgPlayList(i));
 	}
 	docsMonitor.listening["playOneData"]=undefined;
+	const dependList=data.depend??[];
+	if(Array.isArray(dependList)){for(const i of dependList)if(typeof i!=="string")throw new TypeError("依赖列表类型错误");}
+	else throw new TypeError("依赖列表不是数组");
 	if(list.length>0) layui.table.reloadData("playlist",{data:tableData});
+	layer.open({
+		type:1,zIndex:30,
+		title:false,closeBtn:0,
+		shade:0,time:3000,
+		offset:"t",anim:"slideDown",
+		skin:"change-data-success",
+		content:`${filterText(uiText.cd_success1)} ${filterText(data.title)} ${filterText(uiText.cd_success2)}`,
+	});
 	if(playlist.length<1)return;
 	changePLIdx(playIdx);
 	playAudio(playIdx);
@@ -221,10 +238,7 @@ function showArgs(){
 	layui.table.hideCol("playlist",{field:"args",hide:false});
 }
 function changePLIdx(idx){// 更新播放列表，附带滚动
-	layui.table.setRowChecked("playlist",{
-		type:"radio",
-		index:idx,
-	});
+	layui.table.setRowChecked("playlist",{type:"radio",index:idx,});
 	const el=document.querySelector(`[lay-table-id="playlist"] tr[data-index="${idx}"][class="layui-table-checked"]`);
 	if(!el)return;
 	el.scrollIntoView({behavior:"auto",block:"nearest"});
@@ -286,6 +300,7 @@ function getWakeLock(){// 获取锁定阻止
 		});
 	}else{
 		preventScreenLock=false;
+		layer.msg(filterText(uiText.psl_not_api),{icon:2,zIndex:10});
 	}
 }
 function clrWakeLock(){// 清除锁定阻止
