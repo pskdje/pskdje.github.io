@@ -43,9 +43,6 @@ body {
 	#playtext {
 		display: none;
 	}
-	.opt-win-cont {
-		width: 200px;
-	}
 	.layui-form-checkbox[lay-skin=primary]>div {
 		white-space: pre-line;
 	}
@@ -395,6 +392,7 @@ function playError(){// 播放失败处理
 function showOptWindow(){// 显示配置窗口
 	const form=layui.form;
 	function B(v){return Boolean(v)}
+	let wt=window.matchMedia("(max-width:650px)").matches;
 	layer.open({
 		type:1,
 		title:filterText(uiText.opt_title),
@@ -412,6 +410,7 @@ function showOptWindow(){// 显示配置窗口
 		id:"set_option",
 		zIndex:10,
 		resize:true,
+		area:wt?["240px","500px"]:["650px","300px"],
 		success(){
 			form.render(null,"set-opts");
 			form.val("set-opts",{
@@ -435,11 +434,9 @@ function showOptWindow(){// 显示配置窗口
 }
 function apdebugt(){// 调试工具
 	const to=this.listItem("audio play"),
-		sab=this.dce("button"),
-		aemeb=this.dce("button");
-	sab.textContent="显示参数列";
+		sab=this.cbtn("显示参数列"),
+		aemeb=this.cbtn("在控制台显示eval事件");
 	sab.onclick=showArgs;
-	aemeb.textContent="在控制台显示eval事件";
 	aemeb.onclick=()=>cache.runDataReceive.evalMessageEvent.push((n,d)=>console.debug("eval事件",d));
 	to.i.append(sab,aemeb);
 }

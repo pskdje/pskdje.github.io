@@ -13,9 +13,6 @@ title: About
 （不过咱还是觉得应该把网站和对应的存储库分开对待）
 
 <details><summary><!-- link --></summary>
-
-网站Github： [pskdje.github.io](https://github.com/pskdje/pskdje.github.io)
-
-网站存储库公告（不是网站的，但容纳的存储库有变动肯定会影响网站的）： [pskdje.github.io/discussions#1](https://github.com/pskdje/pskdje.github.io/discussions/1)
-
+<p>网站Github：<a target="_blank" href="https://github.com/pskdje/pskdje.github.io">pskdje.github.io</a></p>
+<p>网站存储库公告（不是网站的，但容纳的存储库有变动肯定会影响网站的）：<a target="_blank" href="https://github.com/pskdje/pskdje.github.io/discussions/1">pskdje.github.io/discussions#1</a></p>
 </details>

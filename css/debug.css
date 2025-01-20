@@ -2,11 +2,22 @@
 
 /* debugTool.init */
 div#debug_tool {
+	all: initial;
 	position: absolute;
 	top: -9999px;
 	left: -9999px;
 	width: 100%;
 	height: 100%;
+}
+div#debug_tool button {
+	border-width: 1px;
+	border-style: outset;
+	border-color: #767676;
+	border-radius: 3px;
+	padding: 1px 6px;
+}
+div#debug_tool button:active {
+	border-style: inset;
 }
 div#debug_tool > button {
 	position: fixed;
@@ -49,7 +60,7 @@ div#debug_tool > div.debug_tool_view > h3 {
 	font-size: 1.5em;
 }
 div#debug_tool > div.debug_tool_view > div[data-info="content"] {
-	height: calc(100% - 5.4em);
+	height: calc(100% - 5.8em);
 	overflow: auto;
 }
 div#debug_tool > div.debug_tool_view > div > details {

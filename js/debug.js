@@ -115,7 +115,7 @@ var debugTool={
 		}}else{
 			els.ost().bottom="1em";
 			els.ost().right="1em";
-		}// 关闭(应为隐藏)按钮
+		}// 关闭(实为隐藏)按钮
 		els.c.textContent="×";
 		els.c.onclick=function(){
 			els.w.style.display="none";
@@ -124,7 +124,7 @@ var debugTool={
 		els.w.style.display="none";
 		els.d.setAttribute("data-info","content");
 		els.r.append(els.o,els.w);
-		els.w.append(els.c,els.h,els.d);// show log[Top]
+		els.w.append(els.c,els.h,els.hr,els.d);// show log[Top]
 		els.log.d.className="show_log";
 		els.log.d.append(els.log.s,els.log.i);
 		els.log.d.setAttribute("data-info",els.log.s.textContent="查看日志");
@@ -134,7 +134,7 @@ var debugTool={
 			for(const name in cache.log){
 				if(!(cache.log[name]instanceof Log))continue;// 不会显示不是日志的条目
 				let bul=document.createElement("button");
-				bul.textContent=name;
+				bul.textContent=name; bul.type="button";
 				bul.setAttribute("data-log_name",name);
 				bul.onclick=(function(name){return function(){// 查看日志
 					debugTool.tools.showLog(name,5);
@@ -219,7 +219,7 @@ var debugTool={
 			var dt=Date.now();
 			els.info.i.innerHTML=`<p>位置: ${location.href}</p><p>标题: ${stg(document.title)}</p><p>用户代理: ${navigator.userAgent}</p>${(navigator.oscpu?"<p>操作系统类型: "+navigator.oscpu+"</p>":"")}${(hasOwnKey(navigator,"onLine")?"<p>是否联网: "+navigator.onLine+"</p>":"")}${(hasOwnKey(navigator,"language")?"<p>语言: "+navigator.language+"</p>":"")}<p>字符编码: ${document.characterSet}</p><p>内容区域宽高度: ${window.innerWidth}(w) × ${window.innerHeight}(h)</p><p>子窗口数量: ${window.length}</p><p>超链接数: ${document.links.length}</p><p>图片数: ${document.images.length}</p><p>脚本数: ${document.scripts.length}</p><p>样式表数: ${document.styleSheets.length}</p><p>来源: ${document.referrer}</p><p>当前时间/时间戳: <time>${docsScript.dateToStr(dt)}</time> <code>${dt}</code></p>`;
 		}; els.info.s.onclick=()=>els.info.r.click();
-		els.d.append(els.hr, els.log.d, els.hr, els.cookie.d, els.hr, els.los.d, els.hr, els.ses.d, els.hr, els.info.d, els.hr);
+		els.d.append(els.log.d,els.hr,els.cookie.d,els.hr,els.los.d,els.hr,els.ses.d,els.hr,els.info.d,els.hr);
 		document.body.append(els.r);
 		if(Array.isArray(this?.initFun))try{
 			cache.log.debugTool.add(10,"窗口扩展:加载",["开始加载已注册在initFun中的扩展。数量: ",this.initFun.length]);
@@ -244,6 +244,11 @@ var debugTool={
 					d.append(s,i); s.textContent=su;
 					this.element.append(d,this.hr);
 					return Object.freeze({n:su,d:d,s:s,i:i});
+				};cbtn(text){// 创建一个按钮
+					var e=this.dce("button");
+					e.type="button";
+					e.textContent=text;
+					return e;
 				}
 			};for(const wFun of this.initFun){
 				if(typeof wFun!=="function")continue;
@@ -253,6 +258,7 @@ var debugTool={
 		}catch(err){// 扩展出错时静默处理
 			cache.log.debugTool.add(40,"窗口扩展",[err.name,": ",err.message,"\n\n",err.stack]);
 		}; cache.log.debugTool.add(10,"调试窗口","初始化结束");
+		els.info.r.type=els.ses.c.type=els.los.c.type=els.cookie.c.type=els.o.type=els.c.type="button";
 		return{
 			get show(){return els.w.style.display==="block";},
 			set show(v){els.w.style.display=(v?"block":"none");}
