@@ -26,5 +26,6 @@ body > main {
 	padding: 0;
 	text-overflow: ellipsis;
 	overflow: hidden;
-	height: 1cqi;
+	font-size: 1em;
+	height: 1.5em;
 }

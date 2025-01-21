@@ -189,6 +189,7 @@ function changeData(data){// 更新数据
 		skin:"change-data-success",
 		content:`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`,
 	});
+	cache.log.all.add(10,"audioplay.html>changeData",`加载"${data.title}"完成`);
 	if(playlist.length<1)return;
 	changePLIdx(playIdx);
 	playAudio(playIdx);
@@ -495,6 +496,7 @@ layui.table.on("row(playlist)",(o)=>{
 	playAudio(playIdx);
 });
 id_player.onerror=()=>{
+	cache.log.err.add(40,"HTMLAudioElement","播放失败，请使用开发者工具分析原因。");
 	playError();
 }
 id_player.onended=()=>{
