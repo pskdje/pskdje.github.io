@@ -9,6 +9,6 @@ fetch(`https://music.163.com/song/media/outer/url?id=${value}.mp3`,{method:'HEAD
 		re=t=>{return new ReferenceError(`get163:${t}`)};
 	if(!h.has('Location'))throw re('未获取到重定向信息');
 	const l=h.get('Location');
-	if(l==='https://music.163.com/404')throw re('对方拒绝提供播放');
+	if(new URL(l).pathname==='/404')throw re('对方拒绝提供播放');
 	fpm(l);
 });
