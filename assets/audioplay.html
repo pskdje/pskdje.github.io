@@ -3,13 +3,18 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>audio play</title>
+		<meta name="referrer" content="no-referrer" />
+		<meta name="description" content="提供自定义播放音频，通过播放列表定义。" />
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
+		<meta name="author" content="pskdje" />
 		<link rel="stylesheet" href="//unpkg.com/layui@2.9.21/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark.css" media="(prefers-color-scheme:dark)" />
+		<meta name="color-scheme" content="light dark" />
 		<style>
 			/*  */
 .s-bacl {
-	background-color: var(--docs-bacl);
+	background-color: var(--lay-color-bg-1,var(--docs-bacl,white));
 }
 #player {
 	width: 35%;
@@ -261,12 +266,9 @@ function playAudio(idx){// 播放某个索引对应的音频
 			running=false;
 			playNext();
 			break;
-		case "call": {
-			let v=p.value;
-			if(typeof v==="string") v='"'+v.replaceAll('"','\\"')+'"';
-			deval.evalCode(`${p.call} (${v})`,Date.now());
+		case "call":
+			deval.evalCode(`${p.call} (${JSON.stringify(p.value)})`,Date.now());
 			break;
-		}
 		default:
 			running=false;
 			layer.msg(filterText(uiText.pa_none_type),{zIndex:20});
