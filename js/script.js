@@ -430,7 +430,7 @@ const docsScript={
 		// 其它
 		isDark:window.matchMedia("(prefers-color-scheme:dark)").matches,
 		get isSetDark(){return document.body.classList.contains("docs-style-dark")}
-	}, compatible:{// 兼容检查。此处提供默认的检查，可以使用其它脚本在此处添加其它的检查结果。
+	}, compat:{// 兼容检查。此处提供默认的检查，可以使用其它脚本在此处添加其它的检查结果。
 		addeventlistenerOptions:(()=>{
 			const opt={once:true,passive:false};try{
 			window.addEventListener("test",null,opt);

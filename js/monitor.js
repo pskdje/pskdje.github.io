@@ -9,6 +9,7 @@ const docsMonitor=(function docsMonitor(){
 	const glerr=cache.log.err;
 	let isListenerErEv=false;
 	function dce(t){return document.createElement(t)};
+	function wmwm(){return window.matchMedia("(max-width: 600px)").matches};
 	function tryFunction(f,a=[]){// 进行捕捉，建议用在最外层。
 		// 使用此函数视为出现严重错误。
 		if(typeof f!=="function")throw new TypeError("参数1不是要被运行和捕捉错误的函数");
@@ -51,7 +52,7 @@ const docsMonitor=(function docsMonitor(){
 		console.error(msg);
 		const ww=docWindow("故障","");
 		ww.zIndex=0xFFFFFFFF;
-		if(window.matchMedia("(max-width: 600px)").matches){
+		if(wmwm()){
 			ww.left=ww.top="0px";
 			ww.width=ww.height="100%";
 		}else{
@@ -97,9 +98,11 @@ const docsMonitor=(function docsMonitor(){
 	font-size: 1.2em;
 	padding-left: 0.25em;
 	font-weight: bold;
+	word-break: break-all;
 }
 .errmsg-root .errmsg {
 	font-size: 0.9em;
+	word-break: break-all;
 }
 .errmsg-root .stack-or-other {
 	border: 1px solid #DBDBDB;
@@ -282,6 +285,52 @@ const docsMonitor=(function docsMonitor(){
 			return isListenerErEv=true;
 		}
 	}
+	function dependCheck(cl){// 依赖检查
+		if(!Array.isArray(cl))throw new TypeError("依赖检查需要传入一个数组");
+		const frt=[],cr=[];
+		function gdc(n){
+			const d=docsScript.compat[n];
+			cr.push({n,d});
+			return d;
+		}
+		function rdc(f){
+			let i,t=false;
+			try{i=f()}catch(e){t=true;i=e}
+			cr.push({i,t});
+			if(i!==true)return true;
+			return false;
+		}
+		for(const ci of cl){
+			if(typeof ci==="string"){if(gdc(ci)!==true) frt.push(`你的浏览器不兼容"${ci}"`);
+			}else if(typeof ci.fun==="function"&&typeof ci.fiTip==="string"){if(rdc(ci.fun)) frt.push(ci.fiTip);
+			}
+		}
+		if(frt.length>0) openDCFWindow(frt);
+		return cr;
+	}
+	function openDCFWindow(et){// 依赖缺失提示
+		const w=docWindow("依赖检查","");
+		w.zIndex=0xFFFF;
+		if(wmwm()){
+			w.left=w.top="10%";
+			w.width=w.height="80%";
+		}else{
+			w.left=w.top="20";
+			w.width=w.height="60%";
+		}
+		let txi=dce("h2"),
+			tp1=dce("p"),
+			icb=dce("hr");
+		txi.textContent="部分依赖缺失";
+		tp1.textContent="请依照下方的信息进行排查，依赖问题可能由浏览器不兼容或网络问题等导致的。";
+		w.e.append(txi,tp1,icb);
+		for(const t of et){
+			let p=dce("p");
+			p.className="depend_check_info_item";
+			p.textContent=t;
+			w.e.append(p);
+		}
+	}
 	return Object.freeze({
 		try:tryFunction,
 		catchPromise,
@@ -293,6 +342,7 @@ const docsMonitor=(function docsMonitor(){
 		listenerErrorEvent,
 		listenerUnhlrejEvent,
 		swEvLse:switchEventListener,
+		dependCheck,
 	});
 })();
 

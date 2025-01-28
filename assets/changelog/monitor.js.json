@@ -3,6 +3,9 @@
 		"name":"monitor.js",
 		"desc":"运行监测组件更新日志"
 	},{
+		"dt":1738061436980,
+		"c":"添加了依赖检查接口。"
+	},{
 		"dt":1735112406644,
 		"c":"提升了故障窗口的zIndex值。额外暴露`listenerErrorEvent`和`listenerUnhlrejEvent`接口，分别用于error事件和未处理的reject事件。(不要用错地方，小心你看不懂)"
 	},{

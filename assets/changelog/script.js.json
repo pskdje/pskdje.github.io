@@ -3,6 +3,9 @@
 		"name":"script.js",
 		"desc":"关于/js/script.js的更新日志"
 	},{
+		"dt":1738002824384,
+		"c":"将`docsScript.compatible`重命名为`docsScript.compat`。"
+	},{
 		"dt":1735202952459,
 		"c":"调整了error事件处理对没有Error对象时的反应。调整了调试库eruda的加载时机（因为本身有网络和被附加的原因，还有性能考量，最终决定添加defer属性）。"
 	},{
