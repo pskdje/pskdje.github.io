@@ -5,6 +5,7 @@
 		<title>audio play</title>
 		<meta name="referrer" content="no-referrer" />
 		<meta name="description" content="提供自定义播放音频，通过播放列表定义。" />
+		<link rel="help" href="https://pskdje.github.io/posts/2025/01/13/audioplay.html" />
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
 		<meta name="author" content="pskdje" />
@@ -59,7 +60,7 @@ body {
 		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
 		<p id="playtext"></p>
 		<p class="s-bacl">
-			<span onclick="adbgt()">操作: </span>
+			<span onclick="try{adbgt()}catch(e){}">操作: </span>
 			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs" title="不要使用不安全的数据">获取数据</button>
 			<button id="showoptionwin" type="button" class="layui-btn layui-btn-xs">修改配置</button>
 			<button type="button" class="layui-btn layui-btn-xs layui-btn-primary"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
@@ -454,10 +455,10 @@ function numToMinTimeStr(n){// 时间数字转为分:秒时间
 }
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
-document.getElementById("getdatabutton").onclick=()=>{
+var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 	layer.alert(`${filterText(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
-		zIndex:10,
-		shadeClose:true,
+		title:filterText(uiText.getdatabutton),
+		shadeClose:true,zIndex:10,
 		btn:[filterText(uiText.gdb_QX),filterText(uiText.gdb_BDSJ),filterText(uiText.gdb_WLSJ)],
 		btnAlign:"c",
 		btn2:getLocalFile,
