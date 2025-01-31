@@ -1,0 +1,47 @@
+{
+	"title":"hy @w4y",
+	"depend":["au_call.json"],
+	"list":[
+		{
+			"title":"崩3 - TruE - 黄龄/HoYo-MiX",
+			"call":"get163",
+			"value":1971144922
+		},{
+			"title":"崩2 - Shopsation - HoYo-MiX",
+			"call":"get163",
+			"value":468513231
+		},{
+			"title":"崩3 - ACE - HoYo-MiX",
+			"call":"get163",
+			"value":484056614
+		},{
+			"title":"原 - Genshin Impact Main - 陈致逸/HoYo-MiX",
+			"call":"get163",
+			"value":1455706958
+		},{
+			"title":"原 - 璃月 - 陈致逸/HoYo-MiX",
+			"call":"get163",
+			"value":1492276411
+		},{
+			"title":"铁 - Star Rail - HoYo-MiX",
+			"call":"get163",
+			"value":2034614720
+		},{
+			"title":"原 - 曲终奏雅 - HoYo-MiX",
+			"call":"get163",
+			"value":2613484742
+		},{
+			"title":"绝 - 绝望吧台 - 三Z-STUDIO/HoYo-MiX",
+			"call":"get163",
+			"value":2639322684
+		},{
+			"title":"铁 - 睡蕉之歌 - HoYo-MiX",
+			"call":"get163",
+			"value":2646986980
+		},{
+			"title":"绝 - 60%的日常·悠闲 - 三Z-STUDIO/HoYo-MiX",
+			"call":"get163",
+			"value":2657833353
+		}
+	]
+}

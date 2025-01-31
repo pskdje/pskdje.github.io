@@ -53,13 +53,13 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 有很多种问题都可能导致同一种失败现象。
 
-1. 以非常快的速度疯狂提示失败，直至失败次数上限
+#### 以非常快的速度疯狂提示失败，直至失败次数上限
 
 可能原因：未加载依赖的播放列表、当前使用或曾使用的播放列表call中存在错误、未允许访问某个域名或配置问题、网络问题。
 
 排查：依照可能原因进行检查，或者依照日志和浏览器控制台信息进行排查问题（需要部分JavaScript开发经验，能看懂<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Errors" title="JavaScript 错误参考" rel="external">错误信息</a>）。
 
-2. 加载播放列表后过了很久提示失败，一直重复到失败次数上限
+#### 加载播放列表后过了很久提示失败，一直重复到失败次数上限
 
 可能原因：默认使用的代理端口不存在、网络问题。
 
@@ -106,6 +106,8 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 [加载默认调用依赖](/assets/audioplay.html?href=playlist%2Fau_call.json) 这个示例会加载一些调用依赖，想要播放还是需要自己加载文件。
 
 [把上面的示例都加载](/assets/audioplay.html?lang=live&href=playlist%2Fau_call.json) 加载了`lang`和`href`的示例。
+
+现在可用[hy](/assets/playlist/mhya_w4y.json)这个播放列表进行测试，建议手动使用该链接，需要提前加载`au_call.json`（直接使用示例3也行）。也可以[直接在查询参数使用](/assets/audioplay.html?href=playlist%2Fau_call.json&href=playlist%2Fmhya_w4y.json)，不过**可能会出现依赖未加载**的情况*（我对此链接测试的时候就有出现）*。
 
 ## 通过油猴脚本获取资源
 
