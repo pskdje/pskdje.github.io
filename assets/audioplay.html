@@ -57,6 +57,10 @@ body {
 		</style>
 	</head>
 	<body>
+		<noscript>
+			<p>未启用<code>JavaScript</code>，无法使用所有的功能。</p>
+			<p>本页面是依靠JS来运行的，大部分代码均为JS脚本。</p>
+		</noscript>
 		<audio id="player" class="layui-show" controls crossorigin="anonymous" autoplay></audio>
 		<p id="playtext"></p>
 		<p class="s-bacl">
@@ -89,6 +93,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	playtitle_pause:"pause:",
 	getdatabutton:"获取数据",
 	showoptionwin:"修改配置",
+	close:"关闭",
 	fail:"失败",
 	// 播放列表
 	pl_title:"标题",
@@ -131,6 +136,14 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	gdb_QX:"取消",
 	gdb_BDSJ:"本地数据",
 	gdb_WLSJ:"网络数据",
+	// 引导提示
+	ydts_bt:"引导",
+	ydts_hy:"欢迎使用audioplay",
+	ydts_bzlq:"你可以查看",
+	ydts_bzlw:"这篇文章",
+	ydts_bzlh:"来了解如何使用。",
+	ydts_lj:"如果你对此有足够的了解，可以直接关闭这个窗口。",
+	ydts_dkbz:"打开帮助",
 });// 主要覆盖显示，不覆盖控制台日志之类的地方。
 let playIdx=0,// 播放索引
 	running=false,// 是否正在运行
@@ -465,6 +478,7 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 		btn3:getNetworkFileWindow,
 	});
 }
+docsMonitor.dependCheck([{fun(){layui;layer;return !0},fiTip:"未检测到Layui库，请检查unpkg.com域名的连接"}]);
 document.addEventListener("visibilitychange",setWakeLock);
 document.getElementById("showoptionwin").onclick=showOptWindow;
 deval.setEnv({network:{mode:"HTTPAgent"}});
@@ -526,6 +540,25 @@ id_player.ontimeupdate=function(){
 }
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
 if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
+function ydtsk(){// 引导提示
+	const helpURL="https://pskdje.github.io/posts/2025/01/13/audioplay.html";
+	layer.open({
+		type:1,
+		content:`<div class="layui-margin-2">
+			<p>${filterText(uiText.ydts_hy)}</p>
+			<p>${filterText(uiText.ydts_bzlq)}<a href="${helpURL}" rel="help">&gt;${filterText(uiText.ydts_bzlw)}&lt;</a>${filterText(uiText.ydts_bzlh)}</p>
+			<p>${filterText(uiText.ydts_lj)}</p></div>`,
+		title:filterText(uiText.ydts_bt),
+		shade:0,zIndex:10,
+		btn:[filterText(uiText.close),filterText(uiText.ydts_dkbz),filterText(uiText.getdatabutton)],
+		btn2(){open(helpURL,"_self")},
+		btn3:getDataWindow,
+	});
+}
+setTimeout(()=>{
+	if(playlist.length>1)return;
+	ydtsk();
+},3000);// 3s
 			//
 		</script>
 	</body>
