@@ -5,7 +5,7 @@ time: 2025/01/13-16:08
 
 # audioplay已基本可用
 
-本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，主要功能基本上都可用。
+本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.3.24版本更新，主要功能基本上都可用。
 
 部署在本网站的audioplay的call功能会无法访问网络，由于 Github Page 是静态服务器，且配置的参数是将请求转发到12000端口，这将会导致无法访问。
 
@@ -40,6 +40,8 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 点击“获取数据”按钮，按照上面的提示进行操作。目前支持从本地读取播放列表和指定链接获取播放列表，请以实际界面显示为准。
 
 点击“修改配置”按钮，你可以对一些配置进行修改。
+
+点击“≡”（U+2261）按钮，将打开“更多操作”窗口，可以使用更多功能。
 
 <!-- 点击“操作:”本身，当处于调试模式下会启用调试功能。 -->
 
@@ -109,7 +111,11 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 [把上面的示例都加载](/assets/audioplay.html?lang=live&href=playlist%2Fau_call.json) 加载了`lang`和`href`的示例。
 
+下面的试用都需要油猴脚本来辅助播放。
+
 现在可用[hy](/assets/playlist/mhya_w4y.json)这个播放列表进行测试，建议手动使用该链接，需要提前加载`au_call.json`（直接使用示例3也行）。也可以[直接在查询参数使用](/assets/audioplay.html?href=playlist%2Fau_call.json&href=playlist%2Fmhya_w4y.json)，不过**可能会出现依赖未加载**的情况*（我对此链接测试的时候就有出现）*。
+
+[听Minecraft音乐](/assets/audioplay.html?href=playlist%2Fminecraft.json)
 
 ## 通过油猴脚本获取资源
 

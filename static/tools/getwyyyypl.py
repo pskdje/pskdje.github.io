@@ -2,7 +2,7 @@
 r"""将网易云音乐的一些播放列表转换为apl播放列表
 """
 
-import json
+import json,time
 import requests
 
 type pllist=list[dict[str,str|int]]
@@ -17,6 +17,11 @@ headers={
     "Dnt":"1",
     "Accept":"application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8",
+}
+dft_meta={
+    "source":"w4y",
+    "program":"getwyyyypl.py",
+    "ctime":int(time.time()),
 }
 
 def get_data(pathname:str)->dict[str,int|str|dict]:
@@ -54,6 +59,9 @@ def get_album(id:int)->playlist|errstr:
     return {
         "title":d["album"]["name"],
         "depend":["au_call.json"],
+        "meta":dft_meta|{
+            "album_id":id,
+        },
         "list":paclists(d["album"]["songs"])
     }
 
@@ -64,6 +72,9 @@ def get_playlist(id:int)->playlist|errstr:
     return {
         "title":d["result"]["name"],
         "depend":["au_call.json"],
+        "meta":dft_meta|{
+            "playlist_id":id,
+        },
         "list":paclists(d["result"]["tracks"])
     }
 
