@@ -37,6 +37,25 @@ body {
 .change-data-success .layui-layer-content {
 	padding: 1em;
 }
+.show_meta_data {
+	min-width: 150px;
+}
+.show_meta_data .no_meta {
+	text-align: center;
+	font-weight: bold;
+}
+.show_meta_data .meta_item {
+	max-width: 80%;
+}
+.meta_item :is(.key,.value) {
+	overflow-wrap: break-word;
+	word-break: break-all;
+}
+.meta_item .key {
+	max-width: 45%;
+	min-width: 10%;
+	margin-right: 2px;
+}
 @media(prefers-reduced-motion:reduce){
 	body {
 		--scroll-behavor: auto;
@@ -67,6 +86,7 @@ body {
 			<span onclick="try{adbgt()}catch(e){}">操作: </span>
 			<button id="getdatabutton" type="button" class="layui-btn layui-btn-xs" title="不要使用不安全的数据">获取数据</button>
 			<button id="showoptionwin" type="button" class="layui-btn layui-btn-xs">修改配置</button>
+			<button id="othermenu" type="button" class="layui-btn layui-btn-xs" title="更多操作">≡</button>
 			<button type="button" class="layui-btn layui-btn-xs layui-btn-primary"><a target="_blank" href="/docs/changelog.html?href=audioplay.html">查看更新日志</a></button>
 		</p>
 		<table id="playlist" class="layui-table" lay-options="{height:'full-80',limit:Infinity,className:'playlistdata s-bacl'}">
@@ -82,8 +102,8 @@ body {
 		<script src="//unpkg.com/layui@2.9.21/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
-const id_player=document.getElementById("player");
-const id_playtext=document.getElementById("playtext");
+const id_player=document.getElementById("player"),
+	id_playtext=document.getElementById("playtext");
 const urlsea=docsScript.pageData.search;
 const playlist=[];// 播放列表(数据层面)
 const uiText=Object.seal({// UI文本(预留I18N)
@@ -131,6 +151,14 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	opt_PSL:"是否阻止屏幕锁定",
 	opt_loop:"是否单曲循环",
 	opt_SRN:"是否强制修改为未在运行\n若正常运行时强行修改可能会出现问题",
+	// 显示元数据
+	meta_title:"元数据查看",
+	meta_nonetext:"不存在元数据",
+	// 其它操作菜单
+	menu_title:"更多操作",
+	M_show_meta:"显示元数据",
+	M_show_depend:"显示依赖列表",
+	show_depend:"查看依赖列表",
 	// 获取选项
 	gdb_XZCZ:"选择数据获取的操作",
 	gdb_QX:"取消",
@@ -151,6 +179,7 @@ let playIdx=0,// 播放索引
 	audioErrorCount=0,// 错误累积计数
 	showPlayTime=false,
 	preventScreenLock=false;
+Temp.pl={};
 function filterText(d){// 处理文本
 	let t=String(d);
 	t=t.replaceAll("&","&amp;");
@@ -160,6 +189,10 @@ function filterText(d){// 处理文本
 }
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
+	const pl=Temp.pl={};
+	const meta=data.meta;
+	if(typeof meta!=="object"&&(meta??null)!==null)return;
+	pl.meta=meta;
 	const uit=data.UIText??{};
 	if(typeof uit!=="object")return;
 	for(const i in uit){
@@ -192,13 +225,14 @@ function changeData(data){// 更新数据
 		if(typeof i.title!=="string"){
 			docsScript.warn("未提供标题，该播放条目被忽略。","log");
 			continue;
-		}
-		tableData.push(cfgPlayList(i));
+		}; tableData.push(cfgPlayList(i));
 	}
 	docsMonitor.listening["playOneData"]=undefined;
 	const dependList=data.depend??[];
-	if(Array.isArray(dependList)){for(const i of dependList)if(typeof i!=="string")throw new TypeError("依赖列表类型错误");}
-	else throw new TypeError("依赖列表不是数组");
+	if(Array.isArray(dependList)){
+		pl.depend=[];
+		for(const i of dependList){if(typeof i!=="string")throw new TypeError("依赖列表类型错误");else pl.depend.push(i);}
+	}else throw new TypeError("依赖列表不是数组");
 	if(list.length>0) layui.table.reloadData("playlist",{data:tableData});
 	layer.open({
 		type:1,zIndex:30,
@@ -233,8 +267,7 @@ function cfgPlayList(d){// 配置播放列表
 		title:d.title,
 		type:"",
 		args:"",
-	};
-	function st(t){rd.type=d.type=t};
+	};function st(t){rd.type=d.type=t};
 	if(typeof d.url==="string"){
 		st("link");
 		rd.args=`url="${d.url}"`;
@@ -347,8 +380,7 @@ function getLocalFile(){// 获取本地文件
 					try{d=JSON.parse(await f.text())}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
 					if(!d)return;
 					docsMonitor.try(changeData,[d]);
-				});
-				layer.close(idx);
+				}); layer.close(idx);
 			}
 		});
 	}
@@ -376,9 +408,7 @@ function getNetworkFileWindow(){// 获取网络文件
 }
 function getNetworkData(u){// 请求文件并处理
 	const loaidx=layer.msg(filterText(uiText.nw_getting),{
-		icon:16,
-		shade:0.2,
-		zIndex:20
+		icon:16,shade:0.2,zIndex:20
 	});
 	return fetch(u).then(async r=>{// 只要能解析出数据就算成功，忽略任何非数据的响应问题
 		let d=null;
@@ -407,23 +437,22 @@ function playError(){// 播放失败处理
 	playNext();
 }
 function showOptWindow(){// 显示配置窗口
-	const form=layui.form;
+	const form=layui.form,FT=filterText;
 	function B(v){return Boolean(v)}
 	let wt=window.matchMedia("(max-width:650px)").matches;
 	layer.open({
 		type:1,
-		title:filterText(uiText.opt_title),
+		title:FT(uiText.opt_title),
 		content:`<div class="layui-form layui-margin-3 opt-win-cont" lay-filter="set-opts">
-			<input type="checkbox" name="napn" title="${filterText(uiText.opt_NAPN)}" />
-			<input type="checkbox" name="spt" title="${filterText(uiText.opt_SPT)}" />
-			<input type="checkbox" name="psl" title="${filterText(uiText.opt_PSL)}" />
-			<input type="checkbox" name="loop" title="${filterText(uiText.opt_loop)}" />
+			<input type="checkbox" name="napn" title="${FT(uiText.opt_NAPN)}" />
+			<input type="checkbox" name="spt" title="${FT(uiText.opt_SPT)}" />
+			<input type="checkbox" name="psl" title="${FT(uiText.opt_PSL)}" />
+			<input type="checkbox" name="loop" title="${FT(uiText.opt_loop)}" />
 			<hr />
-			<input type="checkbox" name="srn" title="${filterText(uiText.opt_SRN)}" />
+			<input type="checkbox" name="srn" title="${FT(uiText.opt_SRN)}" />
 		</div>`,
-		btn:[filterText(uiText.opt_ok),filterText(uiText.opt_cancel)],
-		shade:0.1,
-		shadeClose:true,
+		btn:[FT(uiText.opt_ok),FT(uiText.opt_cancel)],
+		shade:0.1,shadeClose:true,
 		id:"set_option",
 		zIndex:10,
 		resize:true,
@@ -447,7 +476,42 @@ function showOptWindow(){// 显示配置窗口
 			layer.close(i);
 			setWakeLock();
 		},
-	})
+	});
+}
+function showPlaylistMeta(){// 显示播放列表元数据
+	const m=Temp.pl?.meta,ft=filterText;
+	let t="";
+	if(typeof m==="object"&&m!==null)for(const k in m){
+		t+=`<tr class="meta_item"><td class="key">${ft(k)}</td><td class="value">${ft(JSON.stringify(m[k]))}</td></tr>`;
+	}else t=`<tr><td class="no_meta">${ft(uiText.meta_nonetext)}</td></tr>`;
+	layer.open({type:1,title:ft(uiText.meta_title),zIndex:10,shade:0,btn:[ft(uiText.close)],content:`<table class="show_meta_data layui-margin-2">${t}</table>`});
+}
+function showPlaylistDepend(){// 显示播放列表依赖信息
+	const d=Temp.pl?.depend,opt={title:filterText(uiText.show_depend),zIndex:10};
+	if(Array.isArray(d)) layer.alert(filterText(JSON.stringify(d)),opt);
+	else layer.alert("undefined",opt);
+}
+function otherMenu(){// 其它操作菜单
+	function ut(n){
+		const t=uiText["M_"+n];
+		if(typeof t==="string")return filterText(t);
+		return '<span style="color:red;">不存在该UI文本</span>';
+	}
+	function success(o){
+		function ac(s,c){o.find(s).click(c)}
+		ac(".show_meta",showPlaylistMeta);
+		ac(".show_depend",showPlaylistDepend);
+	}
+	layer.open({
+		type:1,maxmin:true,shade:0,zIndex:10,
+		id:"other_menu",hideOnClose:true,
+		title:filterText(uiText.menu_title),
+		content:`<div class="other_menu layui-margin-2">
+			<button class="show_meta layui-btn">${ut("show_meta")}</button>
+			<button class="show_depend layui-btn">${ut("show_depend")}</button>
+		</div>`,
+		success,
+	});
 }
 function apdebugt(){// 调试工具
 	const to=this.listItem("audio play"),
@@ -469,10 +533,11 @@ function numToMinTimeStr(n){// 时间数字转为分:秒时间
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
 var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
-	layer.alert(`${filterText(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
-		title:filterText(uiText.getdatabutton),
+	const FT=filterText;
+	layer.alert(`${FT(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
+		title:FT(uiText.getdatabutton),
 		shadeClose:true,zIndex:10,
-		btn:[filterText(uiText.gdb_QX),filterText(uiText.gdb_BDSJ),filterText(uiText.gdb_WLSJ)],
+		btn:[FT(uiText.gdb_QX),FT(uiText.gdb_BDSJ),FT(uiText.gdb_WLSJ)],
 		btnAlign:"c",
 		btn2:getLocalFile,
 		btn3:getNetworkFileWindow,
@@ -481,6 +546,7 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 docsMonitor.dependCheck([{fun(){layui;layer;return !0},fiTip:"未检测到Layui库，请检查unpkg.com域名的连接"}]);
 document.addEventListener("visibilitychange",setWakeLock);
 document.getElementById("showoptionwin").onclick=showOptWindow;
+document.getElementById("othermenu").onclick=otherMenu;
 deval.setEnv({network:{mode:"HTTPAgent"}});
 deval.on_msgErr=deval.on_handleError=deval.on_addVariableError=deval.on_evalCodeError=deval.on_errorEvent=deval.on_unhandledrejection=ev=>{
 	const d=ev.data.data;
@@ -541,16 +607,17 @@ id_player.ontimeupdate=function(){
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
 if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 function ydtsk(){// 引导提示
-	const helpURL="https://pskdje.github.io/posts/2025/01/13/audioplay.html";
+	const helpURL="https://pskdje.github.io/posts/2025/01/13/audioplay.html",
+		FT=filterText;
 	layer.open({
 		type:1,
 		content:`<div class="layui-margin-2">
-			<p>${filterText(uiText.ydts_hy)}</p>
-			<p>${filterText(uiText.ydts_bzlq)}<a href="${helpURL}" rel="help">&gt;${filterText(uiText.ydts_bzlw)}&lt;</a>${filterText(uiText.ydts_bzlh)}</p>
-			<p>${filterText(uiText.ydts_lj)}</p></div>`,
-		title:filterText(uiText.ydts_bt),
+			<p>${FT(uiText.ydts_hy)}</p>
+			<p>${FT(uiText.ydts_bzlq)}<a href="${helpURL}" rel="help">&gt;${FT(uiText.ydts_bzlw)}&lt;</a>${FT(uiText.ydts_bzlh)}</p>
+			<p>${FT(uiText.ydts_lj)}</p></div>`,
+		title:FT(uiText.ydts_bt),
 		shade:0,zIndex:10,
-		btn:[filterText(uiText.close),filterText(uiText.ydts_dkbz),filterText(uiText.getdatabutton)],
+		btn:[FT(uiText.close),FT(uiText.ydts_dkbz),FT(uiText.getdatabutton)],
 		btn2(){open(helpURL,"_self")},
 		btn3:getDataWindow,
 	});

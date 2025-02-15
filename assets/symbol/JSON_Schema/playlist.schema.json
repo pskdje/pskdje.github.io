@@ -57,6 +57,17 @@
 			"title": "UI文本替换",
 			"description": "可以通过此更改部分UI的文本完成国际化，可选的键在uiText常量里。"
 		},
+		"meta": {
+			"type": "object",
+			"patternProperties": {
+				"^.+$": {
+					"title": "元数据内容",
+					"description": "可以使用任意内容，这些数据不会被处理。"
+				}
+			},
+			"title": "元数据",
+			"description": "存储播放列表的元数据，可以自定义，基本不会被使用。"
+		},
 		"call": {
 			"type": "object",
 			"patternProperties": {
