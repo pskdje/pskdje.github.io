@@ -9,8 +9,8 @@
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.9.21/dist/css/layui.css" />
-		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark.css" media="(prefers-color-scheme:dark)" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.9.23/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
 			/*  */
@@ -99,7 +99,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.9.21/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.9.23/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -487,7 +487,7 @@ function showPlaylistMeta(){// 显示播放列表元数据
 	layer.open({type:1,title:ft(uiText.meta_title),zIndex:10,shade:0,btn:[ft(uiText.close)],content:`<table class="show_meta_data layui-margin-2">${t}</table>`});
 }
 function showPlaylistDepend(){// 显示播放列表依赖信息
-	const d=Temp.pl?.depend,opt={title:filterText(uiText.show_depend),zIndex:10};
+	const d=Temp.pl?.depend,opt={title:filterText(uiText.show_depend),shade:0.1,shadeClose:true,zIndex:10};
 	if(Array.isArray(d)) layer.alert(filterText(JSON.stringify(d)),opt);
 	else layer.alert("undefined",opt);
 }
@@ -622,7 +622,8 @@ function ydtsk(){// 引导提示
 		btn3:getDataWindow,
 	});
 }
-setTimeout(()=>{
+setTimeout(()=>{if(docsScript.pageData.isSetDark)document.documentElement.classList.add("dark")},100);// layui暗色样式表所需要
+setTimeout(()=>{// 显示引导
 	if(playlist.length>1)return;
 	ydtsk();
 },3000);// 3s
