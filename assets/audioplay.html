@@ -46,6 +46,9 @@ body {
 }
 .show_meta_data .meta_item {
 	max-width: 80%;
+	border-style: solid none;
+	border-width: 1px 0;
+	border-color: rgba(128,128,128,0.1);
 }
 .meta_item :is(.key,.value) {
 	overflow-wrap: break-word;
@@ -55,6 +58,10 @@ body {
 	max-width: 45%;
 	min-width: 10%;
 	margin-right: 2px;
+}
+.meta_item .value {
+	border-left: 2px solid rgba(128,128,128,0.3);
+	padding-left: 1px;
 }
 @media(prefers-reduced-motion:reduce){
 	body {
@@ -513,13 +520,35 @@ function otherMenu(){// 其它操作菜单
 		success,
 	});
 }
+function exportUIText(){// 导出UI文本
+	const p={
+		title:"导出的UI文本",
+		meta:{
+			"desc":"被导出的当前UI文本",
+			"create_time":Date.now()
+		},
+		UIText:uiText,
+	};
+	const f=new File([JSON.stringify(p,null,"\t")],"audioplay-UIText.json",{type:"application/json"});
+	const u=URL.createObjectURL(f);
+	layer.open({
+		type:1,title:"导出UI文本",
+		content:`<p>已将当前的UI文本处理成文件，并自动触发下载。</p><p>若未自动开始下载，请<a class="ui_dow_url" download="${f.name}" href="${u}">点击此处链接</a>尝试下载。</p>`,
+		btn:[filterText(uiText.close)],
+		shade:0.2,shadeClose:true,zIndex:10,
+		success(o){o.find("ui_dow_url").click()},
+		end(){URL.revokeObjectURL(u)}
+	});
+}
 function apdebugt(){// 调试工具
 	const to=this.listItem("audio play"),
 		sab=this.cbtn("显示参数列"),
-		aemeb=this.cbtn("在控制台显示eval事件");
+		aemeb=this.cbtn("在控制台显示eval事件"),
+		dwuit=this.cbtn("下载当前UI文本");
 	sab.onclick=showArgs;
 	aemeb.onclick=()=>cache.runDataReceive.evalMessageEvent.push((n,d)=>console.debug("eval事件",d));
-	to.i.append(sab,aemeb);
+	dwuit.onclick=exportUIText;
+	to.i.append(sab,aemeb,dwuit);
 }
 function adbgt(){debugTool.initFun.push(apdebugt);debugTool.init();}// 启用调试面板
 function numToMinTimeStr(n){// 时间数字转为分:秒时间
