@@ -103,7 +103,7 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 ~~（虽然感觉不会有人来翻译，但它本身是有留本地化接口）~~
 
-大部分UI文本都存储在`uiText`常量内，你可以直接通过浏览器控制台获取数据，有时我也会导出这些文本存储在[zh-CN.i18n.json](/assets/plsylist/zh-CN.i18n.json)内。但建议直接从常量中获得，因为我可能会导出不及时。
+大部分UI文本都存储在`uiText`常量内，你可以直接通过浏览器控制台获取数据，有时我也会导出这些文本存储在[zh-CN.i18n.json](/assets/playlist/zh-CN.i18n.json)内。但建议直接从常量中获得，因为我可能会导出不及时。
 
 原始语言为“中文-中国”。
 
@@ -142,7 +142,7 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 - `language` 填入国家语言代码
 
-- `target_version` 填入对应的版本号，你为哪个版本进行翻译就填哪个版本。版本号从更新日志里查看，或者参照[zh-CN.i18n.json](/assets/plsylist/zh-CN.i18n.json)的`source_version`元数据来确定，实在不行就填编写完成的日期。
+- `target_version` 填入对应的版本号，你为哪个版本进行翻译就填哪个版本。版本号从更新日志里查看，或者参照[zh-CN.i18n.json](/assets/playlist/zh-CN.i18n.json)的`source_version`元数据来确定，实在不行就填编写完成的日期。
 
 ## 试用
 

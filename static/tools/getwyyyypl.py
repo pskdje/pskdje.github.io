@@ -19,6 +19,7 @@ headers={
     "Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8",
 }
 dft_meta={
+    "desc":"由程序导出的播放列表",
     "source":"w4y",
     "program":"getwyyyypl.py",
     "ctime":int(time.time()),
@@ -28,7 +29,7 @@ def get_data(pathname:str)->dict[str,int|str|dict]:
     """获取数据"""
     r=requests.get("https://music.163.com/"+pathname,headers=headers)
     if r.status_code!=200:
-        return
+        return {"code":-1}
     fk=r.cookies.get("NMTID")
     if fk:
         print(f"风控用Cookie: NMTID={fk}")
@@ -55,7 +56,7 @@ def paclists(d:list)->pllist:
 def get_album(id:int)->playlist|errstr:
     d=get_data("api/album/"+str(id))
     if d["code"]!=200:
-        return d["message"]
+        return d.get("message","获取失败")
     return {
         "title":d["album"]["name"],
         "depend":["au_call.json"],
@@ -68,7 +69,7 @@ def get_album(id:int)->playlist|errstr:
 def get_playlist(id:int)->playlist|errstr:
     d=get_data("api/playlist/detail?id="+str(id))
     if d["code"]!=200:
-        return d["message"]
+        return d.get("message","获取失败")
     return {
         "title":d["result"]["name"],
         "depend":["au_call.json"],
