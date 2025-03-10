@@ -173,4 +173,5 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 <details>
 <summary>au_call.json 需要的域名</summary>
 <p><code>music.163.com</code> <del>另附<a href="/static/tools/getwyyyypl.py">简单的播放列表转换</a>（不提供帮助支持）</del><ins></ins></p>
+<p><code>m.kugou.com</code></p>
 </details>

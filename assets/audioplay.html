@@ -8,8 +8,9 @@
 		<link rel="help" href="https://pskdje.github.io/posts/2025/01/13/audioplay.html" />
 		<script src="/js/script.js"></script>
 		<script src="/js/monitor.js"></script>
+		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.9.23/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.9.24/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -106,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.9.23/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.9.24/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -180,6 +181,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	ydts_lj:"如果你对此有足够的了解，可以直接关闭这个窗口。",
 	ydts_dkbz:"打开帮助",
 });// 主要覆盖显示，不覆盖控制台日志之类的地方。
+const log=new logging.Logger("audioplay");
 let playIdx=0,// 播放索引
 	running=false,// 是否正在运行
 	noAutoPlayNext=false,
@@ -189,14 +191,17 @@ let playIdx=0,// 播放索引
 Temp.pl={};
 function filterText(d){// 处理文本
 	let t=String(d);
+	log.debug(`文本过滤输入: ${t}`,d);
 	t=t.replaceAll("&","&amp;");
 	t=t.replaceAll("<","&lt;").replaceAll(">","&gt;");
 	t=t.replaceAll('"',"&quot;").replaceAll(" ","&nbsp;");
+	log.debug(`文本过滤输出: ${t}`,t);
 	return t;
 }
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
 	const pl=Temp.pl={};
+	log.debug("数据输入",data);
 	const meta=data.meta;
 	if(typeof meta!=="object"&&(meta??null)!==null)return;
 	pl.meta=meta;
@@ -251,6 +256,7 @@ function changeData(data){// 更新数据
 	});
 	cache.log.all.add(10,"audioplay.html>changeData",`加载"${data.title}"完成`);
 	if(playlist.length<1)return;
+	log.info("播放列表存在内容，将自动开始播放");
 	changePLIdx(playIdx);
 	playAudio(playIdx);
 }
@@ -266,7 +272,9 @@ function changeUIText(d){// 更新已存在元素的文本
 	]]});
 }
 function setCall(n,t){
-	deval.addVar(n,`function ${n} (value){\n\t${t}\n}`);
+	let d=`function ${n} (value){\n\t${t}\n}`;
+	deval.addVar(n,d);
+	log.debug(`设置调用函数: ${n}`,d);
 }
 function cfgPlayList(d){// 配置播放列表
 	if(typeof d.title!=="string")throw new TypeError("标题不是字符串或未定义");
@@ -299,13 +307,16 @@ function changePLIdx(idx){// 更新播放列表，附带滚动
 	const el=document.querySelector(`[lay-table-id="playlist"] tr[data-index="${idx}"][class="layui-table-checked"]`);
 	if(!el)return;
 	el.scrollIntoView({behavior:"auto",block:"nearest"});
+	log.log(`滚动播放列表UI到索引${idx}处`);
 }
 function dfutTtle(){// 重置播放提示
 	document.title="audio play";
 	id_playtext.textContent=`${uiText.playtext} ${uiText.playtext_none}`;
+	log.info("播放提示被重置");
 }
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
+	log.info(`进行播放索引${idx}对应的音频`);
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
 	document.title=`${uiText.playtitle_play} ${p.title}`;
@@ -328,6 +339,7 @@ function playAudio(idx){// 播放某个索引对应的音频
 			layer.msg(filterText(uiText.pa_none_type),{zIndex:20});
 			playNext();
 	}
+	log.info(`结束处理索引${idx}对应的音频`);
 }
 function playNext(){// 播放下一个
 	let nIdx=playIdx+1;
@@ -342,14 +354,16 @@ function playNext(){// 播放下一个
 function getWakeLock(){// 获取锁定阻止
 	if(!preventScreenLock)return;
 	if(Temp.PSWL){
-		if(!Temp.PSWL.released)return;
+		if(!Temp.PSWL.released)return log.warn("屏幕锁定阻止正在运作");
 		Temp.PSWL=null;
 	}
 	if(navigator?.wakeLock?.request){
 		navigator.wakeLock.request?.("screen").then(w=>{
 			Temp.PSWL=w;
 			w.onrelease=()=>Temp.PSWL=null;
+			log.info("已阻止屏幕锁定");
 		}).catch(e=>{
+			log.error("阻止屏幕锁定失败");
 			layer.msg(filterText(uiText.psl_err),{zIndex:20});
 		});
 	}else{
@@ -358,9 +372,10 @@ function getWakeLock(){// 获取锁定阻止
 	}
 }
 function clrWakeLock(){// 清除锁定阻止
-	if(!Temp.PSWL)return;
+	if(!Temp.PSWL)return log.warn("未阻止屏幕锁定");
 	Temp.PSWL.release();
 	Temp.PSWL=null;
+	log.info("已清除屏幕锁定阻止");
 }
 function setWakeLock(){// 设置锁定阻止
 	if(preventScreenLock) getWakeLock();
@@ -384,6 +399,7 @@ function getLocalFile(){// 获取本地文件
 			choose(obj){
 				obj.preview(async(i,f)=>{
 					let d=null;
+					log.debug(`选择的播放列表文件信息:\nname: ${f.name}\nsize: ${f.size}\ntype: ${f.type}\ntime: ${f.lastModified}`);
 					try{d=JSON.parse(await f.text())}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
 					if(!d)return;
 					docsMonitor.try(changeData,[d]);
@@ -414,6 +430,7 @@ function getNetworkFileWindow(){// 获取网络文件
 	});
 }
 function getNetworkData(u){// 请求文件并处理
+	log.log(`请求文件: ${u}`);
 	const loaidx=layer.msg(filterText(uiText.nw_getting),{
 		icon:16,shade:0.2,zIndex:20
 	});
@@ -426,12 +443,14 @@ function getNetworkData(u){// 请求文件并处理
 	},e=>{
 		layer.close(loaidx);
 		layer.msg(filterText(uiText.nw_error),{icon:2,shade:0.2,zIndex:20});
+		log.log("请求文件失败",e);
 	});
 }
 function playError(){// 播放失败处理
 	dfutTtle();
 	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx]?.title}`),{zIndex:20});
 	audioErrorCount++;
+	log.info(`播放失败，失败计数${audioErrorCount}次`);
 	if(audioErrorCount>10){
 		layer.msg(filterText(uiText.pe_errconmax),{zIndex:20});
 		audioErrorCount=0;
@@ -540,15 +559,24 @@ function exportUIText(){// 导出UI文本
 		end(){URL.revokeObjectURL(u)}
 	});
 }
+function skdlog(){// 记录详细日志
+	if(cache.log.audioplay)return log.warn("不可重复调用记录详细日志");
+	let l=cache.log.audioplay=new Log("音频播放","音频播放的详细运行日志");
+	l.maxLog=500;
+	log.addHandler(new logging.OutputLogHandler(l));
+	log.info("已启用默认的详细日志记录");
+}
 function apdebugt(){// 调试工具
 	const to=this.listItem("audio play"),
 		sab=this.cbtn("显示参数列"),
 		aemeb=this.cbtn("在控制台显示eval事件"),
+		rkdlg=this.cbtn("记录详细日志");
 		dwuit=this.cbtn("下载当前UI文本");
 	sab.onclick=showArgs;
 	aemeb.onclick=()=>cache.runDataReceive.evalMessageEvent.push((n,d)=>console.debug("eval事件",d));
+	rkdlg.onclick=skdlog;
 	dwuit.onclick=exportUIText;
-	to.i.append(sab,aemeb,dwuit);
+	to.i.append(sab,aemeb,rkdlg,dwuit);
 }
 function adbgt(){debugTool.initFun.push(apdebugt);debugTool.init();}// 启用调试面板
 function numToMinTimeStr(n){// 时间数字转为分:秒时间
@@ -587,6 +615,7 @@ deval.on_msgErr=deval.on_handleError=deval.on_addVariableError=deval.on_evalCode
 deval.on_functionPush=ev=>{
 	const d=ev.data.data;
 	let e=false;
+	log.debug(`函数 '${ev.data.name}' 推送了数据`,d);
 	if(typeof d==="string"){
 		id_player.src=d;
 	}else if(false){
@@ -598,6 +627,7 @@ deval.on_functionPush=ev=>{
 	if(e) playError();
 }
 layui.table.on("row(playlist)",(o)=>{
+	log.log(`播放列表UI的索引${o.index}被点击`);
 	o.setRowChecked({type:"radio"});
 	if(running){
 		changePLIdx(playIdx);
@@ -655,6 +685,7 @@ setTimeout(()=>{if(docsScript.pageData.isSetDark)document.documentElement.classL
 setTimeout(()=>{// 显示引导
 	if(playlist.length>1)return;
 	ydtsk();
+	log.info("已自动显示引导");
 },3000);// 3s
 			//
 		</script>
