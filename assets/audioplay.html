@@ -451,7 +451,7 @@ function playError(){// 播放失败处理
 	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx]?.title}`),{zIndex:20});
 	audioErrorCount++;
 	log.info(`播放失败，失败计数${audioErrorCount}次`);
-	if(audioErrorCount>10){
+	if(audioErrorCount>9){
 		layer.msg(filterText(uiText.pe_errconmax),{zIndex:20});
 		audioErrorCount=0;
 		return;
@@ -501,6 +501,7 @@ function showOptWindow(){// 显示配置窗口
 			if(d.srn) running=false;
 			layer.close(i);
 			setWakeLock();
+			log.debug(["已更新配置项，信息:",d]);
 		},
 	});
 }
@@ -558,6 +559,7 @@ function exportUIText(){// 导出UI文本
 		success(o){o.find("ui_dow_url").click()},
 		end(){URL.revokeObjectURL(u)}
 	});
+	log.log(`UI文本已导出，临时URL: ${u}`);
 }
 function skdlog(){// 记录详细日志
 	if(cache.log.audioplay)return log.warn("不可重复调用记录详细日志");
@@ -601,7 +603,10 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 	});
 }
 docsMonitor.dependCheck([{fun(){layui;layer;return !0},fiTip:"未检测到Layui库，请检查unpkg.com域名的连接"}]);
-document.addEventListener("visibilitychange",setWakeLock);
+document.addEventListener("visibilitychange",()=>{
+	if(document.visibilityState!=="visible")return;
+	setWakeLock();
+});
 document.getElementById("showoptionwin").onclick=showOptWindow;
 document.getElementById("othermenu").onclick=otherMenu;
 deval.setEnv({network:{mode:"HTTPAgent"}});
@@ -638,7 +643,9 @@ layui.table.on("row(playlist)",(o)=>{
 	playAudio(playIdx);
 });
 id_player.onerror=()=>{
-	cache.log.err.add(40,"HTMLAudioElement","播放失败，请使用开发者工具分析原因。");
+	let e=id_player.error;
+	e=e&&`code:${e.code},msg:${e.message}`;
+	log.error(`audio元素播放失败，error属性提供的信息: ${e}`);
 	playError();
 }
 id_player.onended=()=>{

@@ -366,7 +366,8 @@ var debugTool={
 			w.width="96%";
 			w.height="98%";
 			if(!isNaN(zIndex)) w.zIndex=String(Number(zIndex));
-			var el={
+			const sivOpt={behavior:"instant",block:"end",inline:"start"};
+			const el={
 				i:document.createElement("p"),// 信息
 				l:document.createElement("div")// 内容
 			};function setLog(l){// 单条日志显示
@@ -394,8 +395,11 @@ var debugTool={
 				le.r.append(le.t,le.y," ",le.s,": ",le.m);
 				return le.r;
 			};function add(ev){// 用于处理日志的条目增加事件
-				el.l.append(setLog(ev.data));
+				const e=setLog(ev.data);
+				el.l.append(e);
 				collat();
+				if(w.e.scrollTop+w.e.clientHeight<el.l.clientHeight)return;
+				e.scrollIntoView(sivOpt);
 			};function collat(){// 限制显示
 				if(el.l.childNodes.length>log.maxLog) el.l.firstChild.remove();
 			};
@@ -406,6 +410,7 @@ var debugTool={
 			w.e.append(el.i,document.createElement("hr"),el.l);
 			log.on("add",add);
 			w.onclose=function(){log.dison("add",add)};
+			el.l.lastElementChild.scrollIntoView(sivOpt);
 			return Object.freeze({close:()=>w.close(),get connect(){return w.connect}});
 		}, agentData:function(url,options={}){// 检查响应
 			if(typeof options!=="object")throw new TypeError("options必须是对象");
