@@ -4,6 +4,7 @@
 		"desc": "基本调用依赖"
 	},
 	"call":{
+		"getAudioFile":"new URL(value);fetch(value).then(async r=>{if(!r.ok)throw new TypeError(`获取失败: ${r.status}`);fpm(await r.blob())});",
 		"get163":"fetch(`https://music.163.com/song/media/outer/url?id=${value}.mp3`,{method:'HEAD'}).then(r=>{let h=r.headers,re=t=>{return new ReferenceError(`get163:${t}`)};if(!h.has('Location'))throw re('未获取到重定向信息');let l=h.get('Location');if(new URL(l).pathname==='/404')throw re('对方拒绝提供播放');fpm(l);});",
 		"getkg":"fetch(`https://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash=${value}`).then(async r=>{const d=await r.json();if(typeof d.url==='string')return fpm(d.url);throw new Error('获取失败: '+d.error);});"
 	}

@@ -10,7 +10,7 @@
 		<script src="/js/monitor.js"></script>
 		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.9.24/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.10.0/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -107,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.9.24/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.10.0/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -314,13 +314,20 @@ function dfutTtle(){// 重置播放提示
 	id_playtext.textContent=`${uiText.playtext} ${uiText.playtext_none}`;
 	log.info("播放提示被重置");
 }
+function clrTempData(){// 清除临时数据
+	if(Temp.playBlobURL){
+		URL.revokeObjectURL(Temp.playBlobURL);
+		Temp.playBlobURL=null;
+	}
+}
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
 	log.info(`进行播放索引${idx}对应的音频`);
+	clrTempData();
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
 	document.title=`${uiText.playtitle_play} ${p.title}`;
-	id_playtext.textContent=`${uiText.playtext} ${p.title}`;
+	id_playtext.textContent=`${uiText.playtext} ${p.title} …`;
 	switch(p.type){
 		case "link":
 			id_player.src=p.url;
@@ -435,6 +442,7 @@ function getNetworkData(u){// 请求文件并处理
 		icon:16,shade:0.2,zIndex:20
 	});
 	return fetch(u).then(async r=>{// 只要能解析出数据就算成功，忽略任何非数据的响应问题
+		log.log(`文件响应: ${r.status} ${r.redirected?"已":"未"}进行重定向`);
 		let d=null;
 		layer.close(loaidx);
 		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
@@ -451,6 +459,7 @@ function playError(){// 播放失败处理
 	layer.msg(filterText(`${uiText.pe_msg0} ${playIdx} ${uiText.pe_msg1}\n${uiText.pe_msg2} ${playlist[playIdx]?.title}`),{zIndex:20});
 	audioErrorCount++;
 	log.info(`播放失败，失败计数${audioErrorCount}次`);
+	clrTempData();
 	if(audioErrorCount>9){
 		layer.msg(filterText(uiText.pe_errconmax),{zIndex:20});
 		audioErrorCount=0;
@@ -622,15 +631,19 @@ deval.on_functionPush=ev=>{
 	let e=false;
 	log.debug(`函数 '${ev.data.name}' 推送了数据`,d);
 	if(typeof d==="string"){
-		id_player.src=d;
-	}else if(false){
-		// 没想好
+		try{
+			new URL(d);
+			id_player.src=d;
+		}catch(er){e=true}
+	}else if(d instanceof Blob){
+		Temp.playBlobURL=id_player.src=URL.createObjectURL(d);
 	}else{
 		e=true;
 	}
 	running=false;
 	if(e) playError();
 }
+if(urlsea.has("keep_verbose_log")) skdlog();
 layui.table.on("row(playlist)",(o)=>{
 	log.log(`播放列表UI的索引${o.index}被点击`);
 	o.setRowChecked({type:"radio"});
@@ -657,12 +670,17 @@ id_player.onended=()=>{
 	playNext();
 }
 id_player.onplay=()=>{
+	log.log("音频播放事件");
 	document.title=`${uiText.playtitle_play} ${playlist[playIdx].title}`;
 	getWakeLock();
 }
 id_player.onpause=()=>{
+	log.log("音频暂停事件");
 	document.title=`${uiText.playtitle_pause} ${playlist[playIdx].title}`;
 	clrWakeLock();
+}
+id_player.onloadedmetadata=function(){
+	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title}`;
 }
 id_player.ontimeupdate=function(){
 	if(!showPlayTime)return;
@@ -670,6 +688,7 @@ id_player.ontimeupdate=function(){
 	if(Number.isFinite(this.duration)) d=this.duration;
 	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 }
+log.info("初始化完成");
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
 if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 function ydtsk(){// 引导提示

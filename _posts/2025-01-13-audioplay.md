@@ -5,7 +5,7 @@ time: 2025/01/13-16:08
 
 # audioplay已基本可用
 
-本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.3.24版本更新，主要功能基本上都可用。
+本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.3.29版本更新，详细信息请查看更新日志。
 
 部署在本网站的audioplay的call功能会无法访问网络，由于 Github Page 是静态服务器，且配置的参数是将请求转发到12000端口，这将会导致无法访问。
 
@@ -98,6 +98,10 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 这个目的是提供国际化功能，通过拼合`playlist/${lang参数的数据}.i18n.json`来产生链接。将会在`href`之后进行请求。
 
 虽然URL是拼合的，但并不代表一定安全。
+
+### `keep_verbose_log`
+
+一旦存在该参数，将会启用“记录详细日志”功能。
 
 ## 翻译指引
 
