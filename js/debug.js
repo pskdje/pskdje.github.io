@@ -8,21 +8,7 @@
  * 前置: script.js
  */
 
-function dfun(f,t,a){
-	const i={fun:f,this:t,arguments:a};
-	if(typeof f!=="function"){
-		let et="debug.js的函数dfun只支持输入function";
-		console.error(et);
-		cache.log.debug.add(40,"debugfunction",et,i);
-		throw new TypeError(et);
-	};return(function(){try{return f.apply(t,a)}catch(e){
-		console.error(e);
-		console.debug(`${e.name}: ${e.message}\n${e.stack}`);
-		cache.log.err.addError(40,"debug.js>dfun(函数执行)",e,i);
-		throw e;
-	}});
-}
-var debugTool={
+const debugTool=Object.freeze({
 	info:Object.freeze({// 工具信息
 		version:"1.0",// 版本号
 		betaVersion:"#",// 测试版本号
@@ -32,19 +18,19 @@ var debugTool={
 		message:"debug",// 消息
 		checkCode:"0x0"// 校验码
 	}),
-	errorName:{
+	errorName:{// 错误名映射
 		"Error":"错误",
 		"SyntaxError":"语法错误",
 		"ReferenceError":"引用错误",
 		"TypeError":"类型错误",
 		"RangeError":"范围错误",
 		"URIError":"URI错误",
+		"EvalError":"Eval错误",
+		"AggregateError":"错误聚合",
 	}, addHelp:function(obj,name,help){// 添加帮助文本
-		var funcName="toLocaleString";// 被用作返回帮助文本的函数(或者说属性)名称
-		var retObj=obj;
-		retObj[name][funcName]=help;
-		return retObj;
-	}, init:function(){
+		const funcName="toLocaleString";// 被用作返回帮助文本的函数(或者说属性)名称
+		return obj[name][funcName]=help;
+	}, init:function(){// 初始化调试工具面板
 		Temp.debugToolElement=document.getElementById("debug_tool");
 		if(Temp.debugToolElement){
 			Temp.debugToolElement.getElementsByClassName("debug_tool_view")[0].style.display="block";
@@ -86,14 +72,14 @@ var debugTool={
 				s:dce("summary"),
 				i:dce("div"),
 				r:dce("button")
-			}
+			},
+			get ost(){return els.o.style},
 		}; els.r.id="debug_tool";
 		els.r.setAttribute("data-info","debugTool");
 		els.o.textContent="D";
 		els.o.onclick=function(){
 			els.w.style.display=(els.w.style.display==="block"?"none":"block");
-		}; els.ost=function(){return els.o.style;};
-		if((config.auto_dark && window.matchMedia("(prefers-color-scheme:dark)").matches)|| config.colorScheme==="dark"){
+		};if(docsScript.pageData.isSetDark){
 			els.w.style.backgroundColor="black";
 			els.w.style.color="white";
 		};if(typeof window?.DATA_page?.debugToolPosition==="string"){switch(DATA_page.debugToolPosition){// 调整显示调试工具窗口按钮位置
@@ -101,20 +87,20 @@ var debugTool={
 				cache.log.debugTool.add(30,"debugTool.init:开关按钮位置","未知的位置缩写");
 			case "":
 			case "br":
-				els.ost().bottom=els.ost().right="1em";
+				els.ost.bottom=els.ost.right="1em";
 				break;
 			case "tl":
-				els.ost().top=els.ost().left="1em";
+				els.ost.top=els.ost.left="1em";
 				break;
 			case "tr":
-				els.ost().top=els.ost().right="1em";
+				els.ost.top=els.ost.right="1em";
 				break;
 			case "bl":
-				els.ost().bottom=els.ost().left="1em";
+				els.ost.bottom=els.ost.left="1em";
 				break;
 		}}else{
-			els.ost().bottom="1em";
-			els.ost().right="1em";
+			els.ost.bottom="1em";
+			els.ost.right="1em";
 		}// 关闭(实为隐藏)按钮
 		els.c.textContent="×";
 		els.c.onclick=function(){
@@ -267,32 +253,16 @@ var debugTool={
 	run:function(name,args){// 查找指定函数名称并执行它
 		if(typeof this.tools!=="object")return new ReferenceError("not tool.");// 没有任何工具
 		if(typeof this.tools[name]==="function"){
-			this.runInfo={
-				arguments:{
-					arguments:arguments,
-					name:name,
-					args:args
-				}, args:args,
-				function:this.tools[name], END:false,
-				phase:0,
-			};try{
-				this.runInfo.phase=1;
+			try{
 				return this.tools[name].apply(this.tools,args);
 			}catch(e){
 				if(e.name in debugTool.errorName) e.name=debugTool.errorName[e.name];
 				cache.log["debugTool"].add(40,`工具:'${name}'`,[e.name,": ",e.message,"\n",e.stack]);
-				this.runInfo.phase=4;
-				this.runInfo.error=e;
 				return e.name+": "+e.message;
-			}finally{
-				this.runInfo.phanse=3;
-				this.runInfo["END"]=true;
-				this.runInfo=null;
 			}
 		}else if(!hasOwnKey(this.tools,name))return new ReferenceError(`tool '${name}' is undefined.`);// 工具未定义
 		else return new ReferenceError(`tool '${name}' type not function, typeof ${name} ='${typeof this.tools[name]}'.`);// 存在名为$name的工具条目，但它不是函数
-	}, runInfo:undefined,
-	tools:{// 可跑
+	}, tools:{// 可跑
 		this:function(type){// 返回变量
 			if(type==="root")return debugTool;// 返回根
 			else if(type==="[help]")return "返回debugTool变量。";
@@ -410,7 +380,7 @@ var debugTool={
 			w.e.append(el.i,document.createElement("hr"),el.l);
 			log.on("add",add);
 			w.onclose=function(){log.dison("add",add)};
-			el.l.lastElementChild.scrollIntoView(sivOpt);
+			el.l.lastElementChild?.scrollIntoView(sivOpt);
 			return Object.freeze({close:()=>w.close(),get connect(){return w.connect}});
 		}, agentData:function(url,options={}){// 检查响应
 			if(typeof options!=="object")throw new TypeError("options必须是对象");
@@ -459,9 +429,9 @@ var debugTool={
 				console.error("debugTools>debugJS: 获取失败");
 			};xhr.send();
 			Temp.debugTool["debugJS"]=url;
-		}, performance:function(t){
+		}, performance:function(t){// 获取性能信息
 			const pf=performance.getEntries();
-			if(t==="[help]")return`获取性能信息`;
+			if(t==="[help]")return`获取性能信息\n支持的值:[ "console", "onetab", "json" ]`;
 			else if(t==="console")console.log(pf);
 			else if(t==="onetab"){
 				const o=pf[0];const i=[
@@ -491,15 +461,15 @@ var debugTool={
 			}else if(t==="json")return JSON.stringify(pf);
 		},
 	}
-};debugTool.addHelp["toLocaleString"]=function help(){return"为数据添加帮助文本。\n\n"+this.toString();};
+});
+debugTool.addHelp["toLocaleString"]=function help(){return"为数据添加帮助文本。\n\n"+this.toString();};
 debugTool.tools.debugTool["help"]=function(){return"返回调试工具信息。";};
-
 Temp.debugTool={};
 (function(){
-	var style=document.createElement("link");
+	let style=document.createElement("link");
 	style.rel="stylesheet";
 	style.href="/css/debug.css";
-	document.head.appendChild(style);
+	document.head.append(style);
 })();
 cache.log["debugTool"]=new Log("debug tool log","调试工具日志");
 try{
