@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Minecraft非官方新版本信息获取</title>
+		<script src="/js/script.js"></script>
+	</head>
+	<body>
+		<h1>最新稳定版信息获取</h1>
+		<p>前往信息提供方：<a href="https://bbk.endyun.ltd/">bbk.endyun.ltd</a></p>
+		<p>状态：<span id="status">获取中…</span></p>
+		<p>版本号：<a id="version" title="在wiki查看更新信息，可能会出现错误的链接。" href="https://zh.minecraft.wiki/w/基岩版"></a></p>
+		<p>是否为测试版：<span id="is_beta"></span></p>
+		<p>更新时间(UTC)：<span id="update_time"></span></p>
+		<p>文件大小：<span id="file_size"></span></p>
+		<h3>下载链接</h3>
+		<ol>
+			<li>OneDrive 365 <a id="od_v7">ARMv7</a> <a id="od_v8">ARMv8</a></li>
+			<li>OneDrive <a id="es_v7">ARMv7</a> <a id="es_v8">ARMv8</a></li>
+			<li>123盘 <a id="np_v7">ARMv7</a> <a id="np_v8">ARMv8</a></li>
+		</ol>
+		<p>前往<a href="https://zh.minecraft.wiki/">zh.minecraft.wiki</a>查看更多信息，例如<a href="https://zh.minecraft.wiki/w/基岩版版本记录">基岩版版本记录</a></p>
+		<script>
+			function g(i){return document.getElementById(i)}
+			function stc(e,v){return e.textContent=String(v)}
+			const st=g("status"),ve=g("version"),ib=g("is_beta"),ut=g("update_time"),
+				fs=g("file_size"),o7=g("od_v7"),o8=g("od_v8"),e7=g("es_v7"),
+				e8=g("es_v8"),n7=g("np_v7"),n8=g("np_v8");
+			fetch("http://bbk.endyun.ltd:9000/api/last_version",{
+				method:"POST",
+				headers:{
+					"Content-Type":"application/x-www-form-urlencoded"
+				},
+				"body":"b=0"
+			}).then(async r=>{
+				function sa(e,h){e.href=h}
+				const d=await r.json();
+				p(d,"res");
+				stc(st,d.status);
+				const m=d["message"][0];
+				stc(ve,`${m.version} (${m.version_all})`);
+				stc(ib,m.is_beta?"是":"否");
+				stc(ut,m.update_time);
+				stc(fs,m.file_size);
+				ve.href+=m.version;
+				const l=m.link,v7="ARMv7",v8="ARMv8",
+					o="OneDrive_365",s="OneDrive",n="123盘";
+				sa(o7,l[o][v7]);
+				sa(o8,l[o][v8]);
+				sa(e7,l[s][v7]);
+				sa(e8,l[s][v8]);
+				sa(n7,l[n][v7]);
+				sa(n8,l[n][v8]);
+			}).catch(e=>{
+				stc(st,"出现错误");
+				cache.log.err.addError(40,"(async)fetch",e);
+			});
+			for(const e of document.getElementsByTagName("a")){
+				e.target="_blank";
+				e.referrerpolicy="no-referrer";
+			}
+		</script>
+	</body>
+</html>

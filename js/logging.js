@@ -181,6 +181,7 @@ const logging=Object.freeze((()=>{
 		Handler,
 		Filter,
 		Formatter,
+		LogRecord,
 		OutputLogHandler,
 		FilterData,
 	}
