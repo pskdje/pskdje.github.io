@@ -140,6 +140,7 @@ class DocsEval extends EventTarget {
 		docsScript.HTTPAgent(q.method,q.url,{headers:q.headers,body:q.body,type:"arraybuffer",timeout:50000},"fetch").then(r=>{
 			pd("response",{body:r.data,status:r.statusCode,statusText:r.statusText,headers:r.headers},[r.data]);
 		},e=>{
+			cache.log.requestLog.add(40,`DocsEval.prototype.on_toHTTPAgent`,[e]);
 			pd("reject");
 		});
 	};// toHTTPAgent
