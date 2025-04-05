@@ -5,6 +5,20 @@
 		<meta charset="UTF-8" />
 		<title>预览</title>
 		<script src="/js/script.js"></script>
+		<script src="/js/logging.js"></script>
+		<style>body{margin:0;padding:0;} #loading{text-align:center;display:flex;justify-content:center;} #loading[hidden]{display:none;}
+#view{overflow:auto;height:100vh;width:100vw;} :is(.view_img,.view_audio,.view_video).svt_max-hw{max-height:100%;max-width:100%;}</style>
+		<script>const log=cache.log["rview"]=new Log("view","rv");function gEid(id){return document.getElementById(id)};
+function dce(tag){return document.createElement(tag)};
+const vhl=new logging.Logger("view");Temp.logHandler=new logging.OutputLogHandler(log);
+var viewer=undefined;Temp.loadinfo={docLoad:false};Temp.blobUrlMap=new Map();cache.lib={};
+config.view={viewMediaStyle:""};
+vhl.addHandler(Temp.logHandler);
+if(window.opener||window.parent!==window) DEBUG[0]=false;</script>
+		<script>Temp.runtimeLoadLib=[
+	{n:"highlight",t:"style",u:`https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github${docsScript.pageData.isDark?"-dark":""}.min.css`},
+	{n:"highlight",t:"script",u:"https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"}
+];</script>
 	</head>
 	<body>
 		<div id="loading">
@@ -12,6 +26,343 @@
 			<p id="loading_text">加载中…</p>
 		</div>
 		<div id="view"></div>
-		<p>等我完成逻辑调整后再更新</p>
+		<script>log.add(0,"code","code 1 start");
+const id_loading=gEid("loading"),view=gEid("view");
+const rtfn=function returnFunction(fun){if(typeof fun==="function")return fun;return null;}
+class IsDTFilter extends logging.Filter {
+	get[Symbol.toStringTag](){return"IsDTFilter"}
+	filter(i){
+		if(config.dtllog)return true;
+		return new logging.LogRecord(i.type,i.source,i.message);
+	}
+}
+class ViewerStatusInfo extends EventTarget {// 状态监听
+	get[Symbol.toStringTag](){return"ViewerStatusInfo"}
+	constructor(){
+		super();
+	}
+	disEvent(name,event){
+		this.dispatchEvent(event);
+		try{
+			this["on"+name]?.(event);
+		}catch(e){
+			vhl.warn([`运行"on${name}"事件属性时出现错误`,e]);
+			cache.log.err.addError(40,"ViewerStatusInfo",e);
+		}
+	}
+	#onclear=null;
+	get onclear(){return this.#onclear}
+	set onclear(v){this.#onclear=rtfn(v)}
+}
+class ViewEvent extends Event {
+	get[Symbol.toStringTag](){return"ViewEvent"}
+	constructor(t,i){
+		super(t,i);
+	}
+}
+function loading(t="加载中…"){
+	const le=id_loading,te=gEid("loading_text");
+	le.hidden=false;
+	te.textContent=String(t);
+}
+function done(){id_loading.hidden=true;};
+function loadItemOk(item){
+	const li=Temp.loadinfo;
+	let isload=true;
+	li[item]=true;
+	vhl.info([item,"加载完成"]);
+	for(const k in Temp.loadinfo){
+		if(!li[k]){
+			isload=false;
+			break;
+		}
+	}
+	if(isload){
+		done();
+		Temp.loadEnd=true;
+	}
+}
+function createBlobUrl(b){
+	const u=URL.createObjectURL(b);
+	vhl.debug(`已创建blobURL: ${u}`);
+	Temp.blobUrlMap.set(u,1);
+	return u;
+}
+function removeBlobUrl(u){
+	const m=Temp.blobUrlMap,r="已释放blobURL";
+	if(u===undefined){
+		for(const k of m.keys()){
+			URL.revokeObjectURL(k);
+			vhl.debug(`${r}: ${k}`);
+		}
+		m.clear();
+		return;
+	}
+	URL.revokeObjectURL(u);
+	vhl.debug(`${r}: ${u}`);
+	vhl.debug(["删除Map记录'",u,"'的结果:",m.delete(u)]);
+}
+function loadLib(type,name,url,loadcall){
+	let e,t,k;const p1="loadLib";
+	if(typeof loadcall!=="undefined"&&typeof loadcall!=="function")throw new TypeError("loadcall不是函数");
+	if(type==="style"){
+		t="css";
+		e=dce("link");
+		e.rel="stylesheet";
+		e.href=url;
+	}else if(type==="script"){
+		t="js";
+		e=dce("script");
+		e.src=url;
+	}else throw new TypeError("未知的lib加载类型");
+	if(!e)return;
+	k=`${name}_${t}`;
+	if(cache.lib[k]===true)throw new ReferenceError(`已存在'${name}'的 ${t} lib`);
+	e.onload=function(){
+		cache.lib[k]=true;
+		vhl.log(`加载'${name}'${t}成功`);
+		this.onload=this.onerror=null;
+		if(loadcall)try{loadcall()}catch(e){vhl.error([`运行外部库加载成功回调时出现错误\n库: ${k}\n`,e]);cache.log.err.addError(40,`/resource/view.html>${p1}.onload`,e);}
+	}
+	e.onerror=function(){
+		vhl.log(`加载'${name}'${t}失败`);
+		cache.lib[k]="DOM error Event";
+		this.onload=this.onerror=null;
+	}
+	vhl.log(`加载'${name}',类型${type}`);
+	cache.lib[k]=false;
+	document.head.append(e);
+}
+async function clear(){// 清理
+	vhl.log("清理");
+	view.innerHTML="";
+	removeBlobUrl();
+	viewStatus.disEvent("clear",new ViewEvent("clear"));
+}
+function set_dtllog(t){// 设置是否记录详细日志
+	function sd(y){
+		if(y){
+			Temp.logHandler.level=0;
+			return config.dtllog=true;
+		}else{
+			Temp.logHandler.level=10;
+			return config.dtllog=false;
+		}
+	};if(t===undefined){
+		if(config.dtllog)return sd(false);
+		else return sd(true);
+		return;
+	};if(t)return sd(true);
+	else return sd(false);
+}
+function gs_config(name,value){// 获取或设置配置
+	if(typeof name!=="string")throw new TypeError("配置名称需要字符串");
+	if(!hasOwnKey(config.view,name))throw new ReferenceError("提供了未定义的配置名");
+	const vt=typeof value,cf=config.view;
+	vhl.debug(`[获取或设置]配置项名:"${name}",传入参数:"${value}"`);
+	if(vt==="undefined")return cf[name];// 参数2输入未定义时，进行获取；
+	switch(name){// 否则按照设置处理。
+		default:
+			if(vt!=="string")throw new TypeError("该配置只允许字符串类型");
+			cf[name]=value;
+	}
+}
+Temp.logHandler.addFilter(new IsDTFilter());
+window.addEventListener("load",()=>loadItemOk("docLoad"));
+log.add(0,"code","code 1 end");
+</script><script type="module">log.add(0,"code","code 2 start");
+import * as zip from"/js/module/extern/zip.js.mjs";
+import{ parse as MIMEParse }from"/js/module/mimeinfe.js";
+const svl=Temp.sv_log=new logging.Logger("item");
+async function getDatamime(data){// 获取MIME
+	let m=await MIMEParse(data);
+	if(!m) m={ext:"bin",mime:"application/octet-stream"};
+	return m;
+}
+async function procdata(data,mime){// 处理数据
+	const p1="procdata";
+	await clear();
+	vhl.debug(`procdata参数输入: data is ${getType(data)}, typeof mime = ${typeof mime}`);
+	if(!(data instanceof ArrayBuffer))throw new TypeError("输入的数据不是缓冲");
+	if(typeof mime!=="string")throw new TypeError("输入的MIME类型不是字符串");
+	vhl.debug(`data: ${data.byteLength} byte`);
+	vhl.debug(`mime: ${mime}`);
+	const m=mime.split("/");
+	if(m.length!==2)throw new TypeError("输入的MIME类型无效");
+	const rt=m[0],st=m[1];
+	vhl.log(`下级处理: ${rt} ,二级类型: ${st}`);
+	if(rt==="text")return viewText(data,st);
+	else if(rt==="image")return viewImage(data,st);
+	else if(rt==="audio")return viewAudio(data,st);
+	else if(rt==="video")return viewVideo(data,st);
+	else if(rt==="application"&&st!=="octet-stream")return viewApplication(data,st);
+	else await sv_unknow_type(mime);
+}
+async function dataToView(data){// 输入数据查看预览
+	if(!Temp.loadEnd)throw new ReferenceError("数据尚未加载完成");
+	loading();
+	const d=await new Blob([data]).arrayBuffer();
+	loading("获取MIME类型…");
+	const m=await getDatamime(d);
+	loading();
+	vhl.info("已传入数据，进行预览处理");
+	try{
+		await procdata(d,m.mime);
+	}catch(e){
+		coneole.error(e);
+		cache.log.err.addError(40,"/resource/view.html>dataToView",e);
+		vhl.error(`预览数据时出现错误\n${e}`);
+		throw e;
+	}finally{done()};
+	vhl.info("预览处理完成");
+	return m;
+}
+async function viewText(data,type){
+	loading("正在解析数据到文本…");
+	const text=await new Blob([data]).text();
+	const llt=typeof viewer.lightLang;
+	if(!(llt==="undefined"||llt==="object")) viewer.lightLang=undefined;
+	if(llt==="object"&&!Array.isArray(viewer.lightLang)) viewer.lightLang=undefined;
+	await sv_text(text,viewer.lightLang);
+}
+async function viewImage(data,type){
+	await sv_img(new Blob([data],{type}));
+}
+async function viewAudio(data,type){
+	await sv_audio(new Blob([data],{type}));
+}
+async function viewVideo(data,type){
+	await sv_video(new Blob([data],{type}));
+}
+async function viewApplication(data,type){
+	switch(type){
+		case"xml":
+			return viewText(data,type);
+		case"zip":
+			return sv_zip(data);
+		default:
+			await sv_unknow_type(`application/${type}`);
+	}
+}
+// 实现预览
+async function sv_text(text,lang){
+	const c=hljs.highlightAuto(text,lang);
+	svl.log(`[文本类型推断]编程语言: ${c.language}, 关联性: ${c.relevance}`,c);
+	const pre=dce("pre"),code=dce("code");
+	pre.append(code);
+	code.innerHTML=c.value;
+	view.append(pre);
+}
+async function sv_img(blob){
+	svl.log("预览图片");
+	const u=createBlobUrl(blob);
+	const img=dce("img");
+	img.className="view_img";
+	img.classList.add("svt_"+config.view.viewMediaStyle);
+	img.src=u;
+	img.onload=()=>removeBlobUrl(u);
+	img.onerror=()=>{removeBlobUrl(u);img.alt="加载图片失败"}
+	view.append(img);
+}
+async function sv_audio(blob){
+	svl.log("预览音频");
+	const u=createBlobUrl(blob);
+	const ado=dce("audio");
+	ado.className="view_audio";
+	ado.classList.add("svt_"+config.view.viewMediaStyle);
+	mediaAddEvent(ado,"sv_audio");
+	ado.src=u;
+	ado.controls=true;
+	view.append(ado);
+}
+async function sv_video(blob){
+	svl.log("预览视频");
+	const u=createBlobUrl(blob);
+	const vdo=dce("video");
+	vdo.className="view_video";
+	vdo.classList.add("svt_"+config.view.viewMediaStyle);
+	mediaAddEvent(vdo,"sv_video");
+	vdo.src=u;
+	vdo.controls=true;
+	view.append(vdo);
+}
+async function sv_unknow_type(mime){
+	svl.log(`不存在MIME为"${mime}"的处理，显示回退信息`);
+	const tip=dce("p"),ite1=dce("a"),ite2=dce("span");
+	tip.className="unknow_type_tip";
+	tip.textContent="不支持的MIME类型，可以提供相应的组件来帮忙完善预览组件。要求和提交方法";
+	ite1.textContent="见此处";
+	tip.append(ite1,"。当前的MIME类型为");
+	ite2.textContent=String(mime);
+	tip.append(ite2);
+	view.append(tip);
+}
+async function sv_zip(data){
+	svl.log("预览zip文件");
+	const l=dce("ul"),m=dce("p");
+	let x=0;
+	l.className="view_zip_file";
+	const z=new zip.ZipReader(new zip.BlobReader(new Blob([data])));
+	svl.debug(`zip文件全局注释: ${z.comment}`);
+	for await(const i of z.getEntriesGenerator()){
+		svl.debug(`偏移量${i.offset}, ${i.directory?"目录":"文件"} ${i.filename} 压缩后${i.compressedSize}字节，压缩前${i.uncompressedSize}字节`,i);
+		const t=dce("li");
+		t.textContent=i.filename;
+		l.append(t);
+		x++;
+	}
+	z.close();
+	m.textContent=`文件条目数量: ${x}`;
+	svl.debug(`zip文件处理完成`);
+	view.append(m,l);
+}
+// 其它组件
+function mediaAddEvent(me,sou){// 媒体事件监听
+	if(!(me instanceof HTMLMediaElement))throw new TypeError("提供的参数不是媒体元素");
+	function adel(n,f){return me.addEventListener(n,f)}
+	const s=`组件${sou?"'"+String(sou)+"'":""}媒体元素`;
+	adel("abort",()=>svl.debug(`${s}"${me.src}"已中断。`));
+	adel("canplay",()=>svl.debug(`${s}"${me.src}"可以播放，但可能需要缓冲。`));
+	adel("canplaythrough",()=>svl.debug(`${s}"${me.src}"可以播放，预计可以不暂停进行缓冲。`));
+	adel("ended",()=>svl.debug(`${s}"${me.src}"播放结束。`));
+	adel("error",()=>svl.debug(`${s}"${me.src}"加载失败。`));
+	adel("loadeddata",()=>svl.debug(`${s}"${me.src}"当前视频帧加载完成。`));
+	adel("loadedmetadata",()=>svl.debug(`${s}"${me.src}"元数据加载完成。`));
+	adel("loadstart",()=>svl.debug(`${s}"${me.src}"开始加载。`));
+	adel("pause",()=>svl.debug(`${s}"${me.src}"播放暂停。`));
+	adel("playing",()=>svl.debug(`${s}"${me.src}"播放即将开始。`));
+	adel("play",()=>svl.debug(`${s}"${me.src}"播放继续。`));
+	adel("ratechange",()=>svl.debug(`${s}"${me.src}"播放速度变化。播放速度:${me.playbackRate}`));
+	adel("volumechange",()=>svl.debug(`${s}"${me.src}"音量变化。音量数值:${me.volume}，${me.muted?"已被静音":"未被静音"}`));
+}
+svl.addHandler(Temp.logHandler);
+viewer=cache.view={dataToView,procdata,getDatamime,viewText,// 导出处理函数
+	getOrSetConfig:gs_config,lightLang:undefined};// 导出配置
+log.add(0,"code","code 2 end");</script><script>log.add(0,"code","run start");
+function getViewLog(){return log;}
+function debugViewTool(){
+	if(this?.DT!=="DTW")return;
+	const rdfl=this.listItem("载入文件");
+	const rdipt=dce("input"),rdtip=dce("p");
+	rdipt.type="file";
+	rdipt.onchange=function(){
+		const f=this.files[0];
+		if(!f)return;
+		cache.view.dataToView(f).then(d=>rdtip.textContent="推测MIME为: "+d.mime);
+	}
+	rdtip.textContent="推测MIME为:";
+	rdfl.i.append(rdipt,rdtip);
+}
+var viewStatus=new ViewerStatusInfo();
+var DATA_page={
+	debugToolPosition:"tr",
+	debugToolInit:[debugViewTool]
+};
+(()=>{
+	for(const n of document.body.childNodes)if(n.nodeName==="#text")n.remove();
+	for(const i of Temp.runtimeLoadLib){loadLib(i.t,i.n,i.u)}
+})();
+set_dtllog(false);
+log.add(0,"code","run end");</script>
 	</body>
 </html>

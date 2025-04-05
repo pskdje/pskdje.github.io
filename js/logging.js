@@ -161,6 +161,7 @@ const logging=Object.freeze((()=>{
 			this.log=log;
 		};
 		handle(item){// 绕过格式器
+			if(item.type<this.level)return;
 			let d=this.filter(item);
 			if(!d)return;
 			this.emit(d);
