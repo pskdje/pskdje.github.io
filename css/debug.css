@@ -85,6 +85,9 @@ div#debug_tool > div.debug_tool_view > div > details > div {
 	font-family: monospace;
 	tab-size: 4;
 }
+.show_log_content > p {
+	margin: 0;
+}
 .show_log_content > p > .time {
 	color: green;
 }
@@ -98,6 +101,7 @@ div#debug_tool > div.debug_tool_view > div > details > div {
 	white-space: pre-wrap;
 	color: black;
 	overflow-wrap: anywhere;
+	word-break: break-all;
 }
 div.window_root.docs-style-dark .show_log_content > p > .message {
 	color: white;
