@@ -5,7 +5,7 @@ time: 2025/01/13-16:08
 
 # audioplay已基本可用
 
-本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.3.29版本更新，详细信息请查看更新日志。
+本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.3.32版本更新，详细信息请查看更新日志。
 
 部署在本网站的audioplay的call功能会无法访问网络，由于 Github Page 是静态服务器，且配置的参数是将请求转发到12000端口，这将会导致无法访问。
 
@@ -95,7 +95,7 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 ### `lang`
 
-这个目的是提供国际化功能，通过拼合`playlist/${lang参数的数据}.i18n.json`来产生链接。将会在`href`之后进行请求。
+这个目的是提供国际化功能，通过拼合`/assets/playlist/${lang参数的数据}.i18n.json`来产生链接。将会在`href`之后进行请求。
 
 虽然URL是拼合的，但并不代表一定安全。
 
@@ -152,19 +152,19 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 
 在点击前先鼠标悬停或者手机上长按看看链接（部分浏览器可能没有链接显示功能），虽然本文提供的链接是较为安全的，但还是建议检查。
 
-[普通的直接查看页面](/assets/audioplay.html) 此时只会加载基本页面，没有什么会播放。
+[普通的直接查看页面](/resource/audioplay.html) 此时只会加载基本页面，没有什么会播放。
 
-[加载UI文本（利用lang参数）](/assets/audioplay.html?lang=live) 这个示例只会把“正在播放”改为“背景音乐”。
+[加载UI文本（利用lang参数）](/resource/audioplay.html?lang=live) 这个示例只会把“正在播放”改为“背景音乐”。
 
-[加载默认调用依赖](/assets/audioplay.html?href=playlist%2Fau_call.json) 这个示例会加载一些调用依赖，想要播放还是需要自己加载文件。
+[加载默认调用依赖](/resource/audioplay.html?href=%2Fassets%2Fplaylist%2Fau_call.json) 这个示例会加载一些调用依赖，想要播放还是需要自己加载文件。
 
-[把上面的示例都加载](/assets/audioplay.html?lang=live&href=playlist%2Fau_call.json) 加载了`lang`和`href`的示例。
+[把上面的示例都加载](/resource/audioplay.html?lang=live&href=%2Fassets%2Fplaylist%2Fau_call.json) 加载了`lang`和`href`的示例。
 
 下面的试用都需要油猴脚本来辅助播放。
 
-现在可用[hy](/assets/playlist/mhya_w4y.json)这个播放列表进行测试，建议手动使用该链接，需要提前加载`au_call.json`（直接使用示例3也行）。也可以[直接在查询参数使用](/assets/audioplay.html?href=playlist%2Fau_call.json&href=playlist%2Fmhya_w4y.json)，不过**可能会出现依赖未加载**的情况*（我对此链接测试的时候就有出现）*。
+现在可用[hy](/assets/playlist/mhya_w4y.json)这个播放列表进行测试，建议手动使用该链接，需要提前加载`au_call.json`（直接使用示例3也行）。也可以[直接在查询参数使用](/resource/audioplay.html?href=%2Fassets%2Fplaylist%2Fau_call.json&href=%2Fassets%2Fplaylist%2Fmhya_w4y.json)，不过**可能会出现依赖未加载**的情况*（我对此链接测试的时候就有出现）*。
 
-[听Minecraft音乐](/assets/audioplay.html?href=playlist%2Fminecraft.json)
+[听Minecraft音乐](/resource/audioplay.html?href=%2Fassets%2Fplaylist%2Fminecraft.json)
 
 ## 通过油猴脚本获取资源
 

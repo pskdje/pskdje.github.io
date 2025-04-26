@@ -10,7 +10,7 @@
 		<script src="/js/monitor.js"></script>
 		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.10.0/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.11.0/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -107,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.10.0/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.11.0/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -166,6 +166,8 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	menu_title:"更多操作",
 	M_show_meta:"显示元数据",
 	M_show_depend:"显示依赖列表",
+	M_show_analyser_sw:"查看音频波形",
+	M_show_analyser_fb:"查看音频频率",
 	show_depend:"查看依赖列表",
 	// 获取选项
 	gdb_XZCZ:"选择数据获取的操作",
@@ -471,6 +473,22 @@ function playError(){// 播放失败处理
 	}
 	playNext();
 }
+function loadScript(src){// 加载脚本
+	const s=document.createElement("script"),
+		ac=new AbortController();
+	s.src=src;
+	s.addEventListener("error",()=>{
+		log.warn(`脚本 ${src} 加载失败`);
+		s.remove();
+		ac.abort();
+	},{signal:ac.signal});
+	s.addEventListener("load",()=>{
+		log.info(`脚本 ${src} 加载成功`);
+		ac.abort();
+	},{signal:ac.signal});
+	document.body.append(s);
+	return s;
+}
 function showOptWindow(){// 显示配置窗口
 	const form=layui.form,FT=filterText;
 	function B(v){return Boolean(v)}
@@ -527,6 +545,14 @@ function showPlaylistDepend(){// 显示播放列表依赖信息
 	if(Array.isArray(d)) layer.alert(filterText(JSON.stringify(d)),opt);
 	else layer.alert("undefined",opt);
 }
+function showAudioAnalyser(ty){// 显示音频分析信息
+	let r=()=>{Temp.audioAnalyser?.[ty]()};
+	if(Temp.audioAnalyser){
+		return r();
+	}
+	let s=loadScript("audioplay/analyser.js");
+	s.addEventListener("load",r,{once:true});
+}
 function otherMenu(){// 其它操作菜单
 	function ut(n){
 		const t=uiText["M_"+n];
@@ -537,6 +563,8 @@ function otherMenu(){// 其它操作菜单
 		function ac(s,c){o.find(s).click(c)}
 		ac(".show_meta",showPlaylistMeta);
 		ac(".show_depend",showPlaylistDepend);
+		ac(".show_anys_sw",()=>showAudioAnalyser("sinewave"));
+		ac(".show_anys_fb",()=>showAudioAnalyser("frequencybars"));
 	}
 	layer.open({
 		type:1,maxmin:true,shade:0,zIndex:10,
@@ -545,6 +573,8 @@ function otherMenu(){// 其它操作菜单
 		content:`<div class="other_menu layui-margin-2">
 			<button class="show_meta layui-btn">${ut("show_meta")}</button>
 			<button class="show_depend layui-btn">${ut("show_depend")}</button>
+			<button class="show_anys_sw layui-btn">${ut('show_analyser_sw')}</button>
+			<button class="show_anys_fb layui-btn">${ut('show_analyser_fb')}</button>
 		</div>`,
 		success,
 	});
@@ -602,6 +632,17 @@ var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
 var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 	const FT=filterText;
+	(()=>{// 需要点击启动的区域
+		if(config.singleRun)return;
+		const ac=Temp.audioCtx=new AudioContext();
+		const an=Temp.analyser=new AnalyserNode(ac);
+		const sou=Temp.audioSource=ac.createMediaElementSource(id_player);
+		an.maxDecibels=-20;
+		an.minDecibels=-80;
+		sou.connect(an);
+		an.connect(ac.destination);
+		config.singleRun=true;
+	})();
 	layer.alert(`${FT(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
 		title:FT(uiText.getdatabutton),
 		shadeClose:true,zIndex:10,
@@ -687,10 +728,10 @@ id_player.ontimeupdate=function(){
 	let d=-1;
 	if(Number.isFinite(this.duration)) d=this.duration;
 	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
-}
+};
 log.info("初始化完成");
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
-if(urlsea.has("lang")) getNetworkData("playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
+if(urlsea.has("lang")) getNetworkData("/assets/playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 function ydtsk(){// 引导提示
 	const helpURL="https://pskdje.github.io/posts/2025/01/13/audioplay.html",
 		FT=filterText;
