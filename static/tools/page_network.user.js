@@ -4,7 +4,7 @@
 // @description 通过油猴脚本允许我网站访问其它资源
 // @author      dsjofh
 // @icon        https://pskdje.github.io/website_icon/favicon-64.ico
-// @version     2025-02-08T20
+// @version     2025-04-28T00
 // @match       *://127.0.0.1:12540/*
 // @match       *://localhost:12540/*
 // @match       https://pskdje.github.io/*
@@ -58,7 +58,7 @@
 			}
 		});
 	}
-	if(path==="/assets/audioplay.html"){
+	if(path==="/resource/audioplay.html"){
 		deval.on_toHTTPAgent=on_toHTTPAgent;
 	}
 })();
