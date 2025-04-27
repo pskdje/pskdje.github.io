@@ -143,10 +143,10 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	psl_not_api:"你的浏览器不支持阻止屏幕锁定，已自动重置该配置。",
 	psl_err:"阻止屏幕锁定失败",
 	// 文件获取
-	readfiletitle:"读取文件",
-	readfilecontent:"点击获取文件，或拖拽文件至此。",
+	readfiletitle:"读取播放列表文件",
+	readfilecontent:"点击获取播放列表文件，或拖拽播放列表文件至此。",
 	// 网络
-	nw_wwtitle:"输入要获取文件的url",
+	nw_wwtitle:"输入要获取播放列表文件的URL",
 	nw_urlerr:"无法解析该URL数据",
 	nw_getting:"获取网络文件中…",
 	nw_error:"由于网络或策略原因，获取数据失败。",
@@ -170,7 +170,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	M_show_analyser_fb:"查看音频频率",
 	show_depend:"查看依赖列表",
 	// 获取选项
-	gdb_XZCZ:"选择数据获取的操作",
+	gdb_XZCZ:"选择获取播放列表数据的操作",
 	gdb_QX:"取消",
 	gdb_BDSJ:"本地数据",
 	gdb_WLSJ:"网络数据",
@@ -637,8 +637,8 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 		const ac=Temp.audioCtx=new AudioContext();
 		const an=Temp.analyser=new AnalyserNode(ac);
 		const sou=Temp.audioSource=ac.createMediaElementSource(id_player);
-		an.maxDecibels=-20;
-		an.minDecibels=-80;
+		an.maxDecibels=-0;
+		an.minDecibels=-100;
 		sou.connect(an);
 		an.connect(ac.destination);
 		config.singleRun=true;

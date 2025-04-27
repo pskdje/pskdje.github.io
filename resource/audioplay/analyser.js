@@ -72,10 +72,14 @@
 			cvc.fillRect(0,0,W,H);
 			let bw=(W/bl)*2.5;
 			let x=0;
+			let col=cvc.createLinearGradient(0,0,0,H);
+			col.addColorStop(0,"red");
+			col.addColorStop(0.4,"yellow");
+			col.addColorStop(1,"green");
 			for(let i=0;i<bl;i++){
-				let bh=arr[i]/2;
-				cvc.fillStyle=`rgb(${bh+100},50,50)`;
-				cvc.fillRect(x,H-bh/2,bw,bh);
+				let bh=Math.round(arr[i]/255*H);
+				cvc.fillStyle=col;
+				cvc.fillRect(x,H-bh,bw,bh);
 				x+=bw+1;
 			}
 		}
@@ -87,10 +91,10 @@
 	}
 	Temp.audioAnalyser={
 		sinewave(){
-			createWindow({title:"音频波形",success:suTDD});
+			createWindow({title:`音频波形( ${dfay.maxDecibels}dB ~ ${dfay.minDecibels}dB )`,success:suTDD});
 		},
 		frequencybars(){
-			createWindow({title:"音频频率",success:suFD});
+			createWindow({title:`音频频率( ${dfay.maxDecibels}dB ~ ${dfay.minDecibels}dB )`,success:suFD});
 		}
 	};
 })();

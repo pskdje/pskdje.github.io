@@ -2,10 +2,10 @@
 	"title": "默认UI文本",
 	"meta": {
 		"desc": "从audioplay导出的原始UI文本，原始数据内嵌于audioplay本身。本文件仅作翻译参考，请以原始的uiText常量为准。不建议直接修改本文件来进行本地化翻译，至少也得把元数据给改了。",
-		"source_version":"0.3.25",
+		"source_version":"0.3.33",
 		"language":"zh-CN",
 		"file_source":"export",
-		"create_time": 1740991476371
+		"create_time": 1745776942992
 	},
 	"UIText": {
 		"playtext": "正在播放:",
@@ -32,9 +32,9 @@
 		"is_running": "当前正在处理歌曲信息，暂时不可切换。",
 		"psl_not_api": "你的浏览器不支持阻止屏幕锁定，已自动重置该配置。",
 		"psl_err": "阻止屏幕锁定失败",
-		"readfiletitle": "读取文件",
-		"readfilecontent": "点击获取文件，或拖拽文件至此。",
-		"nw_wwtitle": "输入要获取文件的url",
+		"readfiletitle": "读取播放列表文件",
+		"readfilecontent": "点击获取播放列表文件，或拖拽播放列表文件至此。",
+		"nw_wwtitle": "输入要获取播放列表文件的URL",
 		"nw_urlerr": "无法解析该URL数据",
 		"nw_getting": "获取网络文件中…",
 		"nw_error": "由于网络或策略原因，获取数据失败。",
@@ -51,8 +51,10 @@
 		"menu_title": "更多操作",
 		"M_show_meta": "显示元数据",
 		"M_show_depend": "显示依赖列表",
+		"M_show_analyser_sw": "查看音频波形",
+		"M_show_analyser_fb": "查看音频频率",
 		"show_depend": "查看依赖列表",
-		"gdb_XZCZ": "选择数据获取的操作",
+		"gdb_XZCZ": "选择获取播放列表数据的操作",
 		"gdb_QX": "取消",
 		"gdb_BDSJ": "本地数据",
 		"gdb_WLSJ": "网络数据",
