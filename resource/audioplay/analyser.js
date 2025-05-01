@@ -29,7 +29,10 @@
 		let cvc=cv.getContext("2d");
 		let bl=dfay.fftSize;
 		let arr=new Uint8Array(bl);
+		let run=true,qafid=0;
 		function draw(){
+			if(!run)return;
+			qafid=requestAnimationFrame(draw);
 			if(document.visibilityState!=="visible")return;
 			let W=cv.width,H=cv.height;
 			dfay.getByteTimeDomainData(arr);
@@ -53,18 +56,22 @@
 			cvc.lineTo(W,H/2);
 			cvc.stroke();
 		}
-		id_player.addEventListener("timeupdate",draw);
 		that.config.beforeEnd=()=>{
-			id_player.removeEventListener("timeupdate",draw);
+			run=false;
+			cancelAnimationFrame(qafid);
 		}
 		that.config.resizing=creaResiz(cv);
+		draw();
 	}
 	function suFD(layero,index,that){// 条形
 		const cv=layero.find("canvas")[0];
 		let cvc=cv.getContext("2d");
 		let bl=dfay.frequencyBinCount;
 		let arr=new Uint8Array(bl);
+		let run=true,qafid=0;
 		function draw(){
+			if(!run)return;
+			qafid=requestAnimationFrame(draw);
 			if(document.visibilityState!=="visible")return;
 			let W=cv.width,H=cv.height;
 			dfay.getByteFrequencyData(arr);
@@ -83,11 +90,12 @@
 				x+=bw+1;
 			}
 		}
-		id_player.addEventListener("timeupdate",draw);
 		that.config.beforeEnd=()=>{
-			id_player.removeEventListener("timeupdate",draw);
+			run=false;
+			cancelAnimationFrame(qafid);
 		}
 		that.config.resizing=creaResiz(cv);
+		draw();
 	}
 	Temp.audioAnalyser={
 		sinewave(){
