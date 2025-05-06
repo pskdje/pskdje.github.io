@@ -162,6 +162,8 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	// 显示元数据
 	meta_title:"元数据查看",
 	meta_nonetext:"不存在元数据",
+	// 脚本加载相关
+	script_exist_tip:"该功能所需要的组件正在加载中或出现故障。",
 	// 其它操作菜单
 	menu_title:"更多操作",
 	M_show_meta:"显示元数据",
@@ -474,6 +476,7 @@ function playError(){// 播放失败处理
 	playNext();
 }
 function loadScript(src){// 加载脚本
+	if(document.querySelector(`script[src="${src}"]`))return "exist";
 	const s=document.createElement("script"),
 		ac=new AbortController();
 	s.src=src;
@@ -551,6 +554,10 @@ function showAudioAnalyser(ty){// 显示音频分析信息
 		return r();
 	}
 	let s=loadScript("audioplay/analyser.js");
+	if(s==="exist"){
+		return void(layer.msg(filterText(uiText.script_exist_tip),{zIndex:20}));
+	}
+	s.id="audio_analyser";
 	s.addEventListener("load",r,{once:true});
 }
 function otherMenu(){// 其它操作菜单

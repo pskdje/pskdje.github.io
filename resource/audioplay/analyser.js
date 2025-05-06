@@ -4,6 +4,7 @@
 	const dfay=Temp.analyser;
 	if(!dfay){
 		layer.alert("由于Chromium限制，请先点击获取数据按钮再尝试。");
+		document.getElementById("audio_analyser")?.remove?.();
 		return;
 	}
 	function createWindow(opt){// 创建窗口
@@ -60,7 +61,19 @@
 			run=false;
 			cancelAnimationFrame(qafid);
 		}
-		that.config.resizing=creaResiz(cv);
+		let sz=creaResiz(cv);
+		that.config.resizing=sz;
+		that.config.full=sz;
+		that.config.restore=(l)=>{
+			sz(l);
+			if(!run){
+				run=true;
+				draw();
+			}
+		}
+		that.config.min=()=>{
+			run=false;
+		}
 		draw();
 	}
 	function suFD(layero,index,that){// 条形
@@ -94,7 +107,19 @@
 			run=false;
 			cancelAnimationFrame(qafid);
 		}
-		that.config.resizing=creaResiz(cv);
+		let sz=creaResiz(cv);
+		that.config.resizing=sz;
+		that.config.full=sz;
+		that.config.restore=(l)=>{
+			sz(l);
+			if(!run){
+				run=true;
+				draw();
+			}
+		}
+		that.config.min=()=>{
+			run=false;
+		}
 		draw();
 	}
 	Temp.audioAnalyser={
