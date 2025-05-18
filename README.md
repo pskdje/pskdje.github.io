@@ -13,13 +13,13 @@ Github Page
 <details>
 <summary>部分列表</summary>
 
-**这些链接并不完整，有的链接可能需要一些配置才能使用。**~~*相关文档可能还分散在各处。*~~
+**这些链接并不完整，有的链接可能已过期，有的链接可能需要一些配置才能使用。**~~*相关文档可能还分散在各处。*~~
 
 [post列表](https://pskdje.github.io/posts/list/)
 
 [time.html](https://pskdje.github.io/assets/time.html)
 
-[audioplay.html](https://pskdje.github.io/assets/audioplay.html)
+[audioplay.html](https://pskdje.github.io/resource/audioplay.html)
 
 </details>
 
