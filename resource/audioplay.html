@@ -10,7 +10,7 @@
 		<script src="/js/monitor.js"></script>
 		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.11.0/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.11.2/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -107,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.11.0/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.11.2/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -193,6 +193,22 @@ let playIdx=0,// 播放索引
 	showPlayTime=false,
 	preventScreenLock=false;
 Temp.pl={};
+class AudioplayEventTrigger extends EventTarget {// 事件基础
+	/* 事件名 信息 是否可取消(存在该部分可取消)
+	 * playlistLoadOK 播放列表加载完成 取消将阻止自动开始播放
+	 * playlistEnd 播放列表播放到末尾 取消将阻止跳转到开头
+	 * playNext 播放下一个 取消将阻止播放下一个
+	 * playConfigChange 播放配置更新
+	 * userInit 用户初始化，因部分功能需要用户点击进行初始化
+	 */
+	trig(n){// 触发一个非常简单的事件，复杂事件需自定义
+		const e=new Event(n,{cancelable:true});
+		const r=this.dispatchEvent(e);
+		log.debug(`简单可取消事件 ${n} 触发，是否运行默认: ${r}`);
+		return r;
+	}
+}
+const apET=window.audioplayEventListener=new AudioplayEventTrigger();
 function filterText(d){// 处理文本
 	let t=String(d);
 	log.debug(`文本过滤输入: ${t}`,d);
@@ -259,6 +275,7 @@ function changeData(data){// 更新数据
 		content:`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`,
 	});
 	cache.log.all.add(10,"audioplay.html>changeData",`加载"${data.title}"完成`);
+	if(!apET.trig("playlistLoadOk"))return;
 	if(playlist.length<1)return;
 	log.info("播放列表存在内容，将自动开始播放");
 	changePLIdx(playIdx);
@@ -354,10 +371,12 @@ function playAudio(idx){// 播放某个索引对应的音频
 }
 function playNext(){// 播放下一个
 	let nIdx=playIdx+1;
+	if(nIdx===playlist.length&&(!apET.trig("playlistEnd")))return "playlistEnd";
 	if(!(nIdx in playlist)){
 		nIdx=0;
 	}
-	if(playlist.length<1)return;
+	if(playlist.length<1)return "noItem";
+	if(!apET.trig("playNext"))return "noNext";
 	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
@@ -450,12 +469,13 @@ function getNetworkData(u){// 请求文件并处理
 		let d=null;
 		layer.close(loaidx);
 		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
-		if(!d)return;
+		if(!d)return "noData";
 		docsMonitor.try(changeData,[d]);
 	},e=>{
 		layer.close(loaidx);
 		layer.msg(filterText(uiText.nw_error),{icon:2,shade:0.2,zIndex:20});
 		log.log("请求文件失败",e);
+		return "reqError";
 	});
 }
 function playError(){// 播放失败处理
@@ -532,6 +552,7 @@ function showOptWindow(){// 显示配置窗口
 			layer.close(i);
 			setWakeLock();
 			log.debug(["已更新配置项，信息:",d]);
+			apET.trig("playConfigChange");
 		},
 	});
 }
@@ -649,6 +670,7 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 		sou.connect(an);
 		an.connect(ac.destination);
 		config.singleRun=true;
+		apET.trig("userInit");
 	})();
 	layer.alert(`${FT(uiText.gdb_XZCZ)}<br /><b><em>注意：</em>请确认使用的是信任的数据，否则可能会出现一些问题。</b>`,{
 		title:FT(uiText.getdatabutton),
