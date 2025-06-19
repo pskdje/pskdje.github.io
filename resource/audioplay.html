@@ -10,7 +10,7 @@
 		<script src="/js/monitor.js"></script>
 		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.11.2/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.11.3/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -107,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.11.2/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.11.3/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -121,8 +121,21 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	playtitle_pause:"pause:",
 	getdatabutton:"获取数据",
 	showoptionwin:"修改配置",
+	// 通用
 	close:"关闭",
 	fail:"失败",
+	ok:"确定",
+	confirm:"确定",
+	cancel:"取消",
+	save:"保存",
+	reset:"重置",
+	undo:"撤销",
+	add:"添加",
+	edit:"编辑",
+	create:"创建",
+	delete:"删除",
+	import:"导入",
+	export:"导出",
 	// 播放列表
 	pl_title:"标题",
 	pl_type:"类型",
@@ -152,8 +165,6 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	nw_error:"由于网络或策略原因，获取数据失败。",
 	// 配置
 	opt_title:"配置",
-	opt_ok:"确定",
-	opt_cancel:"取消",// 下面那些都没有写输入检查，不要老想着注入口牙！
 	opt_NAPN:"是否不播放下一个",
 	opt_SPT:"是否显示播放时间",
 	opt_PSL:"是否阻止屏幕锁定",
@@ -170,6 +181,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	M_show_depend:"显示依赖列表",
 	M_show_analyser_sw:"查看音频波形",
 	M_show_analyser_fb:"查看音频频率",
+	M_show_playNextList:"播完自动下一个列表",
 	show_depend:"查看依赖列表",
 	// 获取选项
 	gdb_XZCZ:"选择获取播放列表数据的操作",
@@ -196,6 +208,7 @@ Temp.pl={};
 class AudioplayEventTrigger extends EventTarget {// 事件基础
 	/* 事件名 信息 是否可取消(存在该部分可取消)
 	 * playlistLoadOK 播放列表加载完成 取消将阻止自动开始播放
+	 * playlistLoadFail 播放列表加载失败
 	 * playlistEnd 播放列表播放到末尾 取消将阻止跳转到开头
 	 * playNext 播放下一个 取消将阻止播放下一个
 	 * playConfigChange 播放配置更新
@@ -210,23 +223,27 @@ class AudioplayEventTrigger extends EventTarget {// 事件基础
 }
 const apET=window.audioplayEventListener=new AudioplayEventTrigger();
 function filterText(d){// 处理文本
+	const o={source:".filterText"};
 	let t=String(d);
-	log.debug(`文本过滤输入: ${t}`,d);
+	log.debug(`文本过滤输入: ${t}`,d,o);
 	t=t.replaceAll("&","&amp;");
 	t=t.replaceAll("<","&lt;").replaceAll(">","&gt;");
 	t=t.replaceAll('"',"&quot;").replaceAll(" ","&nbsp;");
-	log.debug(`文本过滤输出: ${t}`,t);
+	log.debug(`文本过滤输出: ${t}`,t,o);
 	return t;
 }
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
 	const pl=Temp.pl={};
 	log.debug("数据输入",data);
+	function lfe(){
+		apET.trig("playlistLoadFail");
+	}
 	const meta=data.meta;
-	if(typeof meta!=="object"&&(meta??null)!==null)return;
+	if(typeof meta!=="object"&&(meta??null)!==null)return lfe();
 	pl.meta=meta;
 	const uit=data.UIText??{};
-	if(typeof uit!=="object")return;
+	if(typeof uit!=="object")return lfe();
 	for(const i in uit){
 		if(typeof uit[i]!=="string")continue;
 		uiText[i]=uit[i];// 若因输错键名导致在严格模式下报错概不负责
@@ -235,7 +252,7 @@ function changeData(data){// 更新数据
 	const cf=data.call??{};
 	if(typeof cf!=="object"){
 		layer.msg(filterText(uiText.cd_calldatatypeerr),msgOpt);
-		return;
+		return lfe();
 	}
 	for(const i in cf){
 		setCall(i,cf[i]);
@@ -243,7 +260,7 @@ function changeData(data){// 更新数据
 	const list=data.list??[];
 	if(!Array.isArray(list)){
 		layer.msg(filterText(uiText.cd_playlist_typeerr),msgOpt);
-		return;
+		return lfe();
 	}
 	if(list.length>0){
 		playIdx=0;
@@ -274,7 +291,7 @@ function changeData(data){// 更新数据
 		skin:"change-data-success",
 		content:`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`,
 	});
-	cache.log.all.add(10,"audioplay.html>changeData",`加载"${data.title}"完成`);
+	log.info(`加载"${data.title}"完成`);
 	if(!apET.trig("playlistLoadOk"))return;
 	if(playlist.length<1)return;
 	log.info("播放列表存在内容，将自动开始播放");
@@ -326,9 +343,10 @@ function showArgs(){
 function changePLIdx(idx){// 更新播放列表，附带滚动
 	layui.table.setRowChecked("playlist",{type:"radio",index:idx,});
 	const el=document.querySelector(`[lay-table-id="playlist"] tr[data-index="${idx}"][class="layui-table-checked"]`);
-	if(!el)return;
+	if(!el)return "noElement";
 	el.scrollIntoView({behavior:"auto",block:"nearest"});
 	log.log(`滚动播放列表UI到索引${idx}处`);
+	return "end";
 }
 function dfutTtle(){// 重置播放提示
 	document.title="audio play";
@@ -371,6 +389,7 @@ function playAudio(idx){// 播放某个索引对应的音频
 }
 function playNext(){// 播放下一个
 	let nIdx=playIdx+1;
+	dfutTtle();
 	if(nIdx===playlist.length&&(!apET.trig("playlistEnd")))return "playlistEnd";
 	if(!(nIdx in playlist)){
 		nIdx=0;
@@ -380,6 +399,7 @@ function playNext(){// 播放下一个
 	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
+	return "end";
 }
 function getWakeLock(){// 获取锁定阻止
 	if(!preventScreenLock)return;
@@ -437,7 +457,7 @@ function getLocalFile(){// 获取本地文件
 			}
 		});
 	}
-	layer.open({
+	return layer.open({
 		type:1,
 		zIndex:10,
 		id:"read_file",
@@ -452,7 +472,7 @@ function getLocalFile(){// 获取本地文件
 	});
 }
 function getNetworkFileWindow(){// 获取网络文件
-	layer.prompt({title:filterText(uiText.nw_wwtitle),zIndex:10},(value,index)=>{
+	return layer.prompt({title:filterText(uiText.nw_wwtitle),zIndex:10},(value,index)=>{
 		var u="";
 		try{u=new URL(value).href;}catch(e){layer.msg(filterText(uiText.nw_urlerr),{zIndex:20});return;}
 		getNetworkData(u);
@@ -471,6 +491,7 @@ function getNetworkData(u){// 请求文件并处理
 		try{d=await r.json();}catch(e){cache.log.err.addError(30,"JSON.parse",e);alertParseError();}
 		if(!d)return "noData";
 		docsMonitor.try(changeData,[d]);
+		return "end";
 	},e=>{
 		layer.close(loaidx);
 		layer.msg(filterText(uiText.nw_error),{icon:2,shade:0.2,zIndex:20});
@@ -527,7 +548,7 @@ function showOptWindow(){// 显示配置窗口
 			<hr />
 			<input type="checkbox" name="srn" title="${FT(uiText.opt_SRN)}" />
 		</div>`,
-		btn:[FT(uiText.opt_ok),FT(uiText.opt_cancel)],
+		btn:[FT(uiText.confirm),FT(uiText.cancel)],
 		shade:0.1,shadeClose:true,
 		id:"set_option",
 		zIndex:10,
@@ -581,7 +602,16 @@ function showAudioAnalyser(ty){// 显示音频分析信息
 	s.id="audio_analyser";
 	s.addEventListener("load",r,{once:true});
 }
+function showPlayNextListTool(){// 显示播完自动下一个列表工具
+	const pnlt=Temp.playNextListTool;
+	if(pnlt){
+		pnlt.openWindow();
+		return;
+	}
+	loadScript("audioplay/play_next_list.js");
+}
 function otherMenu(){// 其它操作菜单
+	const BTNC="layui-btn layui-col-md3";
 	function ut(n){
 		const t=uiText["M_"+n];
 		if(typeof t==="string")return filterText(t);
@@ -593,16 +623,19 @@ function otherMenu(){// 其它操作菜单
 		ac(".show_depend",showPlaylistDepend);
 		ac(".show_anys_sw",()=>showAudioAnalyser("sinewave"));
 		ac(".show_anys_fb",()=>showAudioAnalyser("frequencybars"));
+		ac(".show_playnextlist",showPlayNextListTool);
+		cache.otherMenuElement=o.find(".other_menu")[0];
 	}
 	layer.open({
 		type:1,maxmin:true,shade:0,zIndex:10,
 		id:"other_menu",hideOnClose:true,
 		title:filterText(uiText.menu_title),
-		content:`<div class="other_menu layui-margin-2">
-			<button class="show_meta layui-btn">${ut("show_meta")}</button>
-			<button class="show_depend layui-btn">${ut("show_depend")}</button>
-			<button class="show_anys_sw layui-btn">${ut('show_analyser_sw')}</button>
-			<button class="show_anys_fb layui-btn">${ut('show_analyser_fb')}</button>
+		content:`<div class="other_menu layui-margin-2 layui-row">
+			<button class="show_meta ${BTNC}">${ut("show_meta")}</button>
+			<button class="show_depend ${BTNC}">${ut("show_depend")}</button>
+			<button class="show_anys_sw ${BTNC}">${ut('show_analyser_sw')}</button>
+			<button class="show_anys_fb ${BTNC}">${ut('show_analyser_fb')}</button>
+			<button class="show_playnextlist ${BTNC}">${ut('show_playNextList')}</button>
 		</div>`,
 		success,
 	});
@@ -627,6 +660,7 @@ function exportUIText(){// 导出UI文本
 		end(){URL.revokeObjectURL(u)}
 	});
 	log.log(`UI文本已导出，临时URL: ${u}`);
+	return f;
 }
 function skdlog(){// 记录详细日志
 	if(cache.log.audioplay)return log.warn("不可重复调用记录详细日志");
