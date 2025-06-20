@@ -640,6 +640,16 @@ function otherMenu(){// 其它操作菜单
 		success,
 	});
 }
+function loadExtensionFromSearch(){// 从查询参数加载扩展
+	const du=(location.origin+location.pathname).replace(/\.html$/,"/");
+	log.debug(`扩展的基础对比路径: ${du}`);
+	for(const i of urlsea.getAll("extension")){
+		if(!new URL(i,location.href).href.startsWith(du))continue;
+		log.debug(`将要加载扩展: ${i}`);
+		const sc=loadScript(i);
+		sc.className="audioplay_extension";
+	}
+}
 function exportUIText(){// 导出UI文本
 	const p={
 		title:"导出的UI文本",
@@ -718,6 +728,7 @@ var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
 docsMonitor.dependCheck([{fun(){layui;layer;return !0},fiTip:"未检测到Layui库，请检查unpkg.com域名的连接"}]);
 document.addEventListener("visibilitychange",()=>{
 	if(document.visibilityState!=="visible")return;
+	if(!preventScreenLock)return;
 	setWakeLock();
 });
 document.getElementById("showoptionwin").onclick=showOptWindow;
@@ -793,6 +804,7 @@ id_player.ontimeupdate=function(){
 	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 };
 log.info("初始化完成");
+if(urlsea.has("extension")) loadExtensionFromSearch();
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
 if(urlsea.has("lang")) getNetworkData("/assets/playlist/"+urlsea.get("lang")+".i18n.json");// 本质上语言文件也是一种播放列表
 function ydtsk(){// 引导提示
