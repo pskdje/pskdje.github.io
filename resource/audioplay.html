@@ -597,7 +597,7 @@ function showAudioAnalyser(ty){// 显示音频分析信息
 	}
 	let s=loadScript("audioplay/analyser.js");
 	if(s==="exist"){
-		return void(layer.msg(filterText(uiText.script_exist_tip),{zIndex:20}));
+		return void layer.msg(filterText(uiText.script_exist_tip),{zIndex:20});
 	}
 	s.id="audio_analyser";
 	s.addEventListener("load",r,{once:true});

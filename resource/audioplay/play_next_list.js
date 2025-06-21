@@ -10,8 +10,8 @@
 		get run(){return run;},
 		get errCount(){return errCount;},
 		maxErrorStop:true,
-	},FT=filterText;
-	let xzlb=[],run=false,errCount=0,pIdxEl;
+	},FT=filterText,dfPLT="当前播放列表:";
+	let xzlb=[],run=false,errCount=0,pIdxEl,pltEl;
 	let isOpenWind=false;
 	let iswinmin=matchMedia("(max-height:600px),(max-width:400px)").matches;
 	function getTxt(key,dfu){// 获取UI文本
@@ -23,16 +23,11 @@
 		return layer.open({
 			type:1,title:getTxt("PNLT_wintitle","自动跳转下一个播放列表"),
 			content:`<style>
-.pnlt_plt {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
 .pnlt_btn_l {
 	text-align: right;
 }
 </style>
-<p class="pnlt_plt">当前播放列表: </p>
+<p class="pnlt_plt layui-ellip">${getTxt("PNLT_plt",dfPLT)} </p>
 <div class="layui-input-group">
 	<div class="layui-input-prefix layui-input-split">播放索引</div>
 	<input type="number" class="layui-input pnlt_index" lay-affix="number" step="1" min="0" lay-precision lay-step-strictly />
@@ -64,6 +59,7 @@
 					if(!f)return;
 					f.text().then(d=>JSON.parse(d)).then(loadListData);
 				});
+				pltEl=l.find(".pnlt_plt")[0];
 				pIdxEl=l.find(".pnlt_index")[0];
 				transfer.render({
 					elem:l.find(".pnlt_listitem"),
@@ -98,6 +94,7 @@
 	function loadPlaylist(idx){// 加载指定
 		const d=list[idx];
 		if(!d)throw new ReferenceError(`索引 ${idx} 无数据`);
+		pltEl.textContent=`${getTxt("PNLT_plt",dfPLT)} ${d.title}`;
 		getNetworkData(d.url).then(d=>{
 			if(d==="end")return;
 			nextPlaylist();
