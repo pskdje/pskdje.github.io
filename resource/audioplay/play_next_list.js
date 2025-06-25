@@ -12,7 +12,6 @@
 		maxErrorStop:true,
 	},FT=filterText,dfPLT="当前播放列表:";
 	let xzlb=[],run=false,errCount=0,pIdxEl,pltEl;
-	let isOpenWind=false;
 	let iswinmin=matchMedia("(max-height:600px),(max-width:400px)").matches;
 	function getTxt(key,dfu){// 获取UI文本
 		const t=uiText[key]??dfu;
@@ -95,6 +94,7 @@
 		const d=list[idx];
 		if(!d)throw new ReferenceError(`索引 ${idx} 无数据`);
 		pltEl.textContent=`${getTxt("PNLT_plt",dfPLT)} ${d.title}`;
+		setWakeLock();
 		getNetworkData(d.url).then(d=>{
 			if(d==="end")return;
 			nextPlaylist();

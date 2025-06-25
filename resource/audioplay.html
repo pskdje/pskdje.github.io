@@ -200,11 +200,11 @@ const uiText=Object.seal({// UI文本(预留I18N)
 const log=new logging.Logger("audioplay");
 let playIdx=0,// 播放索引
 	running=false,// 是否正在运行
-	noAutoPlayNext=false,
+	noAutoPlayNext=false,// 不自动播放下一个
 	audioErrorCount=0,// 错误累积计数
-	showPlayTime=false,
-	preventScreenLock=false;
-Temp.pl={};
+	showPlayTime=false,// 显示播放时间
+	preventScreenLock=false;// 是否自动阻止屏幕锁定
+Temp.pl={};// 播放列表信息容纳
 class AudioplayEventTrigger extends EventTarget {// 事件基础
 	/* 事件名 信息 是否可取消(存在该部分可取消)
 	 * playlistLoadOK 播放列表加载完成 取消将阻止自动开始播放
@@ -214,7 +214,7 @@ class AudioplayEventTrigger extends EventTarget {// 事件基础
 	 * playConfigChange 播放配置更新
 	 * userInit 用户初始化，因部分功能需要用户点击进行初始化
 	 */
-	trig(n){// 触发一个非常简单的事件，复杂事件需自定义
+	trig(n){// 触发一个非常简单的可取消事件，复杂事件需自定义
 		const e=new Event(n,{cancelable:true});
 		const r=this.dispatchEvent(e);
 		log.debug(`简单可取消事件 ${n} 触发，是否运行默认: ${r}`);
@@ -231,6 +231,16 @@ function filterText(d){// 处理文本
 	t=t.replaceAll('"',"&quot;").replaceAll(" ","&nbsp;");
 	log.debug(`文本过滤输出: ${t}`,t,o);
 	return t;
+}
+function topTipMsg(tip){// 在顶部显示提示
+	return layer.open({
+		type:1,zIndex:30,
+		title:false,closeBtn:0,
+		shade:0,time:3000,
+		offset:"t",anim:"slideDown",
+		skin:"change-data-success",
+		content:tip,
+	});
 }
 function changeData(data){// 更新数据
 	const msgOpt={zIndex:20,icon:0,anim:6};
@@ -283,14 +293,7 @@ function changeData(data){// 更新数据
 		for(const i of dependList){if(typeof i!=="string")throw new TypeError("依赖列表类型错误");else pl.depend.push(i);}
 	}else throw new TypeError("依赖列表不是数组");
 	if(list.length>0) layui.table.reloadData("playlist",{data:tableData});
-	layer.open({
-		type:1,zIndex:30,
-		title:false,closeBtn:0,
-		shade:0,time:3000,
-		offset:"t",anim:"slideDown",
-		skin:"change-data-success",
-		content:`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`,
-	});
+	topTipMsg(`${filterText(uiText.cd_success1)} <i>${filterText(data.title)}</i> ${filterText(uiText.cd_success2)}`);
 	log.info(`加载"${data.title}"完成`);
 	if(!apET.trig("playlistLoadOk"))return;
 	if(playlist.length<1)return;
@@ -675,7 +678,7 @@ function exportUIText(){// 导出UI文本
 function skdlog(){// 记录详细日志
 	if(cache.log.audioplay)return log.warn("不可重复调用记录详细日志");
 	let l=cache.log.audioplay=new Log("音频播放","音频播放的详细运行日志");
-	l.maxLog=500;
+	l.maxLog=1000;
 	log.addHandler(new logging.OutputLogHandler(l));
 	log.info("已启用默认的详细日志记录");
 }
