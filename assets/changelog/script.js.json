@@ -3,6 +3,9 @@
 		"name":"script.js",
 		"desc":"关于/js/script.js的更新日志"
 	},{
+		"dt":1750566353353,
+		"c":"修复Log类的maxLog未能正确生效的问题。"
+	},{
 		"dt":1738002824384,
 		"c":"将`docsScript.compatible`重命名为`docsScript.compat`。"
 	},{

@@ -178,7 +178,7 @@ class Log {// 日志
 			var t=typeof this.maxLog;
 			this.maxLog=Infinity;
 			cache.log.root.add(40,"Log.prototype.collat","类型错误: 日志上限应为数字，当前类型为'"+t+"'");
-		};if(this.length>t)return this.remove("shift");
+		};if(this.length>this.maxLog)return this.remove("shift");
 	}; remove(type,len=1,ind=0){// 清除日志
 		var arr=[];// 暂存被清除的日志
 		if(typeof type!=="string")throw new TypeError("不是字符串");
