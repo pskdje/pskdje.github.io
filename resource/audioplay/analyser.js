@@ -102,6 +102,7 @@
 				cvc.fillStyle=col;
 				cvc.fillRect(x,H-bh,bw,bh);
 				x+=bw;
+				if(x>W)break;
 			}
 		}
 		that.config.beforeEnd=()=>{// 销毁

@@ -211,6 +211,7 @@ class AudioplayEventTrigger extends EventTarget {// 事件基础
 	 * playlistLoadFail 播放列表加载失败
 	 * playlistEnd 播放列表播放到末尾 取消将阻止跳转到开头
 	 * playNext 播放下一个 取消将阻止播放下一个
+	 * playPrev 播放上一个 取消将阻止播放上一个
 	 * playConfigChange 播放配置更新
 	 * userInit 用户初始化，因部分功能需要用户点击进行初始化
 	 */
@@ -404,6 +405,19 @@ function playNext(){// 播放下一个
 	playAudio(nIdx);
 	return "end";
 }
+function playPrev(){// 播放上一个
+	let nIdx=playIdx-1;
+	dfutTtle();
+	if(playlist.length<1)return "noItem";
+	if(!(nIdx in playlist)){
+		nIdx=playlist.length-1;
+	}
+	if(!apET.trig("playPrev"))return "noPrev";
+	playIdx=nIdx;
+	changePLIdx(nIdx);
+	playAudio(nIdx);
+	return "end";
+}
 function getWakeLock(){// 获取锁定阻止
 	if(!preventScreenLock)return;
 	if(Temp.PSWL){
@@ -425,7 +439,7 @@ function getWakeLock(){// 获取锁定阻止
 	}
 }
 function clrWakeLock(){// 清除锁定阻止
-	if(!Temp.PSWL)return log.warn("未阻止屏幕锁定");
+	if(!Temp.PSWL)return log.debug("未阻止屏幕锁定");
 	Temp.PSWL.release();
 	Temp.PSWL=null;
 	log.info("已清除屏幕锁定阻止");
@@ -806,6 +820,11 @@ id_player.ontimeupdate=function(){
 	if(Number.isFinite(this.duration)) d=this.duration;
 	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 };
+if(typeof navigator?.mediaSession==="object"){
+	navigator.mediaSession.setActionHandler("nexttrack",playNext);
+	navigator.mediaSession.setActionHandler("previoustrack",playPrev);
+	log.log("已添加媒体会话活动处理");
+}
 log.info("初始化完成");
 if(urlsea.has("extension")) loadExtensionFromSearch();
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
