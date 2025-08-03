@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         设置哔哩哔哩播放器初始配置
-// @namespace    https://pskdje.github.io/static/assets/tools/tm_js/
+// @namespace    https://pskdje.github.io/static/tools/tm_js/
 // @version      2025-08-03
 // @description  通过提前注入配置来达到效果，若配置已存在将不注入。强制关闭自动播放推荐。
 // @note         可自行修改配置来定义你想要的初始化配置。
@@ -10,8 +10,8 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bilibili.com
 // @run-at       document-start
 // @grant        none
-// @downloadURL  https://pskdje.github.io/static/assets/tools/tm_js/bili_video_default_config.user.js
-// @supportURL   https://pskdje.github.io/static/assets/tools/tm_js/
+// @downloadURL  https://pskdje.github.io/static/tools/tm_js/bili_video_default_config.user.js
+// @supportURL   https://pskdje.github.io/static/tools/tm_js/
 // @license      CC0
 // ==/UserScript==
 
