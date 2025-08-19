@@ -366,6 +366,7 @@ function clrTempData(){// 清除临时数据
 function playAudio(idx){// 播放某个索引对应的音频
 	const p=playlist[idx];
 	log.info(`进行播放索引${idx}对应的音频`);
+	playIdx=Number(idx);
 	clrTempData();
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
@@ -400,7 +401,6 @@ function playNext(){// 播放下一个
 	}
 	if(playlist.length<1)return "noItem";
 	if(!apET.trig("playNext"))return "noNext";
-	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
 	return "end";
@@ -413,7 +413,6 @@ function playPrev(){// 播放上一个
 		nIdx=playlist.length-1;
 	}
 	if(!apET.trig("playPrev"))return "noPrev";
-	playIdx=nIdx;
 	changePLIdx(nIdx);
 	playAudio(nIdx);
 	return "end";
@@ -659,11 +658,13 @@ function otherMenu(){// 其它操作菜单
 }
 function loadExtensionFromSearch(){// 从查询参数加载扩展
 	const du=(location.origin+location.pathname).replace(/\.html$/,"/");
-	log.debug(`扩展的基础对比路径: ${du}`);
+	log.debug(`扩展的基础路径: ${du}`);
 	for(const i of urlsea.getAll("extension")){
-		if(!new URL(i,location.href).href.startsWith(du))continue;
+		const cu=new URL(i,du).href;
+		log.debug(`要被检查的扩展路径: ${cu}`);
+		if(!cu.startsWith(du))continue;
 		log.debug(`将要加载扩展: ${i}`);
-		const sc=loadScript(i);
+		const sc=loadScript("audioplay/"+i);
 		sc.className="audioplay_extension";
 	}
 }
@@ -784,8 +785,7 @@ layui.table.on("row(playlist)",(o)=>{
 		layer.msg(filterText(uiText.is_running),{zIndex:20});
 		return;
 	}
-	playIdx=o.index;
-	playAudio(playIdx);
+	playAudio(o.index);
 });
 id_player.onerror=()=>{
 	let e=id_player.error;

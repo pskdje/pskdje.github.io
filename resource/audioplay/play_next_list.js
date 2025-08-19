@@ -5,25 +5,35 @@
 	const list=[];
 	const pnlt=Temp.playNextListTool={
 		listIdx:0,
-		list,
-		get xzlb(){return xzlb;},
-		get run(){return run;},
-		get errCount(){return errCount;},
-		maxErrorStop:true,
+		list,// 导入的全部播放列表
+		get xzlb(){return xzlb;},// 选择的播放列表
+		get run(){return run;},// 是否运行
+		get errCount(){return errCount;},// 错误计数
+		maxErrorStop:true,// 达到最大错误限制是否停止
 	},FT=filterText,dfPLT="当前播放列表:";
 	let xzlb=[],run=false,errCount=0,pIdxEl,pltEl;
 	let iswinmin=matchMedia("(max-height:600px),(max-width:400px)").matches;
+	let conOthElH=0,conOthElW=0;
 	function getTxt(key,dfu){// 获取UI文本
 		const t=uiText[key]??dfu;
 		return FT(t);
 	}
 	function openWindow(){// 打开工具窗口
 		const BTN="layui-btn layui-btn-sm";
+		function reload(l){
+			const llc=l.find(".layui-layer-content")[0];
+			if(!llc)return;
+			transfer.reload("pnlt_listitem",{
+				height:llc.clientHeight-conOthElH,
+				width:(llc.clientWidth-conOthElW)/2,
+			});
+		}
 		return layer.open({
 			type:1,title:getTxt("PNLT_wintitle","自动跳转下一个播放列表"),
 			content:`<style>
 .pnlt_btn_l {
 	text-align: right;
+	padding-right: 8px;
 }
 </style>
 <p class="pnlt_plt layui-ellip">${getTxt("PNLT_plt",dfPLT)} </p>
@@ -38,6 +48,7 @@
 </div>
 <div class="pnlt_listitem">配置控件</div>
 <div class="pnlt_btn_l">
+	<button class="${BTN} pnlt_playcurrentlist_btn" title="${getTxt("PNLT_playCurrentList_tip","直接播放当前播放索引")}">${getTxt("PNLT_playCurrentList","播放当前索引")}
 	<button class="${BTN} pnlt_confirm_btn">${FT(uiText.confirm)}</button>
 	<button class="${BTN} pnlt_reset_btn">${FT(uiText.reset)}</button>
 </div>
@@ -53,6 +64,13 @@
 				bc("export",exportList);
 				bc("confirm",confirm);
 				bc("reset",resetInput);
+				bc("playcurrentlist",()=>{
+					try{playCurrentList()}
+					catch(e){
+						console.error(e);
+						layer.msg(getTxt("PNLT_playCurrentList_err","无法播放当前播放索引"),{zIndex:30});
+					}
+				});
 				l.find(".pnlt_import_file")[0]?.addEventListener("change",function(){
 					const f=this.files[0];
 					if(!f)return;
@@ -68,7 +86,14 @@
 				});
 				form.render(l.find(".pnlt_index"));
 				th.offset();
-			}
+				const llc=l.find(".layui-layer-content")[0];
+				if(!llc)return;
+				conOthElH=llc.clientHeight-(iswinmin?160:360)+1;
+				conOthElW=llc.clientWidth-200*2;
+			},
+			full:reload,
+			resizing:reload,
+			restore:reload,
 		});
 	}
 	function loadListData(d){// 加载列表数据
@@ -99,6 +124,11 @@
 			if(d==="end")return;
 			nextPlaylist();
 		});
+	}
+	function playCurrentList(){// 播放当前指定列表
+		let i=Number(pIdxEl.value);
+		if(Number.isNaN(i)) pIdxEl.value=i=0;
+		loadPlaylist(xzlb[i]);
 	}
 	function nextPlaylist(){// 下一个列表
 		let i=Number(pIdxEl.value);
@@ -169,7 +199,7 @@
 		else run=false;
 		let pIdx=Number(pIdxEl.value);
 		if(pIdx>=xzlb.length||pIdx<0||Number.isNaN(pIdx)) pIdxEl.value=pIdx=0;
-		if(playlist.length<1&&run) loadPlaylist(pIdx);
+		if(playlist.length<1&&run) loadPlaylist(xzlb[pIdx]);
 		pnlt.listIdx=pIdx;
 		layer.msg(getTxt("PNLT_confirm_tip","操作完成"),{zIndex:20});
 	}

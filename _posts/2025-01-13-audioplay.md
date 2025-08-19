@@ -5,7 +5,7 @@ time: 2025/01/13-16:08
 
 # audioplay已基本可用
 
-本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.4.2版本更新，详细信息请查看更新日志。
+本文是在[0.3.4](/docs/changelog.html?href=audioplay.html)版本创建的，于0.4.5版本更新，详细信息请查看更新日志。
 
 部署在本网站的audioplay的call功能会无法访问网络，由于 Github Page 是静态服务器，且配置的参数是将请求转发到12000端口，这将会导致无法访问。
 
@@ -104,6 +104,10 @@ audioplay本身是设计来给我直播间提供背景音乐，作为OBS浏览�
 该参数用于加载扩展，路径必须为当前路径下同名文件夹内的文件。
 
 可以存在多个参数，将按一定顺序开始加载。
+
+示例：一个扩展的路径为 `/resource/audioplay/random_play.js` ，查询参数应为 `extension=random_play.js` 。
+
+若需要第三方扩展请自行注入脚本，推荐使用`loadScript`函数加载扩展脚本。
 
 ### `keep_verbose_log`
 
