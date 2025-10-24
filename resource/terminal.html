@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>终端</title>
+		<script src="/js/script.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/xterminal/dist/xterminal.css" />
+		<script src="https://unpkg.com/xterminal/dist/xterminal.umd.js"></script>
+		<style data-info="xterminal theme">
+:root {
+	--xt-bg: black;
+	--xt-fg: #D0D0D0;
+	color-scheme: dark;
+}
+body {
+	margin: 0;
+	padding: 0;
+}
+#main {
+	height: 100cqh;
+}
+.terminal-error {
+	color: #f85858;
+}
+		</style>
+	</head>
+	<body>
+		<noscript>未启用JavaScript，无法使用。</noscript>
+		<div id="main">loading…</div>
+		<script>// run
+const term=new XTerminal({target:document.getElementById("main")});
+const pushList=[];// 推送列表
+var ps="$ ";
+if(window.parent!==window)DEBUG[0]=false;
+function setCompleter(f){// 设置自动补全函数
+	term.setCompleter(f);
+}
+function write(t){// 向终端写入文本
+	term.write(t);
+}
+function writeln(t){// 向终端写入文本，自动在末尾添加换行
+	term.writeln(t);
+}
+function clear(){// 清空终端
+	term.clear();
+	term.writeln("<i>清空终端函数已被调用</i>");
+	inputPrompt();
+}
+function clearLast(){// 清除当前未换行的输出
+	term.clearLast();
+}
+function focusTerm(){// 聚焦终端
+	term.focus();
+}
+function blurTerm(){// 不聚焦终端
+	term.blur();
+}
+function pauseTerm(){// 暂停终端用户输入
+	term.pause();
+}
+function resumeTerm(){// 允许终端用户输入
+	term.resume();
+}
+function inputPrompt(){// 进入输入状态
+	term.write(ps);
+	term.resume();
+	term.focus();
+}
+function addHandle(f){// 添加处理函数
+	if(typeof f!=="function")throw new TypeError("需要提供一个处理函数");
+	pushList.push(f);
+}
+term.on("data",function data(input){
+	term.pause();
+	if(!input){
+		inputPrompt();
+		return;
+	}else if(input==="clear"){
+		term.clear();
+		term.writeln("<i>已清空终端</i>");
+		inputPrompt();
+		return;
+	}else if(input==="clearHistory"){
+		term.clearHistory();
+		term.writeln("历史输入已清除。");
+		inputPrompt();
+		return;
+	}
+	let isrun=false;
+	try{
+		for(run of pushList){
+			let rrt=undefined;
+			if(typeof run==="function")try{
+				rrt=run(input);
+			}catch(e){
+				console.error(e);
+			}
+			if(typeof rrt==="symbol"){
+				isrun=true;
+				return;
+			}
+			if(rrt&&typeof rrt==="string"){
+				isrun=true;
+				term.writeln(rrt);
+				break;
+			}
+		}
+	}catch(e){
+		console.error("运行命令处理时出现错误: ",e);
+	}
+	if(!isrun){
+		const cmd=input.split(" ")[0].replace(/[<>"'=&]/g,"■");
+		term.writeln(`<span class="terminal-error">命令 ${cmd} 不存在</span>`);
+	}
+	inputPrompt();
+});
+term.writeln("Terminal open.");
+term.writeln("切勿输入任何与HTML有关的字符，否则可能会出现显示异常导致错误。例如: &amp;&lt;&gt;");
+term.write("\n");
+inputPrompt();
+		</script>
+	</body>
+</html>
