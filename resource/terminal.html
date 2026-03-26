@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<title>终端</title>
 		<script src="/js/script.js"></script>
+		<script>if(window.opener||window.top!==window)DEBUG[0]=false;</script>
 		<link rel="stylesheet" href="https://unpkg.com/xterminal/dist/xterminal.css" />
 		<script src="https://unpkg.com/xterminal/dist/xterminal.umd.js"></script>
 		<style data-info="xterminal theme">
@@ -22,6 +23,9 @@ body {
 .terminal-error {
 	color: #f85858;
 }
+.terminal-input-tip {
+	color: #7fff00;
+}
 		</style>
 	</head>
 	<body>
@@ -30,16 +34,21 @@ body {
 		<script>// run
 const term=new XTerminal({target:document.getElementById("main")});
 const pushList=[];// 推送列表
-var ps="$ ";
-if(window.parent!==window)DEBUG[0]=false;
+var ps=`<span class="terminal-input-tip">$</span> `;
 function setCompleter(f){// 设置自动补全函数
 	term.setCompleter(f);
 }
-function write(t){// 向终端写入文本
+function write(t){// 向终端写入HTML文本
 	term.write(t);
 }
-function writeln(t){// 向终端写入文本，自动在末尾添加换行
+function writeln(t){// 向终端写入HTML文本，自动在末尾添加换行
 	term.writeln(t);
+}
+function writeSafe(t){// 向终端写入文本
+	term.writeSafe(t);
+}
+function writelnSafe(t){// 向终端写入文本，自动在末尾添加换行
+	term.writelnSafe(t)
 }
 function clear(){// 清空终端
 	term.clear();
@@ -93,13 +102,20 @@ term.on("data",function data(input){
 			if(typeof run==="function")try{
 				rrt=run(input);
 			}catch(e){
-				console.error(e);
+				const et="命令执行时出现错误";
+				console.error(et,input,e);
+				term.writeln(`<span class="terminal-error">${et}</span>`);
 			}
 			if(typeof rrt==="symbol"){
 				isrun=true;
+				if(DEBUG[0])console.warn("命令返回了symbol类型将表明该命令将自行调用inputPrompt()释放终端锁定");
 				return;
-			}
-			if(rrt&&typeof rrt==="string"){
+			}else if(typeof rrt==="number"){// 退出状态(errno)
+				isrun=true;
+				if(rrt===0)break;
+				term.writeln(`<i>命令非零退出，状态为: ${rrt}</i>`);
+				break;
+			}else if(typeof rrt==="string"&&rrt){// 运行结果
 				isrun=true;
 				term.writeln(rrt);
 				break;
@@ -107,15 +123,28 @@ term.on("data",function data(input){
 		}
 	}catch(e){
 		console.error("运行命令处理时出现错误: ",e);
+		term.writeln(`<span class="terminal-error">未知故障</span>`);
 	}
 	if(!isrun){
-		const cmd=input.split(" ")[0].replace(/[<>"'=&]/g,"■");
+		const cmd=XTerminal.escapeHTML(input.split(" ",2)[0]);
 		term.writeln(`<span class="terminal-error">命令 ${cmd} 不存在</span>`);
 	}
 	inputPrompt();
 });
-term.writeln("Terminal open.");
-term.writeln("切勿输入任何与HTML有关的字符，否则可能会出现显示异常导致错误。例如: &amp;&lt;&gt;");
+term.write("Terminal open.");
+(function(){// 与上游窗口交换
+	let win=null;
+	if(window.opener) win=window.opener;
+	else if(window.parent!==window){
+		win=window.parent;
+		if(win instanceof HTMLIFrameElement) win=win.contentWindow;
+	}
+	let tc=win?.DATA_page?.terminal;
+	if(typeof tc==="object"){
+		term.writelnSafe(`已连接到: ${tc.originName??"[未声明]"}`);
+		if(typeof tc.initialPrintStr==="string") term.writeln(tc.initialPrintStr);
+	}
+})();
 term.write("\n");
 inputPrompt();
 		</script>
