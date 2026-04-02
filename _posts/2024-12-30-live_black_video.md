@@ -75,69 +75,76 @@ time: 2024/12/30-20:56
 
 图片工程文件：[单纯背景](/static/assets/直播用遮挡特殊信息视频/背景.pdi) [背景文本](/static/assets/直播用遮挡特殊信息视频/文本.pdi) (PhotoDemon)
 
+图片文件使用哔哩哔哩图片CDN(i0.hdslb.com)共享。
+
 <div id="sucai"></div>
 <script data-info="图片数据">
 	const imglistd=[
-		{name:"背景",src:"https://i1.hdslb.com/bfs/new_dyn/05b297d52a3e10c01755d7a6ddbf77bb438160221.jpg"},
-		{name:"400",src:"https://i0.hdslb.com/bfs/new_dyn/c07d9604a7e9227a33c30fc58dff5db0438160221.png"},
-		{name:"403",src:"https://i0.hdslb.com/bfs/new_dyn/aa6eed285612741113192fc5e2c2e9bf438160221.png"},
-		{name:"404",src:"https://i0.hdslb.com/bfs/new_dyn/901c708f0fe333e7fbd015644eab14bc438160221.png"},
-		{name:"410",src:"https://i0.hdslb.com/bfs/new_dyn/c38ab205a72531b985ecd36c1e1323e3438160221.png"},
-		{name:"418",src:"https://i0.hdslb.com/bfs/new_dyn/2fe84dd3739faf9d81e970e9350ca884438160221.png"},
-		{name:"500",src:"https://i0.hdslb.com/bfs/new_dyn/967bfa1b531b404825b8fd217510ec5d438160221.png"},
-		{name:"502",src:"https://i0.hdslb.com/bfs/new_dyn/536ea5e35ab95716fce0b0ebef2eef92438160221.png"},
-		{name:"504",src:"https://i0.hdslb.com/bfs/new_dyn/909c5cc912c6ab3744147d1341fea8e4438160221.png"},
-		{name:"abort",src:"https://i0.hdslb.com/bfs/new_dyn/af772fe6fd15483b78f9fa3f86da389b438160221.png"},
-		{name:"bad",src:"https://i0.hdslb.com/bfs/new_dyn/a31e78d40e84601d5ecf21c5d4a646d3438160221.png"},
-		{name:"EOF",src:"https://i0.hdslb.com/bfs/new_dyn/214522b0114b228b08cc49bb910a3b8f438160221.png"},
-		{name:"error",src:"https://i0.hdslb.com/bfs/new_dyn/306670c6a4de462d73559f325765112a438160221.png"},
-		{name:"exception",src:"https://i0.hdslb.com/bfs/new_dyn/b61ebae931c4c57525230810917c8a4b438160221.png"},
-		{name:"forbidden",src:"https://i0.hdslb.com/bfs/new_dyn/3fbb0fbd0c05b1e51bea15f79f33bdd5438160221.png"},
-		{name:"gone",src:"https://i0.hdslb.com/bfs/new_dyn/ae02a700974258bebd514e4c36498521438160221.png"},
-		{name:"internal error",src:"https://i0.hdslb.com/bfs/new_dyn/65498813a22ec47212c9d657c9663949438160221.png"},
-		{name:"lock",src:"https://i0.hdslb.com/bfs/new_dyn/12e957c0a3fce4e79fdf4a4eb7229a83438160221.png"},
-		{name:"loop",src:"https://i0.hdslb.com/bfs/new_dyn/a8e22f45fbd2120fbddb5d0042c973ad438160221.png"},
-		{name:"not found",src:"https://i0.hdslb.com/bfs/new_dyn/1c35182f323f8fb4262b023336f5d015438160221.png"},
-		{name:"range error",src:"https://i0.hdslb.com/bfs/new_dyn/78861fb671d1e02f2a99a219cb2d938a438160221.png"},
-		{name:"reference error",src:"https://i0.hdslb.com/bfs/new_dyn/0384bfa39183dc9561b22f91f07eed42438160221.png"},
-		{name:"reset",src:"https://i0.hdslb.com/bfs/new_dyn/a534f0ade192e3e900df6d43c5d2285f438160221.png"},
-		{name:"runtime error",src:"https://i0.hdslb.com/bfs/new_dyn/5066796cd0f03d7215c0579d15b0e24e438160221.png"},
-		{name:"syntax error",src:"https://i0.hdslb.com/bfs/new_dyn/0b77f422c0b96d10d8df2c6858fda9aa438160221.png"},
-		{name:"timeout",src:"https://i0.hdslb.com/bfs/new_dyn/aaf2f9c67fddfb999192a9dbf0531592438160221.png"},
-		{name:"type error",src:"https://i0.hdslb.com/bfs/new_dyn/744e18e88eafa3d0ed01d4108152bd83438160221.png"},
-		{name:"warning",src:"https://i0.hdslb.com/bfs/new_dyn/8a2191db402d8eeb9f867d56ee09db1d438160221.png"},
-		{name:"不允许",src:"https://i0.hdslb.com/bfs/new_dyn/823ac170bb530e0549868ffcb535ec65438160221.png"},
-		{name:"超时",src:"https://i0.hdslb.com/bfs/new_dyn/a03a1fa79d25c8b64b6c04a1161effef438160221.png"},
-		{name:"错误",src:"https://i0.hdslb.com/bfs/new_dyn/a07428d5a8bb0f56d261ec0a8df32fde438160221.png"},
-		{name:"范围错误",src:"https://i0.hdslb.com/bfs/new_dyn/07d2473f4a40e8f0f95565fe370ed73e438160221.png"},
-		{name:"故障",src:"https://i0.hdslb.com/bfs/new_dyn/b34614afe7665f5938ea46ae4496f56c438160221.png"},
-		{name:"警告",src:"https://i0.hdslb.com/bfs/new_dyn/74a74785d23fe481ea78a1aa1841f6b8438160221.png"},
-		{name:"类型错误",src:"https://i0.hdslb.com/bfs/new_dyn/f5cd24d65b296e59722211fafbc051ab438160221.png"},
-		{name:"连接错误",src:"https://i0.hdslb.com/bfs/new_dyn/2ce8b27b0e80ac3c94c90fa0cdfca910438160221.png"},
-		{name:"内部错误",src:"https://i0.hdslb.com/bfs/new_dyn/1fea52bdbfb104071c25d1d9a93cabb2438160221.png"},
-		{name:"数据结束",src:"https://i0.hdslb.com/bfs/new_dyn/eda97c185dded404541de35d04f4e933438160221.png"},
-		{name:"锁定",src:"https://i0.hdslb.com/bfs/new_dyn/62565360040004eb09b8a014cc1706c6438160221.png"},
-		{name:"无权限",src:"https://i0.hdslb.com/bfs/new_dyn/d39081cd46b6f5b05d55ab807351e4f2438160221.png"},
-		{name:"无效",src:"https://i0.hdslb.com/bfs/new_dyn/6e4895cb1f1108d08fff10183cd35020438160221.png"},
-		{name:"无信号",src:"https://i0.hdslb.com/bfs/new_dyn/d41387b70caead2d581889dbed2ee9ca438160221.png"},
-		{name:"信号中断",src:"https://i0.hdslb.com/bfs/new_dyn/a54c49e4fc9823510cb5809c936900eb438160221.png"},
-		{name:"循环",src:"https://i0.hdslb.com/bfs/new_dyn/d196eff942ddcbcb1583db7e4070ba0a438160221.png"},
-		{name:"异常",src:"https://i0.hdslb.com/bfs/new_dyn/d603a7f1fd6cf876e1b56605aa3be076438160221.png"},
-		{name:"引用错误",src:"https://i0.hdslb.com/bfs/new_dyn/d7f121021e1d179beafd7c230a5cd3af438160221.png"},
-		{name:"语法错误",src:"https://i0.hdslb.com/bfs/new_dyn/fa9467a6446be6a35fcb3d3c1d91a479438160221.png"},
-		{name:"中断",src:"https://i0.hdslb.com/bfs/new_dyn/2ad6d9e942ab78e2b7f486d2ba4a9390438160221.png"},
-		{name:"重置",src:"https://i0.hdslb.com/bfs/new_dyn/edf839c2bb09f5e601b50e058618257c438160221.png"},
+		{name:"背景",file:"背景.jpg",src:"https://i1.hdslb.com/bfs/new_dyn/05b297d52a3e10c01755d7a6ddbf77bb438160221.jpg"},
+		{name:"400",file:"400(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/c07d9604a7e9227a33c30fc58dff5db0438160221.png"},
+		{name:"403",file:"403(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/aa6eed285612741113192fc5e2c2e9bf438160221.png"},
+		{name:"404",file:"404(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/901c708f0fe333e7fbd015644eab14bc438160221.png"},
+		{name:"410",file:"410(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/c38ab205a72531b985ecd36c1e1323e3438160221.png"},
+		{name:"418",file:"418(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/2fe84dd3739faf9d81e970e9350ca884438160221.png"},
+		{name:"500",file:"500(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/967bfa1b531b404825b8fd217510ec5d438160221.png"},
+		{name:"502",file:"502(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/536ea5e35ab95716fce0b0ebef2eef92438160221.png"},
+		{name:"504",file:"504(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/909c5cc912c6ab3744147d1341fea8e4438160221.png"},
+		{name:"abort",file:"abort(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/af772fe6fd15483b78f9fa3f86da389b438160221.png"},
+		{name:"bad",file:"bad(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/a31e78d40e84601d5ecf21c5d4a646d3438160221.png"},
+		{name:"EOF",file:"EOF(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/214522b0114b228b08cc49bb910a3b8f438160221.png"},
+		{name:"error",file:"error(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/306670c6a4de462d73559f325765112a438160221.png"},
+		{name:"exception",file:"exception(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/b61ebae931c4c57525230810917c8a4b438160221.png"},
+		{name:"forbidden",file:"forbidden(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/3fbb0fbd0c05b1e51bea15f79f33bdd5438160221.png"},
+		{name:"gone",file:"gone(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/ae02a700974258bebd514e4c36498521438160221.png"},
+		{name:"internal error",file:"internalerror(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/65498813a22ec47212c9d657c9663949438160221.png"},
+		{name:"lock",file:"(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/12e957c0a3fce4e79fdf4a4eb7229a83438160221.png"},
+		{name:"loop",file:"(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/a8e22f45fbd2120fbddb5d0042c973ad438160221.png"},
+		{name:"not found",file:"not_found(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/1c35182f323f8fb4262b023336f5d015438160221.png"},
+		{name:"range error",file:"rangeerror(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/78861fb671d1e02f2a99a219cb2d938a438160221.png"},
+		{name:"reference error",file:"referenceerror(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/0384bfa39183dc9561b22f91f07eed42438160221.png"},
+		{name:"reset",file:"reset(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/a534f0ade192e3e900df6d43c5d2285f438160221.png"},
+		{name:"runtime error",file:"runtimeerror(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/5066796cd0f03d7215c0579d15b0e24e438160221.png"},
+		{name:"syntax error",file:"syntaxerror(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/0b77f422c0b96d10d8df2c6858fda9aa438160221.png"},
+		{name:"timeout",file:"timeout(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/aaf2f9c67fddfb999192a9dbf0531592438160221.png"},
+		{name:"type error",file:"typeerror(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/744e18e88eafa3d0ed01d4108152bd83438160221.png"},
+		{name:"value error",file:"valueerror(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/c09dc380850a1468d230936808dbed02438160221.png"},
+		{name:"warning",file:"warning(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/8a2191db402d8eeb9f867d56ee09db1d438160221.png"},
+		{name:"不允许",file:"不允许(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/823ac170bb530e0549868ffcb535ec65438160221.png"},
+		{name:"超时",file:"超时(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/a03a1fa79d25c8b64b6c04a1161effef438160221.png"},
+		{name:"错误",file:"错误(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/a07428d5a8bb0f56d261ec0a8df32fde438160221.png"},
+		{name:"范围错误",file:"范围错误(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/07d2473f4a40e8f0f95565fe370ed73e438160221.png"},
+		{name:"故障",file:"故障(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/b34614afe7665f5938ea46ae4496f56c438160221.png"},
+		{name:"警告",file:"警告(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/74a74785d23fe481ea78a1aa1841f6b8438160221.png"},
+		{name:"类型错误",file:"类型错误(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/f5cd24d65b296e59722211fafbc051ab438160221.png"},
+		{name:"连接错误",file:"连接错误(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/2ce8b27b0e80ac3c94c90fa0cdfca910438160221.png"},
+		{name:"内部错误",file:"内部错误(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/1fea52bdbfb104071c25d1d9a93cabb2438160221.png"},
+		{name:"数据结束",file:"数据结束(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/eda97c185dded404541de35d04f4e933438160221.png"},
+		{name:"锁定",file:"锁定(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/62565360040004eb09b8a014cc1706c6438160221.png"},
+		{name:"无权限",file:"无权限(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/d39081cd46b6f5b05d55ab807351e4f2438160221.png"},
+		{name:"无效",file:"无效(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/6e4895cb1f1108d08fff10183cd35020438160221.png"},
+		{name:"无信号",file:"无信号(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/d41387b70caead2d581889dbed2ee9ca438160221.png"},
+		{name:"信号中断",file:"信号中断(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/a54c49e4fc9823510cb5809c936900eb438160221.png"},
+		{name:"循环",file:"循环(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/d196eff942ddcbcb1583db7e4070ba0a438160221.png"},
+		{name:"异常",file:"异常(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/d603a7f1fd6cf876e1b56605aa3be076438160221.png"},
+		{name:"引用错误",file:"引用错误(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/d7f121021e1d179beafd7c230a5cd3af438160221.png"},
+		{name:"语法错误",file:"语法错误(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/fa9467a6446be6a35fcb3d3c1d91a479438160221.png"},
+		{name:"中断",file:"中断(下).png",src:"https://i0.hdslb.com/bfs/new_dyn/2ad6d9e942ab78e2b7f486d2ba4a9390438160221.png"},
+		{name:"重置",file:"重置(上).png",src:"https://i0.hdslb.com/bfs/new_dyn/edf839c2bb09f5e601b50e058618257c438160221.png"},
 	]
 </script>
 <script data-info="生成图片">
 	const id_sucai=document.getElementById("sucai");
 	const content=document.getElementById("body_content");
 	for(const i of imglistd){
-		const l=new Image();
-		l.referrerPolicy="no-referrer";
+		const a=document.createElement(a),l=new Image();
+		a.referrerPolicy=l.referrerPolicy="no-referrer";
 		l.loading="lazy";
 		l.alt=i.name;
 		l.src=i.src+"";
-		content.append(l);
+		a.href=i.src;
+		a.download=i.file;
+		a.title="点击下载文件: "+i.file;
+		a.append(l);
+		id_sucai.append(a);
 	}
 </script>
