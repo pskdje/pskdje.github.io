@@ -10,7 +10,7 @@
 		<script src="/js/monitor.js"></script>
 		<script src="/js/logging.js"></script>
 		<meta name="author" content="pskdje" />
-		<link rel="stylesheet" href="//unpkg.com/layui@2.11.3/dist/css/layui.css" />
+		<link rel="stylesheet" href="//unpkg.com/layui@2.13.9/dist/css/layui.css" />
 		<link rel="stylesheet" href="//unpkg.com/layui-theme-dark/dist/layui-theme-dark-selector.css" />
 		<meta name="color-scheme" content="light dark" />
 		<style>
@@ -107,7 +107,7 @@ body {
 			</thead>
 		</table>
 		<script src="/js/evaltool.js"></script>
-		<script src="//unpkg.com/layui@2.11.3/dist/layui.js"></script>
+		<script src="//unpkg.com/layui@2.13.9/dist/layui.js"></script>
 		<script>
 			// 还是不手搓太多功能了
 const id_player=document.getElementById("player"),
@@ -179,6 +179,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	menu_title:"更多操作",
 	M_show_meta:"显示元数据",
 	M_show_depend:"显示依赖列表",
+	M_clear_playtext_content:"清除播放提示",
 	M_show_analyser_sw:"查看音频波形",
 	M_show_analyser_fb:"查看音频频率",
 	M_show_playNextList:"播完自动下一个列表",
@@ -198,6 +199,7 @@ const uiText=Object.seal({// UI文本(预留I18N)
 	ydts_dkbz:"打开帮助",
 });// 主要覆盖显示，不覆盖控制台日志之类的地方。
 const log=new logging.Logger("audioplay");
+const otherMenuButtonClass="layui-btn layui-col-md3";// 其它菜单的按钮样式(用作 class 属性)
 let playIdx=0,// 播放索引
 	running=false,// 是否正在运行
 	noAutoPlayNext=false,// 不自动播放下一个
@@ -357,6 +359,9 @@ function dfutTtle(){// 重置播放提示
 	id_playtext.textContent=`${uiText.playtext} ${uiText.playtext_none}`;
 	log.info("播放提示被重置");
 }
+function getPlayLeftText(){// 获取播放左侧的提示
+	return `${uiText.playtext} ${playlist[playIdx]?.title??uiText.playtext_none}`;
+}
 function clrTempData(){// 清除临时数据
 	if(Temp.playBlobURL){
 		URL.revokeObjectURL(Temp.playBlobURL);
@@ -371,7 +376,7 @@ function playAudio(idx){// 播放某个索引对应的音频
 	if(typeof p!=="object")throw new TypeError("无效的音频参数数据");
 	running=true;
 	document.title=`${uiText.playtitle_play} ${p.title}`;
-	id_playtext.textContent=`${uiText.playtext} ${p.title} …`;
+	id_playtext.textContent=`${getPlayLeftText()} …`;
 	switch(p.type){
 		case "link":
 			id_player.src=p.url;
@@ -588,6 +593,7 @@ function showOptWindow(){// 显示配置窗口
 			if(d.srn) running=false;
 			layer.close(i);
 			setWakeLock();
+			if(B(d.spt)===false) id_playtext.textContent=getPlayLeftText();
 			log.debug(["已更新配置项，信息:",d]);
 			apET.trig("playConfigChange");
 		},
@@ -627,20 +633,24 @@ function showPlayNextListTool(){// 显示播完自动下一个列表工具
 	loadScript("audioplay/play_next_list.js");
 }
 function otherMenu(){// 其它操作菜单
-	const BTNC="layui-btn layui-col-md3";
+	const BTNC=otherMenuButtonClass;
 	function ut(n){
 		const t=uiText["M_"+n];
 		if(typeof t==="string")return filterText(t);
 		return '<span style="color:red;">不存在该UI文本</span>';
 	}
-	function success(o){
+	function success(o,i,t){
+		if(cache.hasOtherMenuBuild)return;
 		function ac(s,c){o.find(s).click(c)}
 		ac(".show_meta",showPlaylistMeta);
 		ac(".show_depend",showPlaylistDepend);
+		ac(".clear_playtext_content",()=>{id_playtext.textContent="";log.info("手动清除播放提示")});
 		ac(".show_anys_sw",()=>showAudioAnalyser("sinewave"));
 		ac(".show_anys_fb",()=>showAudioAnalyser("frequencybars"));
 		ac(".show_playnextlist",showPlayNextListTool);
 		cache.otherMenuElement=o.find(".other_menu")[0];
+		cache.hasOtherMenuBuild=true;
+		layer.close(i);
 	}
 	layer.open({
 		type:1,maxmin:true,shade:0,zIndex:10,
@@ -649,6 +659,7 @@ function otherMenu(){// 其它操作菜单
 		content:`<div class="other_menu layui-margin-2 layui-row">
 			<button class="show_meta ${BTNC}">${ut("show_meta")}</button>
 			<button class="show_depend ${BTNC}">${ut("show_depend")}</button>
+			<button class="clear_playtext_content ${BTNC}">${ut("clear_playtext_content")}</button>
 			<button class="show_anys_sw ${BTNC}">${ut('show_analyser_sw')}</button>
 			<button class="show_anys_fb ${BTNC}">${ut('show_analyser_fb')}</button>
 			<button class="show_playnextlist ${BTNC}">${ut('show_playNextList')}</button>
@@ -787,6 +798,9 @@ layui.table.on("row(playlist)",(o)=>{
 	}
 	playAudio(o.index);
 });
+cache.fetch=(url,options={})=>{// 可选用的网络访问端口，主要给其它脚本替换成能绕过同源策略的访问。
+	return docsScript.HTTPAgent(options?.method||"GET",url,options);
+}
 id_player.onerror=()=>{
 	let e=id_player.error;
 	e=e&&`code:${e.code},msg:${e.message}`;
@@ -812,19 +826,20 @@ id_player.onpause=()=>{
 	clrWakeLock();
 }
 id_player.onloadedmetadata=function(){
-	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title}`;
+	id_playtext.textContent=`${getPlayLeftText()}`;
 }
 id_player.ontimeupdate=function(){
 	if(!showPlayTime)return;
 	let d=-1;
 	if(Number.isFinite(this.duration)) d=this.duration;
-	id_playtext.textContent=`${uiText.playtext} ${playlist[playIdx].title} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
+	id_playtext.textContent=`${getPlayLeftText()} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
 };
 if(typeof navigator?.mediaSession==="object"){
 	navigator.mediaSession.setActionHandler("nexttrack",playNext);
 	navigator.mediaSession.setActionHandler("previoustrack",playPrev);
 	log.log("已添加媒体会话活动处理");
 }
+otherMenu();
 log.info("初始化完成");
 if(urlsea.has("extension")) loadExtensionFromSearch();
 if(urlsea.has("href"))for(const h of urlsea.getAll("href")) getNetworkData(h);
