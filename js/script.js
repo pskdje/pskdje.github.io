@@ -13,7 +13,6 @@ const cache={// 缓存
 };// cache[END]
 const config={// 配置
 	storage:{
-		auto_dark:true,// 自动切换暗色
 		colorScheme:"auto",// 配色方案
 	}
 };// config[END]
@@ -344,10 +343,6 @@ function errorElement(text,appendNode){//在元素内输出错误
 		typeof events.close[0]==="function"&& events.close[0].call(els.d,ev);
 	}
 	els.r.className="window_root";
-	if(
-		(config.storage.auto_dark && window.matchMedia("(prefers-color-scheme:dark)").matches)
-		|| config.storage.colorScheme==="dark"
-	) els.r.classList.add("docs-style-dark");
 	els.h.className="window_header";
 	els.t.textContent=String(title);
 	els.b.title="关闭";
@@ -438,87 +433,9 @@ const docsScript={
 			return true;
 			}catch(e){return false};
 		})(),// 添加事件的第3个参数是否支持多个操作
-	}, init:function scriptInit(keys={},...args){// 用于启动
-		var rl=cache.log.root;
-		rl.add(10,"docsScript.init","开始加载页面");
-		var sInitK=keys;// 复制keys的数据
-		if(!window["DATA_page"]){// 判断"DATA_page"是否存在。若不存在，输出错误。
-			errorElement("不存在页面数据！");
-			rl.add(40,"docsScript.init","加载页面失败，原因：全局属性DATA_page不存在，应在执行docsScript.init()前声明。");
-			return new Error("Not found page object.");
-		};if(typeof keys!=="object"){// keys的类型不属于Object时执行
-			errorElement("InitError: key 'keys' not Object.");
-			rl.add(40,"docsScript.init","加载页面失败，原因：属性keys的类型不是Object，请确保它的前后存在'{}'。");
-			return new Error("key 'keys' type not Object.");
-		};var sInitK=keys;
-		this.XHR("GET","/js/website.json",function(){
-			if(this.status===404){
-				errorElement("数据不存在。");
-				rl.add(40,"docsScript.init","加载页面失败，原因：没有在路径'/js'找到'website.json'。");
-				return;
-			};try{var websiteData=JSON.parse(this.responseText);// 转换JSON文本
-			}catch(err){
-				rl.add(50,"docsScript.init","解析'website.json'文件的内容时出现异常，请确保'website.json'文件是用JSON语法编写并且没有语法错误。");
-				if(err instanceof SyntaxError){// 无法转化时执行
-					errorElement(`服务器返回数据类型错误。<br /><iframe src="data:text/html,${encodeURIComponent(this.response)}" width="100%"></iframe>`);
-					return;
-				}else throw err;
-			}; cache["websiteData"]=websiteData;// 缓存website.json文件
-			cache["websiteData"].toLocaleString=function(){return"缓存数据";}
-			Object.freeze(cache["websiteData"]);// 冻结缓存
-			rl.add(20,"tips",docsScript.getTip());
-			if(Array.isArray(DATA_page.lib)){// 当DATA_page.lib为Array时才执行
-				if(!websiteData.lib)throw new ReferenceError("不存在lib引用表");
-				for(const i of DATA_page.lib)try{ docsScript.loadLib(i);}catch(e){rl.add(40,"docsScript.init.lib:error",e);}
-			};if(Array.isArray(DATA_page.load))for(const i of DATA_page.load)try{
-				if(typeof i==="function") i();
-			}catch(e){cache.log.err.addError(40,"DATA_page.load",e)};
-		});// this.XHR[END]
-		rl.add(10,"docsScript.init","页面加载结束");
-	}, loadLib:function loadLib(name){// 加载库
-		if(!cache.websiteData?.lib)throw new ReferenceError("不存在lib引用表");
-		var lib=cache.websiteData.lib,rl=cache.log.root,al=cache.log.all;
-		function toser(t){// host调整
-			if(typeof t!=="string")return t;
-			if(t[0]==="#"&&t[1]==="/")return "//"+location.hostname+":12000/path/se0A.obb.lib/"+t.slice(2);
-			return t;
-		};function append(id,src){// 检查是否存在，若不存在，添加；若存在，抛出错误。
-			if(document.getElementById(id))throw ReferenceError("已存在该库");
-			var scr=document.createElement("script");
-			scr.id=id;
-			scr.src=src;
-			scr.onload=function(){
-				al.add(0,"docsScript.loadLib",["Lib id '",id,"' 加载成功"]);this.onload=this.onerror=null;
-			};scr.onerror=function(){
-				al.add(40,"docsScript.loadLib",["Lib id '",id,"' 加载失败"]);this.onload=this.onerror=null;
-			};document.head.append(scr);
-		};if(name in lib){
-			if(typeof lib[name]==="string") append(name,toser(lib[name]));
-			else if(Array.isArray(lib[name])){
-				var i=0;
-				for(const lp of lib[name]){
-					if(typeof lp==="string") append(name+"-"+(++i),toser(lp));
-					else rl.add(40,"docsScript.loadLib",new TypeError(`'${name}'的某一项不是字符串。内容类型:${typeof lp}，值: '${lp}'`));
-				}
-			}else rl.add(40,"docsScript.loadLib",new TypeError(`无法解析'${name}'的值`));
-		}else al.add(40,"docsScript.loadLib",["不存在名为'",name,"'的库。"]);
-	}, getTip:function getTip(){// 获取提示
-		var rl=cache.log.root;
-		if(typeof cache["websiteData"]!=="object"){
-			rl.add(40,"docsScript.getTip","未找到网站数据");
-			console.error("websiteDate not found");
-			return undefined;
-		};var tips=cache["websiteData"]["tips"];
-		if(!Array.isArray(tips)){
-			rl.add(40,"docsScript.getTip","未找到提示列表");
-			console.error("tips is unknow");
-			return null;
-		};if(tips.length<1){
-			rl.add(30,"docsScript.getTip","没有提示");
-			this.warn("tips length is 0","console");
-			return null;
-		}return tips[this.getRandom("f",0,tips.length)];
-	}, XHR:function xhr(method,url,loadFun=function(){console.debug(this.response);},errorFun=function(){console.error("%c请求失败。","color:red;background:yellow;");},type="",data=undefined){// 用于加载数据
+	},
+	darkMatchMedia:window.matchMedia("(prefers-color-scheme:dark)"),
+	XHR:function xhr(method,url,loadFun=function(){console.debug(this.response);},errorFun=function(){console.error("%c请求失败。","color:red;background:yellow;");},type="",data=undefined){// 用于加载数据
 		var xhr=new XMLHttpRequest();
 		xhr.onload=function(event){
 			var responseSize=(function(res,type){
@@ -797,14 +714,18 @@ const docsScript={
 		};if(DEBUG[0]&&typeof isdr==="boolean"){
 			if(isdr) dr();else lg();return;
 		};if(config.storage.colorScheme==="dark") dr();
-		else if(config.storage.colorScheme==="auto"&& docsScript.pageData.isDark) dr();
+		else if(config.storage.colorScheme==="auto"&& docsScript.darkMatchMedia.matches) dr();
 		else lg();
+	}, schemeChange:function colorSchemeChangeEvent(){// 发出主题更新事件
+		let cs=config.storage.colorScheme;
+		if(cs==="auto") cs=docsScript.darkMatchMedia.matches?"dark":"light";
+		const ev=new CustomEvent("colorschemechange",{composed:true,detail:cs});
+		document.dispatchEvent(ev);
 	}, readConfig:function readConfigInLocalStorage(){// 从local storage读取配置
 		var s=window.localStorage.getItem("docs-config");
 		if(!s)return false;
 		try{
 			config.storage=JSON.parse(s);
-			if(typeof config.storage.auto_dark!=="boolean")config.storage.auto_dark=true;
 			if(typeof config.storage.colorScheme!=="string")config.storage.colorScheme="auto";
 		}catch(e){
 			cache.log.err.addError(40,"docsScript.readConfig",e,s);
@@ -851,6 +772,10 @@ cache.log.all.addError=cache.log.err.addError=function(t,sou,mes,data=undefined)
 	}
 }
 pageInit();// 开始初始化页面
+docsScript.darkMatchMedia.addEventListener("change",ev=>{// 暗色更新事件
+	docsScript.bodyDark();
+	docsScript.schemeChange();
+});
 Temp["loadDebugTool"]=(function hasLoadDebugTool(){// 判断是否加载调试工具
 	if(cache["loadDebugToolCache"])return;
 	var rlog=cache.log.root;
@@ -866,6 +791,15 @@ Temp["loadDebugTool"]=(function hasLoadDebugTool(){// 判断是否加载调试�
 		};dte.onerror=function debugTool_JavaScriptFileLoadError(){// 设置错误处理
 			rlog.add(30,"(hasDebugTool).debugTool","调试工具'debug.js'加载失败.");
 		};document.head.append(dte);// 附加
+	};function appendEruda(){// 附加 Eruda
+		var erudaDT=document.createElement("script");// 创建script元素
+		rlog.add(0,"(hasDebugTool).debugTool","调试工具确认添加，来自:eruda");
+		erudaDT.id="eruda";
+		erudaDT.src="https://unpkg.com/eruda/eruda.js";// 设置路径
+		erudaDT.defer=true;
+		erudaDT.onload=()=>{eruda.init()};// 必须，启动调试工具。
+		erudaDT.onerror=()=>{rlog.add(30,"(hasDebugTool).debugTool","调试工具加载失败。(工具名:eruda)");}// 加载失败时输出信息到日志
+		document.head.appendChild(erudaDT);// 附加
 	};var isADT=function isAppendDebugTool(){// 是否附加调试工具
 		if(hasOwnKey(cache.websiteData??{},"debugTool")) appendDebugTool();
 		else if(typeof DATA_page==="object"){
@@ -875,16 +809,7 @@ Temp["loadDebugTool"]=(function hasLoadDebugTool(){// 判断是否加载调试�
 	else{
 		if(typeof DATA_page==="object") isADT();
 		else window.addEventListener("load",isADT);
-	};if(DEBUG[0]){
-		var erudaDT=document.createElement("script");// 创建script元素
-		rlog.add(0,"(hasDebugTool).debugTool","调试工具确认添加，来自:eruda");
-		erudaDT.id="eruda";
-		erudaDT.src="https://unpkg.com/eruda/eruda.js";// 设置路径
-		erudaDT.defer=true;
-		erudaDT.onload=()=>{eruda.init()};// 必须，启动调试工具。
-		erudaDT.onerror=()=>{rlog.add(30,"(hasDebugTool).debugTool","调试工具加载失败。(工具名:eruda)");}// 加载失败时输出信息到日志
-		document.head.appendChild(erudaDT);// 附加
-	}
+	};if(DEBUG[0]&&docsScript.pageData.search.has("debug_append-eruda")) appendEruda();
 });
 window.addEventListener("message",ev=>{
 	const d=ev.data;
@@ -905,7 +830,7 @@ setTimeout(function(){// 快速
 	if(typeof DATA_page==="object"&&typeof DATA_page.setDEBUG==="boolean")DEBUG[0]=Boolean(DATA_page.setDEBUG);
 	Temp["loadDebugTool"]();
 	if(DEBUG[0]) cache["loadDebugToolCache"]=Temp["loadDebugTool"];
-	if(config.storage.auto_dark) docsScript.bodyDark();
+	if(config.storage.colorScheme==="auto") docsScript.bodyDark();
 },50);// 快速队列
 setTimeout(async function(){// 用于调试
 	if(DEBUG[0]){

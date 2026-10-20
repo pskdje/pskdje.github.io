@@ -103,6 +103,6 @@ div#debug_tool > div.debug_tool_view > div > details > div {
 	overflow-wrap: anywhere;
 	word-break: break-all;
 }
-div.window_root.docs-style-dark .show_log_content > p > .message {
+body.docs-style-dark div.window_root .show_log_content > p > .message {
 	color: white;
 }

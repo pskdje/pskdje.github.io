@@ -778,7 +778,12 @@ deval.on_functionPush=ev=>{
 		try{
 			new URL(d);
 			id_player.src=d;
-		}catch(er){e=true}
+		}catch(er){
+			e=true;
+			const et="函数推送的不是播放链接"
+			log.error(`${et}: ${d}`);
+			console.error(`${et}: ${d}`);
+		}
 	}else if(d instanceof Blob){
 		Temp.playBlobURL=id_player.src=URL.createObjectURL(d);
 	}else{
@@ -861,6 +866,10 @@ function ydtsk(){// 引导提示
 	});
 }
 setTimeout(()=>{if(docsScript.pageData.isSetDark)document.documentElement.classList.add("dark")},100);// layui暗色样式表所需要
+document.addEventListener("colorschemechange",ev=>{// layui暗色样式表切换
+	if(ev.detail==="dark")document.documentElement.classList.add("dark");
+	else document.documentElement.classList.remove("dark");
+});
 setTimeout(()=>{// 显示引导
 	if(playlist.length>1)return;
 	ydtsk();

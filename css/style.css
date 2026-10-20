@@ -150,16 +150,16 @@ body.docs-style-dark {
 	background-color: black;
 	color: white;
 }
-div.window_root.docs-style-dark {
+body.docs-style-dark div.window_root {
 	--docs-bacl: black;
 	--docs-color: white;
 	background: black;
 	color: white;
 }
-div.window_root.docs-style-dark > div.window_header > button {
+body.docs-style-dark div.window_root > div.window_header > button {
 	background: #333;
 	color: white;
 }
-div.window_root.docs-style-dark > div.window_header > button:hover {
+body.docs-style-dark div.window_root > div.window_header > button:hover {
 	background: black;
 }

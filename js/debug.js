@@ -79,9 +79,6 @@ const debugTool=Object.freeze({
 		els.o.textContent="D";
 		els.o.onclick=function(){
 			els.w.style.display=(els.w.style.display==="block"?"none":"block");
-		};if(docsScript.pageData.isSetDark){
-			els.w.style.backgroundColor="black";
-			els.w.style.color="white";
 		};if(typeof window?.DATA_page?.debugToolPosition==="string"){switch(DATA_page.debugToolPosition){// 调整显示调试工具窗口按钮位置
 			default:
 				cache.log.debugTool.add(30,"debugTool.init:开关按钮位置","未知的位置缩写");
