@@ -362,6 +362,11 @@ function dfutTtle(){// 重置播放提示
 function getPlayLeftText(){// 获取播放左侧的提示
 	return `${uiText.playtext} ${playlist[playIdx]?.title??uiText.playtext_none}`;
 }
+function getPlayTimeText(){// 获取需要播放时间的提示
+	let d=-1;
+	if(Number.isFinite(id_player.duration)) d=id_player.duration;
+	return `${getPlayLeftText()} (${numToMinTimeStr(id_player.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
+}
 function clrTempData(){// 清除临时数据
 	if(Temp.playBlobURL){
 		URL.revokeObjectURL(Temp.playBlobURL);
@@ -399,6 +404,7 @@ function playAudio(idx){// 播放某个索引对应的音频
 }
 function playNext(){// 播放下一个
 	let nIdx=playIdx+1;
+	if(running)return "running";
 	dfutTtle();
 	if(nIdx===playlist.length&&(!apET.trig("playlistEnd")))return "playlistEnd";
 	if(!(nIdx in playlist)){
@@ -412,6 +418,7 @@ function playNext(){// 播放下一个
 }
 function playPrev(){// 播放上一个
 	let nIdx=playIdx-1;
+	if(running)return "running";
 	dfutTtle();
 	if(playlist.length<1)return "noItem";
 	if(!(nIdx in playlist)){
@@ -731,7 +738,7 @@ function numToMinTimeStr(n){// 时间数字转为分:秒时间
 }
 var deval=new DocsEval();
 if(DEBUG[0]) cache.runDataReceive.evalMessageEvent=[];
-var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{
+var getDataWindow=document.getElementById("getdatabutton").onclick=()=>{// 获取数据按钮
 	const FT=filterText;
 	(()=>{// 需要点击启动的区域
 		if(config.singleRun)return;
@@ -774,16 +781,21 @@ deval.on_functionPush=ev=>{
 	const d=ev.data.data;
 	let e=false;
 	log.debug(`函数 '${ev.data.name}' 推送了数据`,d);
-	if(typeof d==="string"){
+	if(typeof d==="string") setPlayURL:{
+		let u=d;
 		try{
-			new URL(d);
-			id_player.src=d;
+			u=new URL(d);
 		}catch(er){
 			e=true;
-			const et="函数推送的不是播放链接"
+			const et="函数推送的不是播放链接";
 			log.error(`${et}: ${d}`);
 			console.error(`${et}: ${d}`);
+			break setPlayURL;
 		}
+		if(typeof cache.playAgent==="function")try{
+			u=cache.playAgent(u);
+		}catch(er){log.error("播放代理无法使用",er)}
+		id_player.src=String(u);
 	}else if(d instanceof Blob){
 		Temp.playBlobURL=id_player.src=URL.createObjectURL(d);
 	}else{
@@ -806,13 +818,14 @@ layui.table.on("row(playlist)",(o)=>{
 cache.fetch=(url,options={})=>{// 可选用的网络访问端口，主要给其它脚本替换成能绕过同源策略的访问。
 	return docsScript.HTTPAgent(options?.method||"GET",url,options);
 }
-id_player.onerror=()=>{
+cache.playAgent=undefined;// 可选的播放代理，在需要时用于绕过同源策略的限制。
+id_player.onerror=()=>{// 播放失败
 	let e=id_player.error;
 	e=e&&`code:${e.code},msg:${e.message}`;
 	log.error(`audio元素播放失败，error属性提供的信息: ${e}`);
 	playError();
 }
-id_player.onended=()=>{
+id_player.onended=()=>{// 播放结束
 	dfutTtle();
 	if(noAutoPlayNext){
 		clrWakeLock();
@@ -820,25 +833,33 @@ id_player.onended=()=>{
 	}
 	playNext();
 }
-id_player.onplay=()=>{
+id_player.onplay=()=>{// 播放
 	log.log("音频播放事件");
 	document.title=`${uiText.playtitle_play} ${playlist[playIdx].title}`;
 	getWakeLock();
 }
-id_player.onpause=()=>{
+id_player.onpause=()=>{// 暂停
 	log.log("音频暂停事件");
 	document.title=`${uiText.playtitle_pause} ${playlist[playIdx].title}`;
 	clrWakeLock();
 }
-id_player.onloadedmetadata=function(){
-	id_playtext.textContent=`${getPlayLeftText()}`;
+id_player.onplaying=function(){// 播放实际开始
+	id_playtext.textContent=getPlayLeftText();
 }
-id_player.ontimeupdate=function(){
+id_player.onwaiting=function(){// 等待数据
+	if(showPlayTime) id_playtext.textContent=`${getPlayTimeText()}…`;
+	else id_playtext.textContent=`${getPlayLeftText()} …`;
+}
+id_player.ontimeupdate=function(){// 播放时间更新
 	if(!showPlayTime)return;
-	let d=-1;
-	if(Number.isFinite(this.duration)) d=this.duration;
-	id_playtext.textContent=`${getPlayLeftText()} (${numToMinTimeStr(this.currentTime)}${d>0?"/"+numToMinTimeStr(d):""})`;
+	id_playtext.textContent=getPlayTimeText();
 };
+id_player.onwaitingforkey=function(){// 需要解密密钥
+	const et="无法播放加密数据";
+	log.warn(et);
+	console.warn(et);
+	playError();
+}
 if(typeof navigator?.mediaSession==="object"){
 	navigator.mediaSession.setActionHandler("nexttrack",playNext);
 	navigator.mediaSession.setActionHandler("previoustrack",playPrev);
