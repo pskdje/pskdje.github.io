@@ -2,10 +2,10 @@
 	"title": "默认UI文本",
 	"meta": {
 		"desc": "从audioplay导出的原始UI文本，原始数据内嵌于audioplay本身。本文件仅作翻译参考，请以原始的uiText常量为准。不建议直接修改本文件来进行本地化翻译，至少也得把元数据给改了。",
-		"source_version":"0.4.2",
+		"source_version":"0.4.9",
 		"language":"zh-CN",
 		"file_source":"export",
-		"create_time": 1750423589669
+		"create_timestamp": 1793371098840
 	},
 	"UIText": {
 		"playtext": "正在播放:",
@@ -62,6 +62,7 @@
 		"menu_title": "更多操作",
 		"M_show_meta": "显示元数据",
 		"M_show_depend": "显示依赖列表",
+		"M_clear_playtext_content": "清除播放提示",
 		"M_show_analyser_sw": "查看音频波形",
 		"M_show_analyser_fb": "查看音频频率",
 		"M_show_playNextList": "播完自动下一个列表",

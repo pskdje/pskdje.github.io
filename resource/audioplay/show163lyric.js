@@ -27,6 +27,7 @@
 				<style>
 					.${ELEM_NAME}{height:100%;width:100%;overflow:hidden;text-align:center;}
 					.${ELEM_NAME}>.lyric{height:1em;}
+					.${ELEM_NAME}>.lrc{white-space:pre-wrap;word-wrap:break-word;}
 				</style>
 				<div class="${ELEM_NAME}"></div>
 			`,
@@ -71,7 +72,7 @@
 			Temp.neteaseMusicLyric.tlrc=d.tlyric;
 			Temp.neteaseMusicLyric.klrc=d.klyric;
 			Temp.neteaseMusicLyric.rlrc=d.romalrc;
-			rebuildLyric()
+			rebuildLyric();
 		}).catch(e=>{
 			console.error("歌词获取失败",e);
 			printLyric("[歌词获取失败]");
@@ -124,6 +125,7 @@
 	let $lrc=null;
 	let $tlrc=null;
 	let cur=-1;
+	let staticText=false;
 	function mount(){// 挂载歌词显示
 		const box=getLyricE();
 		if(!box)return false;
@@ -139,7 +141,7 @@
 	function render(){// 渲染歌词
 		if(!hasLyricE())return;
 		if(!mount())return;
-		$lrc.hidden=lrc.size===0;
+		$lrc.hidden=lrc.size===0&&!staticText;
 		$tlrc.hidden=tlrc.size===0;
 		const i=locate(times,id_player.currentTime*1000);
 		if(i===cur)return;
@@ -147,8 +149,10 @@
 		const t=i<0?null:times[i];
 		$lrc.textContent=t===null?'':(lrc.get(t)??'');
 		$tlrc.textContent=t===null?'':(tlrc.get(t)??'');
+		if(staticText)$lrc.textContent=Temp.neteaseMusicLyric.lrc?.lyric;
 	}
 	function rebuildLyric(){// 处理歌词文本
+		staticText=false;
 		const src=Temp.neteaseMusicLyric;
 		lrc=parseLrc(src.lrc?.lyric);
 		tlrc=parseLrc(src.tlrc?.lyric);
@@ -156,6 +160,10 @@
 		lrc.forEach((_,t)=>set.add(t));
 		tlrc.forEach((_,t)=>set.add(t));
 		times=[...set].sort((a,b)=>a-b);
+		if(lrc.size===0&&typeof src.lrc?.lyric==="string"){
+			staticText=true;
+			times.push(0);
+		}
 		cur=-1;
 		render();
 	}
